@@ -1,6 +1,6 @@
 (ns cache.cache
   (:require [cache.filestorage :as storage]
-            [file.system :as file]
+            [file.system :as fs]
             [cache.log :as log]
             [clojure.string :as string]))
 
@@ -18,14 +18,14 @@
 (defn- match-name? [name-pattern file]
   (cond
     (regexp? name-pattern) (re-find name-pattern file)
-    :else (= name-pattern (file/basename file))))
+    :else (= name-pattern (fs/basename file))))
 
 (defn- file-fingerprint-fn [name-pattern content-head-pattern]
   (fn [file]
     (and (match-name? name-pattern file)
-         (file/exists? file)
+         (fs/exists? file)
          (or (nil? content-head-pattern)
-             (re-find content-head-pattern (file/head file))))))
+             (re-find content-head-pattern (fs/head file))))))
 
 (defn- tuples->fingerprint-fns [type tuples]
   (reduce (fn [acc [filename content]]
@@ -50,7 +50,8 @@
     (tuples->fingerprint-fns ::config t)))
 
 (defn- layout-filetypes []
-  (let [t [[#"/layout/.+\.xml$" #"<page [^>]+\"urn:magento:framework:View/Layout/etc/page_configuration\.xsd\""]]]
+  (let [t [[#"/layout/.+\.xml$"]
+           [#"/page_layout/.+\.xml$"]]]
     (tuples->fingerprint-fns ::layout t)))
 
 (defn- translation-filetypes []
@@ -60,6 +61,8 @@
 (defn- template-filetypes []
   (let [t [[#"/templates/.+\.phtml"]]]
     (tuples->fingerprint-fns ::template t)))
+
+;; TODO: find the theme.xml and etc/view.xml cache types and add them
 
 (def file->type
   (merge (config-filetypes)
@@ -72,9 +75,7 @@
             (when (filetype? file) (reduced type))) nil file->type))
 
 (defn tag->ids [tag]
-  (if (file/exists? (storage/tag->filepath tag))
-    (storage/tag->ids tag)
-    []))
+  (storage/tag->ids tag))
 
 (defn id->file [id]
   (storage/id->filepath id))
@@ -89,18 +90,12 @@
   (let [filetype (magefile->filetype file)]
     (get filetype->cachetypes filetype [])))
 
-(defn- rm-tagfile [tag]
-  (let [file (storage/tag->filepath tag)]
-    (when (file/exists? file)
-      (file/rm file))))
-
 (defn- clean
   ([] (storage/clean-all))
   ([type]
    (let [tag (cachetype->tag type)]
      (log/debug "Cleaning tag" tag)
-     (run! storage/delete (tag->ids tag))
-     (rm-tagfile tag)))
+     (storage/clean-tag tag)))
   ([type & types]
    (run! #(clean %) (into [type] types))))
 

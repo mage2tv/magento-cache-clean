@@ -1,5 +1,5 @@
 (ns cache.filestorage
-  (:require [file.system :as file]
+  (:require [file.system :as fs]
             [cache.log :as log]
             [clojure.string :as string]))
 
@@ -36,7 +36,7 @@
   (:file-name-prefix options))
 
 (defn- cache-id-prefix []
-  (str (subs (md5 (str (file/realpath (base-dir)) "/app/etc/")) 0 3) "_"))
+  (str (subs (md5 (str (fs/realpath (base-dir)) "/app/etc/")) 0 3) "_"))
 
 (defn- chars-from-end [^String s length]
   (subs s (- (count s) length)))
@@ -65,15 +65,22 @@
 
 (defn tag->ids [tag]
   (let [file (tag->filepath tag)]
-    (when (file/exists? file)
-      (doall (map remove-cache-id-prefix (string/split-lines (file/slurp file)))))))
-
-(defn clean-all []
-  (log/debug "Cleaning dir" (cache-dir))
-  (file/rm-contents (cache-dir)))
+    (if (fs/exists? file)
+      (doall (map remove-cache-id-prefix (string/split-lines (fs/slurp file))))
+      [])))
 
 (defn delete [id]
   (log/debug "Cleaning id" id)
   (let [file (id->filepath id)]
-    (when (file/exists? file)
-      (file/rm file))))
+    (when (fs/exists? file)
+      (fs/rm file))))
+
+(defn clean-tag [tag]
+  (let [file (tag->filepath tag)]
+    (when (fs/exists? file)
+      (run! delete (tag->ids tag))
+      (fs/rm file))))
+
+(defn clean-all []
+  (log/debug "Cleaning dir" (cache-dir))
+  (fs/rm-contents (cache-dir)))

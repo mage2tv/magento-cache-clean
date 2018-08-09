@@ -11,19 +11,25 @@
 
 (defonce in-process-files (atom {}))
 
-(defn list-modules-cmd [magento-basedir]
+(defn list-components-cmd [magento-basedir type]
   (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
     (when-not (fs/exists? composer-autoload)
       (throw (ex-info (str "Composer autoload.php not found: " composer-autoload) {})))
     (str "php -r "
          "'require \"" composer-autoload "\"; "
-         "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths(\"module\") as $m) "
+         "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths(\"" type "\") as $m) "
          "echo $m.PHP_EOL;'")))
 
-(defn module-dirs [magento-basedir]
-  (let [cmd (list-modules-cmd magento-basedir)
+(defn list-component-dirs [magento-basedir type]
+  (let [cmd (list-components-cmd magento-basedir type)
         output (.execSync child-process cmd)]
     (string/split-lines output)))
+
+(defn module-dirs [magento-basedir]
+  (list-component-dirs magento-basedir "module"))
+
+(defn theme-dirs [magento-basedir]
+  (list-component-dirs magento-basedir "theme"))
 
 (defn timestamp []
   (.getTime (js/Date.)))
@@ -36,7 +42,7 @@
 
 (defn in-process? [file]
   (when-let [time (get @in-process-files file)]
-    (if (< (+ time 1000) (timestamp))
+    (if (< (+ time 500) (timestamp))
       (set-not-in-process! file)
       true)))
 
@@ -52,31 +58,37 @@
 (defn dirs-in-modules-to-watch [module-dir]
   (let [dirs-in-module ["/etc/"
                         "/view/frontend/layout/"
+                        "/view/frontend/page_layout/"
                         "/view/frontend/ui_component/"
                         "/view/frontend/templates/"
                         "/view/adminhtml/layout/"
+                        "/view/adminhtml/page_layout/"
                         "/view/adminhtml/ui_component/"
                         "/view/adminhtml/templates/"
                         "/view/base/layout/"
+                        "/view/base/page_layout/"
                         "/view/base/ui_component/"
                         "/view/base/templates/"
                         "/i18n/"]]
-    (reduce (fn [acc dir]
-              (into acc (fs/dir-tree dir))) [] (map #(str module-dir %) dirs-in-module))))
+    (filter fs/exists? (map #(str module-dir %) dirs-in-module))))
 
 (defn watch-module [module-dir]
   (let [dirs (dirs-in-modules-to-watch module-dir)]
     (run! (fn [dir]
-            #_(log/debug "Watching dir" dir)
-            (swap! watches assoc dir (fs/watch dir file-changed))) dirs))
+            (let [watch (fs/watch-recursive dir #(file-changed %))]
+              (swap! watches assoc dir watch))) dirs))
   (log/debug "Watching module" (fs/basename module-dir)))
+
+(defn watch-theme [theme-dir]
+  (let [watch (fs/watch-recursive theme-dir #(file-changed %))]
+    (swap! watches assoc theme-dir watch))
+  (log/debug "Watching theme" (fs/basename theme-dir)))
 
 (defn stop []
   (run! (fn [dir]
           (try
             (swap! watches (fn [watches]
                              (when-let [watch (get watches dir)]
-                               (prn watch)
                                (.close watch)
                                (dissoc watches dir))))
             (log/debug "Stopped watching" dir)
@@ -88,5 +100,5 @@
     (when (seq @watches) (stop))
 
     (run! watch-module (module-dirs magento-basedir))
-    ;; TODO: watch themes
+    (run! watch-theme (theme-dirs magento-basedir))
     (log/notice "Watcher initialized (Ctrl-C to quit)")))

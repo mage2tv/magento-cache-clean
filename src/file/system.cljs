@@ -3,6 +3,13 @@
 
 (defonce fs (js/require "fs"))
 (defonce path (js/require "path"))
+(defonce process (js/require "process"))
+
+(defn- win? []
+  (= "win32" (.-platform process)))
+
+(defn- mac? []
+  (= "darwin" (.-platform process)))
 
 (defn- trailing-slash [s]
   (if (= "/" (subs s (- (count s) 1))) s (str s "/")))
@@ -52,10 +59,37 @@
   [dir]
   (.rmdirSync fs dir))
 
-(defn watch [dir callback]
-  (.watch fs dir (fn [event-type filename]
-                   (when filename
-                     (callback (str dir filename))))))
+(defn dir-tree
+  "Return a list of all directories within and including the given dir"
+  [dir]
+  (if (dir? dir)
+    (let [xfn (comp (map #(str (trailing-slash dir) %)) (filter dir?))
+          dirs (into [] xfn (.readdirSync fs dir))]
+      (reduce (fn [acc dir]
+                (into acc (dir-tree dir))) [dir] dirs))
+    []))
+
+(defn watch
+  ([dir-or-file callback] (watch dir-or-file #js {} callback))
+  ([dir-or-file options callback]
+   (let [prefix (trailing-slash (if (dir? dir-or-file)
+                                  dir-or-file
+                                  (dirname dir-or-file)))
+         callback-wrapper (fn [event-type filename]
+                            (when filename
+                              (callback (str prefix filename))))]
+     (.watch fs dir-or-file options callback-wrapper))))
+
+(defn- recursive-watch-supported? []
+  (or (mac?) (win?)))
+
+(defn watch-recursive [dir callback]
+  (if (not (dir? dir))
+    (watch dir callback)
+    (if (recursive-watch-supported?)
+      (watch dir #js {:recursive true} callback)
+      (let [watches (doall (map #(watch % callback) (dir-tree dir)))]
+        #js {:close #(run! (fn [watch] (.close watch)) watches)}))))
 
 (declare rmdir-recursive)
 
@@ -73,13 +107,3 @@
   [dir]
   (rm-contents dir)
   (rmdir dir))
-
-(defn dir-tree
-  "Return a list of all directories within and including the given dir"
-  [dir]
-  (if (dir? dir)
-    (let [xfn (comp (map #(str (trailing-slash dir) %)) (filter dir?))
-          dirs (into [] xfn (.readdirSync fs dir))]
-      (reduce (fn [acc dir]
-                (into acc (dir-tree dir))) [dir] dirs))
-    []))
