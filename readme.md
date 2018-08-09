@@ -5,6 +5,10 @@
 Small filewatcher to automate selectively cleaning affected cache segments in
 the Magento 2 file cache backend during development.
 
+### Building
+
+To build run `clj -m figwheel.main -O advanced -bo build`
+
 ### TODO
 
 Add composer.json
