@@ -5,6 +5,8 @@
             [log.log :as log]
             [magento.watcher :as watcher]))
 
+(set! *warn-on-infer* true)
+
 (defn has-switch?
   "Return true is one of the given opts strings is contained within the args seq"
   [switches args]
@@ -36,9 +38,9 @@
 (defn find-basedir [args]
   (let [basedir (or (find-basedir-in-args args) (find-basedir-in-path (fs/cwd)))]
     (when-not basedir
-      (throw (ex-info "Unable to determine Magento directory." {})))
+      (throw (ex-info "Unable to determine the Magento directory" {})))
     (when-not (fs/dir? basedir)
-      (throw (ex-info (str "Magento directory " basedir " does not exist.") {})))
+      (throw (ex-info (str "The Magento directory \"" basedir "\" does not exist") {})))
     (log/info "Magento dir" basedir)
     basedir))
 
@@ -89,12 +91,14 @@ Clear the given cache types. If none are given, clear all cache types.
   (log/always "Sponsored by https://www.mage2.tv\n")
   (if (help-needed? args)
     (help-the-needfull)
-    (do
+    (try
       (log/set-verbosity! (find-log-level args))
       (storage/set-magento-dir! (find-basedir args))
       (if (has-switch? ["-w" "--watch"] args)
         (watcher/start)
         (let [cache-types (remove-switches-and-args-with-vals args)]
-          (cache/clean-cache-types cache-types))))))
+          (cache/clean-cache-types cache-types)))
+      (catch :default ^Error e
+        (println "[ERROR]" (or (.-message e) e))))))
 
 (set! *main-cli-fn* -main)

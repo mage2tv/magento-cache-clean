@@ -1,0 +1,4 @@
+{:main cache.core
+ :target :nodejs
+ :infer-externs true
+ :output-to "bin/clean-cache.js"}

@@ -100,12 +100,16 @@
    (run! #(clean %) (into [type] types))))
 
 (defn clean-cache-types [cache-types]
-  (apply log/notice "Cleaning cache type(s)" cache-types)
+  (if (seq cache-types)
+    (apply log/notice "Cleaning cache type(s)" cache-types)
+    (log/notice "Flushing cache"))
+
   (when (or (empty? cache-types) (not= ["full_page"] cache-types))
     (log/debug "Using cache dir var/cache...")
     (binding [storage/*cachedir* "var/cache/"]
       (let [cache-types (remove #(= "full_page" %) cache-types)]
         (apply clean cache-types))))
+
   (when (or (empty? cache-types) (some #{"full_page"} cache-types))
     (log/debug "Using cache dir var/page_cache...")
     (binding [storage/*cachedir* "var/page_cache/"]
