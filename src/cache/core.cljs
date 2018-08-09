@@ -54,7 +54,7 @@
     (reduce + 0 (map arg->verbosity args))))
 
 (defn help-the-needfull []
-  (println "Usage: clean-cache [options and flags] [cache-types...]
+  (println "Usage: cache-clean.js [options and flags] [cache-types...]
 Clear the given cache types. If none are given, clear all cache types.
 
 --directory|-d <dir>    Magento base directory
