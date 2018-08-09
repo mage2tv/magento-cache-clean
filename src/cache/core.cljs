@@ -2,7 +2,7 @@
   (:require [cache.cache :as cache]
             [cache.filestorage :as storage]
             [file.system :as fs]
-            [cache.log :as log]
+            [log.log :as log]
             [magento.watcher :as watcher]))
 
 (defn has-switch?

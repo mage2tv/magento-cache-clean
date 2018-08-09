@@ -1,7 +1,7 @@
 (ns cache.cache
   (:require [cache.filestorage :as storage]
             [file.system :as fs]
-            [cache.log :as log]
+            [log.log :as log]
             [clojure.string :as string]))
 
 (defn cachetype->tag [type]

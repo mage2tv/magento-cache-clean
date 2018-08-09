@@ -1,6 +1,6 @@
 (ns magento.watcher
   (:require [cache.filestorage :as storage]
-            [cache.log :as log]
+            [log.log :as log]
             [cache.cache :as cache]
             [file.system :as fs]
             [clojure.string :as string]))

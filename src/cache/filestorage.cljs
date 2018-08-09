@@ -1,6 +1,6 @@
 (ns cache.filestorage
   (:require [file.system :as fs]
-            [cache.log :as log]
+            [log.log :as log]
             [clojure.string :as string]))
 
 (def options
