@@ -59,10 +59,10 @@
     (tuples->fingerprint-fns ::translation t)))
 
 (defn- template-filetypes []
-  (let [t [[#"/templates/.+\.phtml"]]]
+  (let [t [[#"/templates/.+\.phtml"]
+           [#"/etc/view.xml" #"urn:magento:framework:Config/etc/view\.xsd"]
+           ["theme.xml" #"urn:magento:framework:Config/etc/theme\.xsd"]]]
     (tuples->fingerprint-fns ::template t)))
-
-;; TODO: find the theme.xml and etc/view.xml cache types and add them
 
 (def file->type
   (merge (config-filetypes)
