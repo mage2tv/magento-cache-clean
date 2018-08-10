@@ -34,7 +34,7 @@ The script can be used as a faster drop in replacement of `bin/magento cache:cle
 too. For example:
 
 ``` shell
-vendor/bin/cache-clean.js config page_page
+vendor/bin/cache-clean.js config full_page
 ```
 (It's quicker because the start up time of `bin/magento` is so slow.)
 
