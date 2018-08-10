@@ -7,6 +7,10 @@
 
 (set! *warn-on-infer* true)
 
+(defn- exit-with-code [code]
+  (let [proc ^js/process (js/require "process")]
+    (.exit proc code)))
+
 (defn has-switch?
   "Return true is one of the given opts strings is contained within the args seq"
   [switches args]
@@ -87,18 +91,29 @@ Clear the given cache types. If none are given, clear all cache types.
               (switch? arg) (recur xs (inc i))
               :else (recur (conj xs arg) (inc i))))))))
 
+(defn init-app [args]
+  (log/set-verbosity! (find-log-level args))
+  (storage/set-magento-dir! (find-basedir args)))
+
+(defn clean-cache-types [args]
+  (log/inc-verbosity!)
+  (let [cache-types (remove-switches-and-args-with-vals args)]
+    (cache/clean-cache-types cache-types)))
+
+(defn process [args]
+  (init-app args)
+  (if (has-switch? ["-w" "--watch"] args)
+    (watcher/start)
+    (clean-cache-types args)))
+
 (defn -main [& args]
   (log/always "Sponsored by https://www.mage2.tv\n")
   (if (help-needed? args)
     (help-the-needfull)
-    (try
-      (log/set-verbosity! (find-log-level args))
-      (storage/set-magento-dir! (find-basedir args))
-      (if (has-switch? ["-w" "--watch"] args)
-        (watcher/start)
-        (let [cache-types (remove-switches-and-args-with-vals args)]
-          (cache/clean-cache-types cache-types)))
-      (catch :default ^Error e
-        (println "[ERROR]" (or (.-message e) e))))))
+    (try (process args)
+         (catch :default ^Error e
+           (binding [*print-fn* *print-err-fn*]
+             (println "[ERROR]" (or (.-message e) e)))
+           (exit-with-code 1)))))
 
 (set! *main-cli-fn* -main)

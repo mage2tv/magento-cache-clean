@@ -7,8 +7,6 @@
 
 (defonce child-process (js/require "child_process"))
 
-(defonce watches (atom {}))
-
 (defonce in-process-files (atom {}))
 
 (defn list-components-cmd [magento-basedir type]
@@ -55,50 +53,21 @@
     (when-let [types (seq (cache/magefile->cachetypes file))]
       (cache/clean-cache-types types))))
 
-(defn dirs-in-modules-to-watch [module-dir]
-  (let [dirs-in-module ["/etc/"
-                        "/view/frontend/layout/"
-                        "/view/frontend/page_layout/"
-                        "/view/frontend/ui_component/"
-                        "/view/frontend/templates/"
-                        "/view/adminhtml/layout/"
-                        "/view/adminhtml/page_layout/"
-                        "/view/adminhtml/ui_component/"
-                        "/view/adminhtml/templates/"
-                        "/view/base/layout/"
-                        "/view/base/page_layout/"
-                        "/view/base/ui_component/"
-                        "/view/base/templates/"
-                        "/i18n/"]]
-    (filter fs/exists? (map #(str module-dir %) dirs-in-module))))
-
 (defn watch-module [module-dir]
-  (let [dirs (dirs-in-modules-to-watch module-dir)]
-    (run! (fn [dir]
-            (let [watch (fs/watch-recursive dir #(file-changed %))]
-              (swap! watches assoc dir watch))) dirs))
-  (log/debug "Watching module" (fs/basename module-dir)))
+  (when (fs/exists? module-dir)
+    (fs/watch-recursive module-dir #(file-changed %))
+    (log/debug "Watching module" (fs/basename module-dir))))
 
 (defn watch-theme [theme-dir]
-  (let [watch (fs/watch-recursive theme-dir #(file-changed %))]
-    (swap! watches assoc theme-dir watch))
+  (fs/watch-recursive theme-dir #(file-changed %))
   (log/debug "Watching theme" (fs/basename theme-dir)))
 
 (defn stop []
-  (run! (fn [dir]
-          (try
-            (swap! watches (fn [watches]
-                             (when-let [watch (get watches dir)]
-                               (.close watch)
-                               (dissoc watches dir))))
-            (log/debug "Stopped watching" dir)
-            (catch :default e))) (keys @watches))
+  (fs/stop-all-watches)
   (log/always "Stopped watching"))
 
 (defn start []
   (let [magento-basedir (storage/base-dir)]
-    (when (seq @watches) (stop))
-
     (run! watch-module (module-dirs magento-basedir))
     (run! watch-theme (theme-dirs magento-basedir))
     (log/notice "Watcher initialized (Ctrl-C to quit)")))

@@ -5,6 +5,8 @@
 (defonce path (js/require "path"))
 (defonce process (js/require "process"))
 
+(defonce watches (atom {}))
+
 (defn- win? []
   (= "win32" (.-platform process)))
 
@@ -78,18 +80,38 @@
          callback-wrapper (fn [event-type filename]
                             (when filename
                               (callback (str prefix filename))))]
-     (.watch fs dir-or-file options callback-wrapper))))
+     (let [watch (.watch fs dir-or-file options callback-wrapper)]
+       (swap! watches assoc dir-or-file watch)
+       watch))))
 
 (defn- recursive-watch-supported? []
   (or (mac?) (win?)))
+
+(defn- watch-recursive-manually [dir callback]
+  (let [wrapped-callback (fn [file]
+                           (when (and (dir? file) (not (contains? @watches file)))
+                             (watch-recursive-manually file callback))
+                           (callback file))
+        watches (doall (map #(watch % wrapped-callback) (dir-tree dir)))]
+    #js {:close #(run! (fn [watch] (.close watch)) watches)}))
 
 (defn watch-recursive [dir callback]
   (if (not (dir? dir))
     (watch dir callback)
     (if (recursive-watch-supported?)
       (watch dir #js {:recursive true} callback)
-      (let [watches (doall (map #(watch % callback) (dir-tree dir)))]
-        #js {:close #(run! (fn [watch] (.close watch)) watches)}))))
+      (watch-recursive-manually dir callback))))
+
+(defn stop-watching [dir]
+  (try
+    (swap! watches (fn [watches]
+                     (when-let [watch (get watches dir)]
+                       (.close watch)
+                       (dissoc watches dir))))
+    (catch :default e)))
+
+(defn stop-all-watches []
+  (run! stop-watching (keys @watches)))
 
 (declare rmdir-recursive)
 

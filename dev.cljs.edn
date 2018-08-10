@@ -1,2 +1,2 @@
-{:main cache.core
+{:main cache.cache
  :target :nodejs}

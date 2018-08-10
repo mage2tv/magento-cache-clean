@@ -79,6 +79,11 @@ required cache types.
 
 Currently the watcher has to be restarted when a new module or theme is added.
 
+On linux recursive file watches are not supported, so a given directory branch
+is scanned and all child directories are added to the watch list. That part works.
+But when new directories are created, they are added to the watch list on the fly.
+That part of the code needs testing.
+
 
 ## Building
 
@@ -102,17 +107,9 @@ Thanks to [Mage2 TV](https://www.mage2.tv/) for sponsoring the development of th
 
 * Add composer.json
 
-* Increase the default verbosity by 1 when running without `-w` by default.
-
-* Check for new modules or new directories to watch in existing modules
-
 * The config cache should be cleaned for controllers once and only if they contain
 a controller class declaration, i.e. they are picked up by Magento as a
 controller for a route.
-
-* Print errors to stderr
-
-* Use proper exit codes when erroring out
 
 * Add support for the REDIS cache storage backend
 

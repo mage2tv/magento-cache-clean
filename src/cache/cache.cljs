@@ -102,7 +102,7 @@
 (defn clean-cache-types [cache-types]
   (if (seq cache-types)
     (apply log/notice "Cleaning cache type(s)" cache-types)
-    (log/notice "Flushing cache"))
+    (log/notice "Flushing all caches"))
 
   (when (or (empty? cache-types) (not= ["full_page"] cache-types))
     (log/debug "Using cache dir var/cache...")
