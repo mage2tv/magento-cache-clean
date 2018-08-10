@@ -62,13 +62,25 @@
   (.rmdirSync fs dir))
 
 (defn dir-tree
-  "Return a list of all directories within and including the given dir"
+  "Return a seq of all directories within and including the given dir"
   [dir]
   (if (dir? dir)
     (let [xfn (comp (map #(str (trailing-slash dir) %)) (filter dir?))
           dirs (into [] xfn (.readdirSync fs dir))]
       (reduce (fn [acc dir]
                 (into acc (dir-tree dir))) [dir] dirs))
+    []))
+
+(defn file-tree
+  "Return a seq of all files within the given dir"
+  [dir]
+  (if (dir? dir)
+    (let [not-dir? (complement dir?)
+          dirs (dir-tree dir)]
+      (reduce (fn [acc dir]
+                (let [file-xfn (comp (map #(str (trailing-slash dir) %)) (filter not-dir?))
+                      files (into [] file-xfn (.readdirSync fs dir))]
+                  (into acc files))) [] dirs))
     []))
 
 (defn watch
@@ -93,6 +105,7 @@
                              (watch-recursive-manually file callback))
                            (callback file))
         watches (doall (map #(watch % wrapped-callback) (dir-tree dir)))]
+    ;; return composite facade to fs.FSWatcher providing a close method
     #js {:close #(run! (fn [watch] (.close watch)) watches)}))
 
 (defn watch-recursive [dir callback]

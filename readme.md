@@ -127,10 +127,6 @@ only works with redis.
 
 ## TODO
 
-* The config cache should be cleaned for controllers once and only if they
-  contain a controller class declaration, i.e. they are picked up by Magento as
-  a controller for a route.
-
 * Add support for redis cache storage
 
 

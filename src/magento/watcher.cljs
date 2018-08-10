@@ -9,6 +9,8 @@
 
 (defonce in-process-files (atom {}))
 
+(defonce controllers (atom #{}))
+
 (defn list-components-cmd [magento-basedir type]
   (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
     (when-not (fs/exists? composer-autoload)
@@ -44,6 +46,14 @@
       (set-not-in-process! file)
       true)))
 
+(defn controller? [file]
+  (re-find #"/Controller/.+\.php$" file))
+
+(defn clean-cache-for-new-controller [file]
+  (when (and (controller? file) (not (contains? @controllers file)))
+    (cache/clean-cache-types ["config"])
+    (swap! controllers conj file)))
+
 (defn file-changed [file]
   (when (and (fs/exists? file)
              (not (re-find #"___jb_...___" file))
@@ -51,11 +61,16 @@
     (set-in-process! file)
     (log/debug "Processing" file)
     (when-let [types (seq (cache/magefile->cachetypes file))]
-      (cache/clean-cache-types types))))
+      (cache/clean-cache-types types))
+    (clean-cache-for-new-controller file)))
+
+(defn module-controllers [module-dir]
+  (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
 
 (defn watch-module [module-dir]
   (when (fs/exists? module-dir)
     (fs/watch-recursive module-dir #(file-changed %))
+    (swap! controllers into (module-controllers module-dir))
     (log/debug "Watching module" (fs/basename module-dir))))
 
 (defn watch-theme [theme-dir]
