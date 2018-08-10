@@ -1,5 +1,7 @@
 # Magento 2 Cache Clean
 
+> "You know, hope is a mistake. If you can't fix what's broken, you'll, uh... you'll go insane." - Max Rockatansky
+
 A faster drop in replacement for `bin/magento cache:clean` with a file watcher.
 
 The file watcher automates selectively cleaning affected cache
@@ -9,7 +11,7 @@ The project is very young and only tested on MacOS.
 Please report bugs by opening an issue on the GitHub issue tracker.
 
 
-## Installation & Upgrading
+## Installation & Updating
 
 Installation:
 
@@ -17,12 +19,11 @@ Installation:
 composer require --dev mage2tv/magento-cache-clean
 ```
 
-Upgrade:
+Update:
 
 ``` shell
 composer update mage2tv/magento-cache-clean
 ```
-
 
 ## Usage
 
