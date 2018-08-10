@@ -1,6 +1,6 @@
-# Magento 2 Cache Clean
-
 > "You know, hope is a mistake. If you can't fix what's broken, you'll, uh... you'll go insane." - Max Rockatansky
+
+# Magento 2 Cache Clean
 
 A faster drop in replacement for `bin/magento cache:clean` with a file watcher.
 
