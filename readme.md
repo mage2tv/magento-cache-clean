@@ -93,14 +93,19 @@ simply nuke the whole cache after every change.
 
 Automating selective cache cleaning improves the developer experience.
 
+
 ## Known issues
 
-Currently the watcher has to be restarted when a new module or theme is added.
+Currently the watcher has to be restarted after a new module or theme is added
+so it is added to the watchlist.
 
-Node on Linux does not support recursive file watches, so this utitily
-traverses each module for child directories and watches each one individually.
-When new directories are created, they are added to the watch list on the fly.
-This logic is in place but has not been tested. So there be bugs.
+Changes to files on NFS mounts (e.g. in vagrant) do not trigger the watches.
+
+If you run into the error `Error NOSPC` on Linux, run the command:
+
+``` shell
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+```
 
 
 ## Building
