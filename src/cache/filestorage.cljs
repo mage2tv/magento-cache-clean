@@ -83,4 +83,6 @@
 
 (defn clean-all []
   (log/debug "Cleaning dir" (cache-dir))
-  (fs/rm-contents (cache-dir)))
+  (let [dir (cache-dir)]
+    (when (fs/exists? dir)
+      (fs/rm-contents dir))))
