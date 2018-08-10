@@ -59,7 +59,7 @@
 
 (defn help-the-needfull []
   (println "Usage: cache-clean.js [options and flags] [cache-types...]
-Clear the given cache types. If none are given, clear all cache types.
+Clean the given cache types. If none are given, clean all cache types.
 
 --directory|-d <dir>    Magento base directory
 --watch|-w              Watch for file changes
