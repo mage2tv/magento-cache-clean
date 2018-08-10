@@ -1,6 +1,6 @@
 {
     "name": "mage2tv/magento-cache-clean",
-    "description": "Faster drop in replacement for bin/magento cache:clean with file watcher",
+    "description": "A faster drop in replacement for bin/magento cache:clean with file watcher",
     "type": "library",
     "keywords": [
         "magento",
@@ -23,6 +23,6 @@
         "magento/project-community-edition": "*"
     },
     "bin": [
-        "bin/clean-cache.js"
+        "bin/cache-clean.js"
     ]
 }

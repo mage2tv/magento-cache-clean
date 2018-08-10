@@ -7,9 +7,11 @@ The project is very young and only tested on MacOS.
 Please report bugs by opening an issue on the GitHub issue tracker.
 
 
-## Installation
+## Installation & Upgrading
 
-TODO: make installable with composer
+Install: `composer require --dev mage2tv/magento-cache-clean`
+
+Upgrade: `composer update --dev mage2tv/magento-cache-clean`
 
 
 ## Usage
@@ -47,7 +49,7 @@ Clear the given cache types. If none are given, clear all cache types.
 ```
 
 Usually I run the command once with the `--watch` switch when I start
-development, and when I make a change that isn't automatically deteceted (yet),
+development, and when I make a change that isn't automatically detected (yet),
 I run `bin/clean-cache.js` with the given cache types as a drop in replacement
 for `bin/magento cache:clean`.
 
@@ -79,7 +81,7 @@ required cache types.
 
 Currently the watcher has to be restarted when a new module or theme is added.
 
-On linux recursive file watches are not supported, so a given directory branch
+On Linux recursive file watches are not supported, so a given directory branch
 is scanned and all child directories are added to the watch list. That part works.
 But when new directories are created, they are added to the watch list on the fly.
 That part of the code needs testing.
@@ -112,7 +114,7 @@ controller for a route.
 * Add support for the REDIS cache storage backend
 
 
-## Copyright & Licence
+## Copyright & License
 
 Copyright 2018 by Vinai Kopp, distributed under the BSD-3-Clause license (see
 the LICENSE file in this repository).
