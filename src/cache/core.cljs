@@ -52,10 +52,10 @@
   (letfn [(arg->verbosity [arg]
             (case arg
               ( "-v" "--verbose") 1
-              ("-vv" "--shout")   2
-              ("-vvv" "--debug")  3
+              ("-vv" "--debug")   2
+              ("-s" "--silent")  -1
               0))]
-    (reduce + 0 (map arg->verbosity args))))
+    (reduce + 1 (map arg->verbosity args))))
 
 (defn help-the-needfull []
   (println "Usage: cache-clean.js [options and flags] [cache-types...]
@@ -63,9 +63,9 @@ Clean the given cache types. If none are given, clean all cache types.
 
 --directory|-d <dir>    Magento base directory
 --watch|-w              Watch for file changes
---verbose|-v            Display cleared cache types
---shout|-vv             Display more info
---debug|-vvv            Display too much information
+--verbose|-v            Display more information
+--debug|-vv             Display too much information
+--silent|-s             Display less information
 --help|-h               This help message"))
 
 (defn help-needed? [args]
@@ -77,8 +77,8 @@ Clean the given cache types. If none are given, clean all cache types.
 (defn switch? [arg]
   (#{"--watch" "-w"
      "--verbose" "-v"
-     "--shout" "-vv"
-     "--debug" "-vvv"
+     "--debug" "-vv"
+     "--silent" "-s"
      "--help" "-h" } arg))
 
 (defn remove-switches-and-args-with-vals [args]
@@ -96,7 +96,6 @@ Clean the given cache types. If none are given, clean all cache types.
   (storage/set-magento-dir! (find-basedir args)))
 
 (defn clean-cache-types [args]
-  (log/inc-verbosity!)
   (let [cache-types (remove-switches-and-args-with-vals args)]
     (cache/clean-cache-types cache-types)))
 
