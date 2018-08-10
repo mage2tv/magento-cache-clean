@@ -22,7 +22,8 @@ composer require --dev mage2tv/magento-cache-clean
 Update:
 
 ``` shell
-composer update mage2tv/magento-cache-clean
+composer remove --dev mage2tv/magento-cache-clean
+composer require --dev mage2tv/magento-cache-clean
 ```
 
 ## Usage
