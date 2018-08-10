@@ -1,6 +1,8 @@
-# Magento 2 Cache Cleaner
+# Magento 2 Cache Clean
 
-This project is a file watcher to automate selectively cleaning affected cache
+A faster drop in replacement for `bin/magento cache:clean` with a file watcher.
+
+The file watcher automates selectively cleaning affected cache
 types in the Magento 2 file cache backend during development.
 
 The project is very young and only tested on MacOS.
@@ -9,25 +11,31 @@ Please report bugs by opening an issue on the GitHub issue tracker.
 
 ## Installation & Upgrading
 
-Install: `composer require --dev mage2tv/magento-cache-clean`
+Installation:
 
-Upgrade: `composer update --dev mage2tv/magento-cache-clean`
+``` shell
+composer require --dev mage2tv/magento-cache-clean`
+```
+
+
+Upgrade:
+
+``` shell
+composer update mage2tv/magento-cache-clean
+```
 
 
 ## Usage
 
-Prerequisites: `node.js` (built on 10.8, but should work with older versions, too).
+Run `vendor/bin/cache-clean.js --watchw` from within your Magento directory.
 
-1. Turn all on caches with `bin/magento cache:enable`
-2. Run `node vendor/bin/cache-clean.js -w` from within your Magento project.
+Press Ctrl-C to exit the watcher process.
 
-Press Ctrl-C to quit the watcher process.
-
-The script can be used as a quicker version of `bin/magento cache:clean`, too.
+The script can be used as a faster version of `bin/magento cache:clean`, too.
 For example:
 
 ``` shell
-vendor/bin/clean-cache config page_page
+vendor/bin/cache-clean.js config page_page
 ```
 (It's quicker because the start up time of `bin/magento` is a lot slower.)
 
@@ -37,7 +45,7 @@ There are several options to customize the behavior:
 bin/cache-clean.js --help
 Sponsored by https://www.mage2.tv
 
-Usage: clean-cache.js [options and flags] [cache-types...]
+Usage: cache-clean.js [options and flags] [cache-types...]
 Clear the given cache types. If none are given, clear all cache types.
 
 --directory|-d <dir>    Magento base directory
@@ -50,31 +58,37 @@ Clear the given cache types. If none are given, clear all cache types.
 
 Usually I run the command once with the `--watch` switch when I start
 development, and when I make a change that isn't automatically detected (yet),
-I run `bin/clean-cache.js` with the given cache types as a drop in replacement
+I run `bin/cache-clean.js` with the given cache types as a drop in replacement
 for `bin/magento cache:clean`.
+
+
+### Prerequisites:
+
+* `node.js` (built on 10.8, but should work with older versions, too).
+* it probably is a good idea to turn on all Magento caches
+  `bin/magento cache:enable` to get the full benefit.
 
 
 ## Rationale
 
-Two facts:
+Assumptions:
 
-1. Magento uses a lot of caching.
+1. Magento uses caching a lot and is faster when the caches are warm.
 2. As a developer I want a quick feedback loop.
+3. Rebuilding the cache is slower than cleaning the cache
 
-Either I disable caches or I have to clean caches frequently after
-I make some changes so I can see my changes take effect.
-Both options make for a slow feedback loop.
+To support the above assumptions, I want to only remove the cache segments I
+really have to remove after making some changes.
+For example, if I make a change to a template, I only want to flush the
+`block_html` and `full_page` cache, not the `config` cache.
 
-The process of rebuilding the cache contents (i.e. the reload) takes more time
-than the cleaning of cache segments. Because of this, cleaning only the affected
-sections of the cache can be used to shorten the feedback loop.
+Thinking about what cache types need to be cleaned after a change and typing the
+exact command takes time, and gets very repetitive, so many developers simply
+nuke the whole cache after every change.
 
-But cleaning only parts of a cache with a careful - for example with
-`bin/magento cache:clean layout page_cache` takes longer than simply running
-`rm -r var/cache var/page_cache`
-
-This project aims to help Magento developers to spend less time cleaning the
-required cache types.
+This utility aims to improve the Magento developer experience by shortening the
+feedback loop during development through automating the removal of affected
+cache sections after file changes.
 
 
 ## Known issues
@@ -94,15 +108,22 @@ To build, install Clojure 1.9 or later and run
 
 ```shell
 $ clj -m figwheel.main -O advanced -bo build
-$ chmod +x bin/clean-cache.js
+$ chmod +x bin/cache-clean.js
 ```
 
 (Installing Clojure is simple - e.g. on a Mac it's `brew install clojure`)
 
 
-## Sponsorship
+## Thanks
 
 Thanks to [Mage2 TV](https://www.mage2.tv/) for sponsoring the development of this tool.
+
+This script was inspired by [Timon de Groot](https://twitter.com/TimonGreat)'s
+[blog post](https://blog.timpack.org/speed-up-magento-development) where he
+describes the idea to use a file watcher in PHPStorm to call `redis-cli` to
+clear the complete cache whenever a XML file is modified.
+The only downside of that solution is that it always flushes the full cache and
+only works with redis.
 
 
 ## TODO
@@ -111,7 +132,7 @@ Thanks to [Mage2 TV](https://www.mage2.tv/) for sponsoring the development of th
 a controller class declaration, i.e. they are picked up by Magento as a
 controller for a route.
 
-* Add support for the REDIS cache storage backend
+* Add support for the redis cache storage
 
 
 ## Copyright & License
