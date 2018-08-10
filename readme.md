@@ -105,8 +105,6 @@ Thanks to [Mage2 TV](https://www.mage2.tv/) for sponsoring the development of th
 
 ## TODO
 
-* Add composer.json
-
 * The config cache should be cleaned for controllers once and only if they contain
 a controller class declaration, i.e. they are picked up by Magento as a
 controller for a route.

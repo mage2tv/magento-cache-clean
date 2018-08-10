@@ -1,0 +1,28 @@
+{
+    "name": "mage2tv/magento-cache-clean",
+    "description": "Faster drop in replacement for bin/magento cache:clean with file watcher",
+    "type": "library",
+    "keywords": [
+        "magento",
+        "development",
+        "utility"
+    ],
+    "homepage": "https://github.com/mage2tv/magento-cache-clean",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Vinai Kopp",
+            "email": "vinai@netzarbeiter.com",
+            "role": "lead"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/mage2tv/magento-cache-clean/issues"
+    },
+    "suggest": {
+        "magento/project-community-edition": "*"
+    },
+    "bin": [
+        "bin/clean-cache.js"
+    ]
+}
