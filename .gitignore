@@ -3,3 +3,6 @@
 /target
 /.nrepl-port
 /.rebel_readline_history
+/node_modules
+/package.json
+/package-lock.json
