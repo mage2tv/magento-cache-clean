@@ -140,6 +140,7 @@ only works with redis.
 
 * Add support for redis cache storage
 
+* Automatically clean relevant files in generated/code, too
 
 ## Copyright & License
 
