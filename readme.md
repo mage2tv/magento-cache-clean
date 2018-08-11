@@ -6,8 +6,10 @@ A faster drop in replacement for `bin/magento cache:clean` with a file watcher.
 
 The file watcher automates selectively cleaning affected cache
 types in the Magento 2 file cache backend during development.
+For example, if I make a change to a template, I only want to flush the
+`block_html` and `full_page` caches, not the `config` or `layout` caches.
 
-The project is very young and only tested on MacOS.
+The project is very young and only tested on MacOS and Linux.
 Please report bugs by opening an issue on the GitHub issue tracker.
 
 
@@ -97,12 +99,14 @@ Automating selective cache cleaning improves the developer experience.
 
 ## Known issues
 
-Currently the watcher has to be restarted after a new module or theme is added
-so it is added to the watchlist.
+* Currently the watcher has to be restarted after a new module or theme is added
+  so it is added to the watchlist.
 
-Changes to files on NFS mounts (e.g. in vagrant) do not trigger the watches.
+* Changes to files on NFS mounts (e.g. in vagrant) do not trigger the watches.
+  Depending on a given setup, it might be possible to run the watcher on the
+  host system instead.
 
-If you run into the error `Error NOSPC` on Linux, run the command:
+* If you run into the error `Error NOSPC` on Linux, run the command:
 
 ``` shell
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
