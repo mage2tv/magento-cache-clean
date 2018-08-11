@@ -28,8 +28,7 @@
   (add-trailing-slash (str (base-dir) *cachedir*)))
 
 (defn- md5 [^String data]
-  (let [crypto (js/require
-                "crypto")]
+  (let [crypto (js/require "crypto")]
     (-> crypto (.createHash "md5") (.update data) (.digest "hex"))))
 
 (defn- file-name-prefix []
@@ -51,13 +50,13 @@
 (defn- tag-path []
   (str (cache-dir) (file-name-prefix) "-tags/"))
 
-(defn id->filename [^String id]
+(defn- id->filename [^String id]
   (str (file-name-prefix) "---" (cache-id-prefix) id))
 
-(defn id->filepath [^String id]
+(defn- id->filepath [^String id]
   (str (path id) (id->filename id)))
 
-(defn tag->filepath [^String tag]
+(defn- tag->filepath [^String tag]
   (str (tag-path) (id->filename tag)))
 
 (defn- remove-cache-id-prefix [id-with-prefix]

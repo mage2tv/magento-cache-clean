@@ -77,9 +77,6 @@
 (defn tag->ids [tag]
   (storage/tag->ids tag))
 
-(defn id->file [id]
-  (storage/id->filepath id))
-
 (def filetype->cachetypes
   {::config ["config"]
    ::translation ["translate"]
