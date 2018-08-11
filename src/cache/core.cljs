@@ -1,6 +1,6 @@
 (ns cache.core
   (:require [cache.cache :as cache]
-            [cache.filestorage :as storage]
+            [cache.storage.file :as storage]
             [file.system :as fs]
             [log.log :as log]
             [magento.watcher :as watcher]))

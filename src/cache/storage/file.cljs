@@ -1,4 +1,4 @@
-(ns cache.filestorage
+(ns cache.storage.file
   (:require [file.system :as fs]
             [log.log :as log]
             [clojure.string :as string]))

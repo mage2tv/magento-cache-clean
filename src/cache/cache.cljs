@@ -1,5 +1,5 @@
 (ns cache.cache
-  (:require [cache.filestorage :as storage]
+  (:require [cache.storage.file :as storage]
             [file.system :as fs]
             [log.log :as log]
             [clojure.string :as string]))

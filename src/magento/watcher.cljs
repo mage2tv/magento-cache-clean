@@ -1,5 +1,5 @@
 (ns magento.watcher
-  (:require [cache.filestorage :as storage]
+  (:require [cache.storage.file :as storage]
             [log.log :as log]
             [cache.cache :as cache]
             [file.system :as fs]
