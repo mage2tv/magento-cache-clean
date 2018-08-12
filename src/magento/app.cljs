@@ -1,6 +1,7 @@
 (ns magento.app
   (:require [file.system :as fs]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [goog.json :as json]))
 
 (defonce child-process (js/require "child_process"))
 
@@ -31,7 +32,7 @@
 (defn- read-cache-config []
   (let [cmd (cache-config-cmd)
         output (.execSync child-process cmd)
-        config (js->clj (js/goog.json.parse output) :keywordize-keys true)]
+        config (js->clj (json/parse output) :keywordize-keys true)]
     (into {} config)))
 
 (defn cache-config [cache-type]
