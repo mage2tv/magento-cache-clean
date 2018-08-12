@@ -123,9 +123,10 @@
 (defn stop-watching [dir]
   (try
     (swap! watches (fn [watches]
-                     (when-let [watch (get watches dir)]
-                       (.close watch)
-                       (dissoc watches dir))))
+                     (if-let [watch (get watches dir)]
+                       (do (.close watch)
+                           (dissoc watches dir))
+                       watches)))
     (catch :default e)))
 
 (defn stop-all-watches []
