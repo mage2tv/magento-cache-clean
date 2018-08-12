@@ -1,8 +1,9 @@
 (ns cache.storage.redis
-  (:require [cache.storage]))
+  (:require [cache.storage :as storage]
+            [log.log :as log]))
 
 (defrecord Redis [config]
-  cache.storage/CacheStorage
+  storage/CacheStorage
 
   (tag->ids [this tag]
     [])
@@ -17,4 +18,5 @@
     ))
 
 (defn create [config]
+  (log/error "[Error] REDIS cache storage not yet supported.")
   (->Redis config))
