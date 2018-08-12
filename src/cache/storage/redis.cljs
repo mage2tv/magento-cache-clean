@@ -1,15 +1,20 @@
-(ns cache.storage.redis)
+(ns cache.storage.redis
+  (:require [cache.storage]))
 
-;; php -r 'echo json_encode((require "app/etc/env.php")["cache"]["frontend"] ?? []);'
+(defrecord Redis [config]
+  cache.storage/CacheStorage
 
-(defn tag->ids [tag]
-  [])
+  (tag->ids [this tag]
+    [])
 
-(defn delete [id]
-  )
+  (delete [this id]
+    )
 
-(defn clean-tag [tag]
-  )
+  (clean-tag [this tag]
+    )
 
-(defn clean-all []
-  )
+  (clean-all [this]
+    ))
+
+(defn create [config]
+  (->Redis config))

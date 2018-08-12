@@ -1,6 +1,6 @@
 (ns cache.core
   (:require [cache.cache :as cache]
-            [cache.storage.file :as storage]
+            [magento.app :as mage]
             [file.system :as fs]
             [log.log :as log]
             [magento.watcher :as watcher]))
@@ -93,7 +93,7 @@ Clean the given cache types. If none are given, clean all cache types.
 
 (defn init-app [args]
   (log/set-verbosity! (find-log-level args))
-  (storage/set-magento-dir! (find-basedir args)))
+  (mage/set-base-dir! (find-basedir args)))
 
 (defn clean-cache-types [args]
   (let [cache-types (remove-switches-and-args-with-vals args)]

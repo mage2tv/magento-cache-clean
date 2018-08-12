@@ -1,35 +1,12 @@
 (ns magento.watcher
-  (:require [cache.storage.file :as storage]
-            [log.log :as log]
+  (:require [log.log :as log]
+            [magento.app :as mage]
             [cache.cache :as cache]
-            [file.system :as fs]
-            [clojure.string :as string]))
-
-(defonce child-process (js/require "child_process"))
+            [file.system :as fs]))
 
 (defonce in-process-files (atom {}))
 
 (defonce controllers (atom #{}))
-
-(defn list-components-cmd [magento-basedir type]
-  (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
-    (when-not (fs/exists? composer-autoload)
-      (throw (ex-info (str "Composer autoload.php not found: " composer-autoload) {})))
-    (str "php -r "
-         "'require \"" composer-autoload "\"; "
-         "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths(\"" type "\") as $m) "
-         "echo $m.PHP_EOL;'")))
-
-(defn list-component-dirs [magento-basedir type]
-  (let [cmd (list-components-cmd magento-basedir type)
-        output (.execSync child-process cmd)]
-    (string/split-lines output)))
-
-(defn module-dirs [magento-basedir]
-  (list-component-dirs magento-basedir "module"))
-
-(defn theme-dirs [magento-basedir]
-  (list-component-dirs magento-basedir "theme"))
 
 (defn timestamp []
   (.getTime (js/Date.)))
@@ -82,7 +59,6 @@
   (log/always "Stopped watching"))
 
 (defn start []
-  (let [magento-basedir (storage/base-dir)]
-    (run! watch-module (module-dirs magento-basedir))
-    (run! watch-theme (theme-dirs magento-basedir))
-    (log/notice "Watcher initialized (Ctrl-C to quit)")))
+  (run! watch-module (mage/module-dirs))
+  (run! watch-theme (mage/theme-dirs))
+  (log/notice "Watcher initialized (Ctrl-C to quit)"))

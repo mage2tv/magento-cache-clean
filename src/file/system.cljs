@@ -16,6 +16,9 @@
 (defn- trailing-slash [s]
   (if (= "/" (subs s (- (count s) 1))) s (str s "/")))
 
+(def add-trailing-slash
+  (memoize trailing-slash))
+
 (defn exists? [file]
   (.existsSync fs file))
 
