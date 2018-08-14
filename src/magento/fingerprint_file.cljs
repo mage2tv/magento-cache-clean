@@ -51,8 +51,13 @@
            ["theme.xml" #"urn:magento:framework:Config/etc/theme\.xsd"]]]
     (tuples->fingerprint-fns ::template t)))
 
+(defn- requirejs-config-filetypes []
+  (let [t [["requirejs-config.js"]]]
+    (tuples->fingerprint-fns ::requirejs-config t)))
+
 (def file->type
   (merge (config-filetypes)
          (layout-filetypes)
          (translation-filetypes)
-         (template-filetypes)))
+         (template-filetypes)
+         (requirejs-config-filetypes)))

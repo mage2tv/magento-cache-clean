@@ -26,7 +26,8 @@
   {::magefile/config ["config"]
    ::magefile/translation ["translate"]
    ::magefile/layout ["layout" "full_page"]
-   ::magefile/template ["block_html" "full_page"]})
+   ::magefile/template ["block_html" "full_page"]
+   ::magefile/requirejs-config ["full_page"]})
 
 (defn magefile->cachetypes [file]
   (let [filetype (magefile->filetype file)]
