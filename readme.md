@@ -4,8 +4,8 @@
 
 A faster drop in replacement for `bin/magento cache:clean` with a file watcher.
 
-The file watcher automatically cleans affected cache types in the Magento 2 file
-cache backend during development.
+The file watcher automatically cleans affected cache types in the Magento 2
+cache during development.
 For example, if you make a change to a template, it only cleans the
 `block_html` and `full_page` caches, not the `config` or `layout` caches.
 
@@ -137,8 +137,6 @@ only works with redis.
 
 
 ## TODO
-
-* Add support for redis cache storage
 
 * Automatically clean relevant files in generated/code, too
 
