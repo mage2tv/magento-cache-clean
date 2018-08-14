@@ -35,11 +35,13 @@
         config (js->clj (json/parse output) :keywordize-keys true)]
     (into {} config)))
 
-(defn cache-config [cache-type]
-  (let [config (read-cache-config)]
-    (or (get config cache-type)
-        (get (default-cache-config) cache-type)
-        (get (default-cache-config) :default))))
+(def cache-config
+  (memoize
+   (fn [cache-type]
+     (let [config (read-cache-config)]
+       (or (get config cache-type)
+           (get (default-cache-config) cache-type)
+           (get (default-cache-config) :default))))))
 
 (defn- list-components-cmd [magento-basedir type]
   (let [composer-autoload (str magento-basedir "vendor/autoload.php")]

@@ -44,8 +44,7 @@
    (run! #(clean cache %) (into [type] types))))
 
 (def get-storage
-  "TODO: memoize this once it is more stable
-  Note to self: decided against a multi-method because I'm not adding more'
+  "Note to self: decided against a multi-method because I'm not adding more
   backends, and an if statement is simpler."
   (fn [config]
     (log/debug "Cache storage " config)

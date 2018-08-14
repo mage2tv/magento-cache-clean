@@ -7,10 +7,15 @@
 
 (defonce redis (js/require "redis"))
 
-(def ^:const set-ids "zc:ids")
-(def ^:const set-tags "zc:tags")
-(def ^:const prefix-key "zc:k:")
-(def ^:const prefix-tag-id "zc:ti:")
+(comment (defonce ^:const set-ids "zc:ids")
+         (defonce ^:const set-tags "zc:tags")
+         (defonce ^:const prefix-key "zc:k:")
+         (defonce ^:const prefix-tag-id "zc:ti:"))
+
+(def set-ids "zc:ids")
+(def set-tags "zc:tags")
+(def prefix-key "zc:k:")
+(def prefix-tag-id "zc:ti:")
 
 (defn- localhost? [host]
   (#{"localhost" "127.0.0.1"} host))
@@ -30,20 +35,23 @@
       password (assoc :auth_pass password)
       database (assoc :db database))))
 
-(defn- tag->ids [client tag callback]
+(defn- tag->ids [^js/RedisClient client tag callback]
   (.smembers client (str prefix-tag-id tag)
              (fn [err ids]
-               (callback ids))))
+               (if err
+                 (log/error err)
+                 (callback (js->clj ids))))))
 
-(defn- delete-tag-and-ids [client tag ids]
+(defn- delete-tag-and-ids [^js/RedisClient client tag ids]
   ;; TODO: make multi command
-  (run! #(log/debug "Cleaning id" %) ids)
-  (.del client (doall (map #(str prefix-key %) ids)))
-  (.srem client set-ids ids)
+  (when (seq ids)
+    (run! #(log/debug "Cleaning id" %) ids)
+    (apply js-invoke client "del" (doall (map #(str prefix-key %) ids)))
+    (apply js-invoke client "srem" set-ids ids))
   (.del client (str prefix-tag-id tag))
   (.srem client set-tags tag))
 
-(defrecord Redis [client database]
+(defrecord Redis [^js/RedisClient client database]
   storage/CacheStorage
 
   (clean-tag [this tag]
