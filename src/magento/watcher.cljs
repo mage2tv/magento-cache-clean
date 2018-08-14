@@ -36,7 +36,7 @@
              (not (re-find #"___jb_...___" file))
              (not (in-process? file)))
     (set-in-process! file)
-    (log/debug "Processing" file)
+    (log/info "Processing" file)
     (when-let [types (seq (cache/magefile->cachetypes file))]
       (cache/clean-cache-types types))
     (clean-cache-for-new-controller file)))
