@@ -1,6 +1,5 @@
 (ns cache.storage.file
   (:require [file.system :as fs]
-            [magento.app :as mage]
             [cache.storage :as storage]
             [log.log :as log]
             [clojure.string :as string]))
