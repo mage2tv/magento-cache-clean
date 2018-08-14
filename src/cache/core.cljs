@@ -114,5 +114,3 @@ Clean the given cache types. If none are given, clean all cache types.
            (binding [*print-fn* *print-err-fn*]
              (println "[ERROR]" (or (.-message e) e)))
            (exit-with-code 1)))))
-
-(set! *main-cli-fn* -main)

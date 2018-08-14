@@ -9,15 +9,8 @@
   {:file-name-prefix       "mage"
    :hashed-directory-level 1})
 
-(defn- md5 [^String data]
-  (let [crypto (js/require "crypto")]
-    (-> crypto (.createHash "md5") (.update data) (.digest "hex"))))
-
 (defn- file-name-prefix []
   (:file-name-prefix options))
-
-(defn- cache-id-prefix []
-  (str (subs (md5 (str (fs/realpath (mage/base-dir)) "/app/etc/")) 0 3) "_"))
 
 (defn- chars-from-end [^String s length]
   (subs s (- (count s) length)))
@@ -25,7 +18,7 @@
 (defn- path [^String cache-dir ^String id]
   (let [length (:hashed-directory-level options)]
     (if (< 0 length)
-      (let [suffix (chars-from-end (md5 (str (cache-id-prefix) id)) length)]
+      (let [suffix (chars-from-end (storage/md5 id) length)]
         (str cache-dir (file-name-prefix) "--" suffix "/"))
       cache-dir)))
 
@@ -33,7 +26,7 @@
   (str cache-dir (file-name-prefix) "-tags/"))
 
 (defn- id->filename [^String id]
-  (str (file-name-prefix) "---" (cache-id-prefix) id))
+  (str (file-name-prefix) "---" id))
 
 (defn- id->filepath [^String cache-dir ^String id]
   (str (path cache-dir id) (id->filename id)))
@@ -41,29 +34,26 @@
 (defn- tag->filepath [^String cache-dir ^String tag]
   (str (tag-path cache-dir) (id->filename tag)))
 
-(defn- remove-cache-id-prefix [id-with-prefix]
-  (subs id-with-prefix 4))
+(defn- tag->ids [cache-dir tag]
+  (let [file (tag->filepath cache-dir tag)]
+    (if (fs/exists? file)
+      (string/split-lines (fs/slurp file))
+      [])))
+
+(defn- delete [cache-dir id]
+  (log/debug "Cleaning id" id)
+  (let [file (id->filepath cache-dir id)]
+    (when (fs/exists? file)
+      (fs/rm file))))
 
 (defrecord File [cache-dir]
   storage/CacheStorage
-
-  (tag->ids [this tag]
-    (let [file (tag->filepath cache-dir tag)]
-      (if (fs/exists? file)
-        (doall (map remove-cache-id-prefix (string/split-lines (fs/slurp file))))
-        [])))
-
-  (delete [this id]
-    (log/debug "Cleaning id" id)
-    (let [file (id->filepath cache-dir id)]
-      (when (fs/exists? file)
-        (fs/rm file))))
 
   (clean-tag [this tag]
     (let [tag-file (tag->filepath cache-dir tag)]
       (log/debug "Tag-file" tag-file)
       (when (fs/exists? tag-file)
-        (run! #(storage/delete this %) (storage/tag->ids this tag))
+        (run! #(delete cache-dir %) (tag->ids cache-dir tag))
         (fs/rm tag-file))))
 
   (clean-all [this]

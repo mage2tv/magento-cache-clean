@@ -36,9 +36,10 @@
 (defn- clean
   ([cache] (storage/clean-all cache))
   ([cache type]
-   (let [tag (cachetype->tag type)]
+   (let [tag (cachetype->tag type)
+         prefixed-tag (str (storage/magento-instance-cache-id-prefix) tag)]
      (log/debug "Cleaning tag" tag)
-     (storage/clean-tag cache tag)))
+     (storage/clean-tag cache prefixed-tag)))
   ([cache type & types]
    (run! #(clean cache %) (into [type] types))))
 
@@ -51,9 +52,6 @@
     (if (= "Cm_Cache_Backend_Redis" (:backend config))
       (redis/create config)
       (file/create config))))
-
-(defn tag->ids [cache tag]
-  (storage/tag->ids cache tag))
 
 (defn clean-cache-types [cache-types]
   (if (seq cache-types)
