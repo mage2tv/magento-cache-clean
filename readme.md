@@ -19,8 +19,6 @@ Installation:
 
 ``` shell
 composer require --dev mage2tv/magento-cache-clean
-cd vendor/mage2tv/magento-cache-clean
-npm install
 ```
 
 Update:
