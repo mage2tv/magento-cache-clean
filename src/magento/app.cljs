@@ -29,19 +29,19 @@
    :default {:backend "Cm_Cache_Backend_File"
              :cache_dir (str (base-dir) "var/cache")}})
 
-(defn- read-cache-config []
-  (let [cmd (cache-config-cmd)
-        output (.execSync child-process cmd)
-        config (js->clj (json/parse output) :keywordize-keys true)]
-    (into {} config)))
-
-(def cache-config
+(def read-cache-config
   (memoize
-   (fn [cache-type]
-     (let [config (read-cache-config)]
-       (or (get config cache-type)
-           (get (default-cache-config) cache-type)
-           (get (default-cache-config) :default))))))
+   (fn []
+     (let [cmd (cache-config-cmd)
+           output (.execSync child-process cmd)
+           config (js->clj (json/parse output) :keywordize-keys true)]
+       (into {} config)))))
+
+(defn cache-config [cache-type]
+  (let [config (read-cache-config)]
+    (or (get config cache-type)
+        (get (default-cache-config) cache-type)
+        (get (default-cache-config) :default))))
 
 (defn- list-components-cmd [magento-basedir type]
   (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
