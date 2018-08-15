@@ -13,15 +13,22 @@
 (defn base-dir []
   (fs/add-trailing-slash @magento-basedir))
 
-(defn- cache-config-cmd []
+(defn- env-config-cmd []
   (let [app-etc-env (str (base-dir) "app/etc/env.php")]
     (when-not (fs/exists? app-etc-env)
       (throw (ex-info (str "File app/etc/env.php not found: " app-etc-env) {})))
     (str "php -r "
          "'echo json_encode("
-         "(require \"" app-etc-env "\")"
-         "[\"cache\"][\"frontend\"] ?? []"
+         "(require \"" app-etc-env "\") ?? []"
          ");'")))
+
+(def read-app-config
+  (memoize
+   (fn []
+     (let [cmd (env-config-cmd)
+           output (.execSync child-process cmd)
+           config (js->clj (json/parse output) :keywordize-keys true)]
+       (into {} config)))))
 
 (defn default-cache-config []
   {:page_cache {:backend "Cm_Cache_Backend_File"
@@ -29,19 +36,19 @@
    :default {:backend "Cm_Cache_Backend_File"
              :cache_dir (str (base-dir) "var/cache")}})
 
-(def read-cache-config
-  (memoize
-   (fn []
-     (let [cmd (cache-config-cmd)
-           output (.execSync child-process cmd)
-           config (js->clj (json/parse output) :keywordize-keys true)]
-       (into {} config)))))
+(defn read-cache-config []
+  (let [config (read-app-config)]
+    (get-in config [:cache :frontend])))
 
 (defn cache-config [cache-type]
   (let [config (read-cache-config)]
     (or (get config cache-type)
         (get (default-cache-config) cache-type)
         (get (default-cache-config) :default))))
+
+(defn varnish-hosts-config []
+  (let [config (read-app-config)]
+    (get config :http_cache_hosts)))
 
 (defn- list-components-cmd [magento-basedir type]
   (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
