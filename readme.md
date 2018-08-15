@@ -138,7 +138,8 @@ only works with redis.
 
 ## TODO
 
-* Automatically clean relevant files in generated/code, too
+* Add Varnish support
+* Automatically clean relevant files in generated/code
 
 ## Copyright & License
 
