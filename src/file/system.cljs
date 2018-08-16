@@ -86,20 +86,24 @@
                   (into acc files))) [] dirs))
     []))
 
+(defn watched? [dir-or-file]
+  (get @watches (realpath dir-or-file)))
+
 (defn watch
   ([dir-or-file callback] (watch dir-or-file #js {} callback))
   ([dir-or-file options callback]
-   (if-let [watch (get @watches dir-or-file)]
-     watch
-     (let [prefix (trailing-slash (if (dir? dir-or-file)
-                                   dir-or-file
-                                   (dirname dir-or-file)))
-          callback-wrapper (fn [event-type filename]
-                             (when filename
-                               (callback (str prefix filename))))]
-      (let [watch (.watch fs dir-or-file options callback-wrapper)]
-        (swap! watches assoc dir-or-file watch)
-        watch)))))
+   (let [dir-or-file (realpath dir-or-file)]
+     (if-let [watch (watched? dir-or-file)]
+       watch
+       (let [prefix (trailing-slash (if (dir? dir-or-file)
+                                      dir-or-file
+                                      (dirname dir-or-file)))
+             callback-wrapper (fn [event-type filename]
+                                (when filename
+                                  (callback (str prefix filename))))]
+         (let [watch (.watch fs dir-or-file options callback-wrapper)]
+           (swap! watches assoc dir-or-file watch)
+           watch))))))
 
 (defn- recursive-watch-supported? []
   (or (mac?) (win?)))

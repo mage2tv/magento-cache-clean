@@ -45,7 +45,7 @@
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
 
 (defn watch-module [module-dir]
-  (when (fs/exists? module-dir)
+  (when (and (fs/exists? module-dir) (not (fs/watched? module-dir)))
     (fs/watch-recursive module-dir #(file-changed %))
     (swap! controllers into (module-controllers module-dir))
     (log/debug "Watching module" (fs/basename module-dir))))
@@ -54,11 +54,26 @@
   (fs/watch-recursive theme-dir #(file-changed %))
   (log/debug "Watching theme" (fs/basename theme-dir)))
 
+(defn watch-all-modules! []
+  (run! watch-module (mage/module-dirs)))
+
+(defn watch-new-modules! []
+  (log/debug "Checking for new modules...")
+  (watch-all-modules!))
+
+(defn watch-for-new-modules! []
+  (let [config-php-dir (str (mage/base-dir) "app/etc")]
+    (log/debug "Monitoring app/etc/config.php for new modules")
+    (fs/watch config-php-dir (fn [file]
+                               (if (= "config.php" (fs/basename file))
+                                 (watch-new-modules!))))))
+
 (defn stop []
   (fs/stop-all-watches)
   (log/always "Stopped watching"))
 
 (defn start []
-  (run! watch-module (mage/module-dirs))
+  (watch-all-modules!)
   (run! watch-theme (mage/theme-dirs))
+  (watch-for-new-modules!)
   (log/notice "Watcher initialized (Ctrl-C to quit)"))
