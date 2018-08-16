@@ -99,8 +99,8 @@ Automating selective cache cleaning improves the developer experience.
 
 ## Known issues
 
-* Currently the watcher has to be restarted after a new module or theme is added
-  so it is added to the watchlist.
+* Currently the watcher has to be restarted after a new theme is added so it
+  is added to the watchlist.
 
 * Changes to files on NFS mounts (e.g. in vagrant) do not trigger the watches.
   Depending on a given setup, it might be possible to run the watcher on the
