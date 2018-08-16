@@ -139,7 +139,6 @@ only works with redis.
 ## TODO
 
 * Add Varnish support (bin/magento setup:config:set --http-cache-hosts=192.0.2.100,192.0.2.155:6081)
-* Watch app/etc/config.php for changes to register watches on new modules automatically
 * Automatically clean relevant files in generated/code
 
 ## Copyright & License
