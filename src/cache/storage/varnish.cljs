@@ -38,9 +38,10 @@
   Reference PHP implementation at
   \\Magento\\CacheInvalidate\\Model\\PurgeCache::sendPurgeRequest"
   [server pattern]
-  (let [options (clj->js (purge-options server pattern))]
-    (log/debug "Varnish request:" options)
-    (request options handle-varnish-response handle-varnish-error)))
+  (when @enabled?
+    (let [options (clj->js (purge-options server pattern))]
+      (log/debug "Varnish request:" options)
+      (request options handle-varnish-response handle-varnish-error))))
 
 (defn- tags->pattern
   "Transform the given tag or tags into a regular expression pattern for use in

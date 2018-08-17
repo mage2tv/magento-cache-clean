@@ -1,6 +1,7 @@
 (ns cache.cache
   (:require [cache.storage.redis :as redis]
             [cache.storage.file :as file]
+            [cache.storage.varnish :as varnish]
             [cache.storage :as storage]
             [log.log :as log]
             [clojure.string :as string]
@@ -52,6 +53,19 @@
       (redis/create config)
       (file/create config))))
 
+(defn- clean-full-page-cache
+  "Clean both the full_page cache backend and varnish.
+  If varnish is not configured or isn't responding it will be a null op.
+
+  Knowing if varnish is enabled or not would require DB access
+  which I want to avoid to keep things snappy."
+  []
+  (log/debug "Using :page_cache cache backend")
+  (let [cache (get-storage (mage/cache-config :page_cache))]
+    (clean cache))
+  (let [varnish (varnish/create (mage/varnish-hosts-config))]
+    (storage/clean-all varnish)))
+
 (defn clean-cache-types [cache-types]
   (if (seq cache-types)
     (apply log/notice "Cleaning cache type(s)" cache-types)
@@ -64,6 +78,4 @@
       (apply clean cache cache-types)))
 
   (when (or (empty? cache-types) (some #{"full_page"} cache-types))
-    (log/debug "Using :page_cache cache backend")
-    (let [cache (get-storage (mage/cache-config :page_cache))]
-      (clean cache))))
+    (clean-full-page-cache)))
