@@ -8,7 +8,7 @@
 
 (defn- purge-options [server pattern]
   {:protocol "http:"
-   :hostname (:host server)
+   :hostname (:host server "localhost")
    :port (:port server "80")
    :method "PURGE"
    :path "/"
