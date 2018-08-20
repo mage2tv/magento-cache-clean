@@ -13,6 +13,13 @@ The project is very young and only tested on MacOS and Linux.
 Please report bugs by opening an issue on the GitHub issue tracker.
 
 
+## Features
+
+* Supports file, redis and varnish cache backends
+* Removes affected generated code classes when a source file is changed
+* Zero configuration, all required information is read from app/etc/env.php
+
+
 ## Installation & Updating
 
 Installation:
@@ -106,6 +113,8 @@ Automating selective cache cleaning improves the developer experience.
   Depending on a given setup, it might be possible to run the watcher on the
   host system instead.
 
+* Not tested on Windows, please open an issue if you want to contribute.
+
 * If you run into the error `Error NOSPC` on Linux, run the command:
 
 ``` shell
@@ -135,10 +144,6 @@ clear the complete cache whenever a XML file is modified.
 The only downside of that solution is that it always flushes the full cache and
 only works with redis.
 
-
-## TODO
-
-* Automatically clean relevant files in generated/code
 
 ## Copyright & License
 
