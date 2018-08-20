@@ -17,7 +17,7 @@ Please report bugs by opening an issue on the GitHub issue tracker.
 
 * Supports file, redis and varnish cache backends
 * Removes affected generated code classes when a source file is changed
-* Zero configuration, all required information is read from app/etc/env.php
+* Zero configuration, all required information is read from `app/etc/env.php`
 
 
 ## Installation & Updating
