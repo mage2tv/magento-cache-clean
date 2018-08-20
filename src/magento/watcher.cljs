@@ -2,7 +2,8 @@
   (:require [log.log :as log]
             [magento.app :as mage]
             [cache.cache :as cache]
-            [file.system :as fs]))
+            [file.system :as fs]
+            [magento.generated-code :as generated]))
 
 (defonce in-process-files (atom {}))
 
@@ -31,6 +32,17 @@
     (cache/clean-cache-types ["config"])
     (swap! controllers conj file)))
 
+(defn- without-base-path [file]
+  (subs file (count (mage/base-dir))))
+
+(defn remove-generated-files-based-on! [file]
+  (when (= ".php" (subs file (- (count file) 4)))
+    (let [files (generated/php-file->generated-code-files file)]
+      (when (seq files)
+        (apply log/info "Removing generated code "
+               (interpose ", " (map without-base-path files)))
+        (run! fs/rm files)))))
+
 (defn file-changed [file]
   (when (and (fs/exists? file)
              (not (re-find #"___jb_...___" file))
@@ -39,7 +51,8 @@
     (log/info "Processing" file)
     (when-let [types (seq (cache/magefile->cachetypes file))]
       (cache/clean-cache-types types))
-    (clean-cache-for-new-controller file)))
+    (clean-cache-for-new-controller file)
+    (remove-generated-files-based-on! file)))
 
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))

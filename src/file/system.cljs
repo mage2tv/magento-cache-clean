@@ -23,7 +23,7 @@
   (.existsSync fs file))
 
 (defn dir? [s]
-  (and (exists? s) (.. fs (lstatSync s) isDirectory)))
+  (and (exists? s) (.. fs (lstatSync s) isDirectory) s))
 
 (defn symlink? [s]
   (.. fs (lstatSync s) isSymbolicLink))
