@@ -33,7 +33,8 @@
   (let [{:keys [server port]} (:backend_options config)
         unix-socket (unix-socket server)
         tcp-server (tcp-server server)]
-    (if unix-socket {:path unix-socket}
+    (if unix-socket {:path unix-socket
+                     :socket_keepalive false}
         (cond-> {}
           (and tcp-server (not (localhost? tcp-server))) (assoc :host tcp-server)
           (and port (not (default-port? port))) (assoc :port port)))))
