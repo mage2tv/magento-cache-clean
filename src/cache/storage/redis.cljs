@@ -23,12 +23,25 @@
 (defn- connect-db [config]
   (or (-> config :backend_options :database) 0))
 
+(defn- unix-socket [server]
+  (second (re-find #"^(?:unix://)?(/.+)" server)))
+
+(defn- tcp-server [server]
+  (second (re-find #"^(?:tcp://)?([^/]+)" server)))
+
+(defn- server-options [config]
+  (let [{:keys [server port]} (:backend_options config)
+        unix-socket (unix-socket server)
+        tcp-server (tcp-server server)]
+    (if unix-socket {:path unix-socket}
+        (cond-> {}
+          (and tcp-server (not (localhost? tcp-server))) (assoc :host tcp-server)
+          (and port (not (default-port? port))) (assoc :port port)))))
+
 (defn- connect-options [config]
-  (let [{:keys [server port password]} (:backend_options config)
+  (let [password (-> config :backend_options :password)
         database (connect-db config)]
-    (cond-> {}
-      (and server (not (localhost? server))) (assoc :host server)
-      (and port (not (default-port? port))) (assoc :port port)
+    (cond-> (server-options config)
       password (assoc :auth_pass password)
       database (assoc :db database))))
 
