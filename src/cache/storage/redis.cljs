@@ -33,8 +33,7 @@
   (let [{:keys [server port]} (:backend_options config)
         unix-socket (unix-socket server)
         tcp-server (tcp-server server)]
-    (if unix-socket {:path unix-socket
-                     :socket_keepalive false}
+    (if unix-socket {:path unix-socket}
         (cond-> {}
           (and tcp-server (not (localhost? tcp-server))) (assoc :host tcp-server)
           (and port (not (default-port? port))) (assoc :port port)))))
@@ -67,11 +66,13 @@
 
   (clean-tag [this tag]
     (let [callback (partial delete-tag-and-ids client tag)]
-      (tag->ids client tag callback)))
+      (tag->ids client tag callback)
+      (.quit client (fn[]))))
 
   (clean-all [this]
     (log/debug "Flushing redis db" database)
-    (.flushdb client)))
+    (.flushdb client)
+    (.quit client (fn[]))))
 
 (defn create [config]
   (let [options (connect-options config)
