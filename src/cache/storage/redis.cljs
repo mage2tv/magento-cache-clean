@@ -24,10 +24,10 @@
   (or (-> config :backend_options :database) 0))
 
 (defn- unix-socket [server]
-  (second (re-find #"^(?:unix://)?(/.+)" server)))
+  (and server (second (re-find #"^(?:unix://)?(/.+)" server))))
 
 (defn- tcp-server [server]
-  (second (re-find #"^(?:tcp://)?([^/]+)" server)))
+  (and server (second (re-find #"^(?:tcp://)?([^/]+)" server))))
 
 (defn- server-options [config]
   (let [{:keys [server port]} (:backend_options config)
@@ -52,9 +52,12 @@
                  (log/error err)
                  (callback (js->clj ids))))))
 
+(defn- prefix-keys [ids]
+  (doall (map #(str prefix-key %) ids)))
+
 (defn- delete-cache-ids [^js/RedisClient client ids]
   (run! #(log/debug "Cleaning id" %) ids)
-  (apply js-invoke client "del" (doall (map #(str prefix-key %) ids)))
+  (apply js-invoke client "del" (prefix-keys ids))
   (apply js-invoke client "srem" set-ids ids))
 
 (defn- delete-tag-and-ids [^js/RedisClient client tag ids]
@@ -69,9 +72,10 @@
   storage/CacheStorage
 
   (clean-tag [this tag]
-    (let [callback (partial delete-tag-and-ids client tag)]
-      (tag->ids client tag callback)
-      (.quit client (fn[]))))
+    (let [callback (fn [ids]
+                     (delete-tag-and-ids client tag ids)
+                     (.quit client (fn[])))]
+      (tag->ids client tag callback)))
 
   (clean-all [this]
     (log/debug "Flushing redis db" database)
@@ -82,3 +86,7 @@
   (let [options (connect-options config)
         client (.createClient redis (clj->js options))]
     (->Redis client (connect-db config))))
+
+
+#_(def client (:client (create {:backend "Cm_Cache_Backend_Redis", :backend_options {:server "localhost", :database 0, :port 6379}})))
+#_(def c (create {:backend "Cm_Cache_Backend_Redis", :backend_options {:server "localhost", :database 0, :port 6379}}))
