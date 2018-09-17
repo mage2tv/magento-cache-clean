@@ -52,12 +52,16 @@
                  (log/error err)
                  (callback (js->clj ids))))))
 
+(defn- delete-cache-ids [^js/RedisClient client ids]
+  (run! #(log/debug "Cleaning id" %) ids)
+  (apply js-invoke client "del" (doall (map #(str prefix-key %) ids)))
+  (apply js-invoke client "srem" set-ids ids))
+
 (defn- delete-tag-and-ids [^js/RedisClient client tag ids]
   ;; TODO: make multi command
   (when (seq ids)
-    (run! #(log/debug "Cleaning id" %) ids)
-    (apply js-invoke client "del" (doall (map #(str prefix-key %) ids)))
-    (apply js-invoke client "srem" set-ids ids))
+    (log/debug "About to clean" (count ids) "id(s)")
+    (run! #(delete-cache-ids client %) (partition-all 500 ids)))
   (.del client (str prefix-tag-id tag))
   (.srem client set-tags tag))
 
