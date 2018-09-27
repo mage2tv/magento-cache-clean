@@ -66,6 +66,7 @@ Clean the given cache types. If none are given, clean all cache types.
 --verbose|-v            Display more information
 --debug|-vv             Display too much information
 --silent|-s             Display less information
+--version               Display the version
 --help|-h               This help message"))
 
 (defn help-needed? [args]
