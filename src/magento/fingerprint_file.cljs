@@ -31,7 +31,6 @@
            ["search_request.xml" #"urn:magento:framework:Search/etc/search_request\.xsd"]
            ["config.xml" #"urn:magento:module:Magento_Store:etc/config\.xsd"]
            [#"/ui_component/.+\.xml$" #"urn:magento:module:Magento_Ui:etc/ui_configuration\.xsd"]
-           ["menu.xml" #"urn:magento:module:Magento_Backend:etc/menu\.xsd"]
            ["acl.xml" #"urn:magento:framework:Acl/etc/acl\.xsd"]
            ["indexer.xml" #"urn:magento:framework:Indexer/etc/indexer\.xsd"]]]
     (tuples->fingerprint-fns ::config t)))
@@ -55,9 +54,14 @@
   (let [t [["requirejs-config.js"]]]
     (tuples->fingerprint-fns ::requirejs-config t)))
 
+(defn- menu-filetypes []
+  (let [t [["menu.xml" #"urn:magento:module:Magento_Backend:etc/menu\.xsd"]]]
+    (tuples->fingerprint-fns ::menu t)))
+
 (def file->type
   (merge (config-filetypes)
          (layout-filetypes)
          (translation-filetypes)
          (template-filetypes)
+         (menu-filetypes)
          (requirejs-config-filetypes)))
