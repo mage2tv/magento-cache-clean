@@ -73,13 +73,15 @@
 
   (clean-tag [this tag]
     (let [callback (fn [ids]
-                     (delete-tag-and-ids client tag ids)
-                     (.quit client (fn[])))]
+                     (delete-tag-and-ids client tag ids))]
       (tag->ids client tag callback)))
 
   (clean-all [this]
     (log/debug "Flushing redis db" database)
-    (.flushdb client)
+    (.flushdb client))
+
+  (close [this]
+    (log/debug "Closing redis connection")
     (.quit client (fn[]))))
 
 (defn create [config]

@@ -67,7 +67,9 @@
     (run! #(purge-tags! % [tag]) servers))
 
   (clean-all [this]
-    (run! purge-all! servers)))
+    (run! purge-all! servers))
+
+  (close [this]))
 
 (defn create [servers]
   (->Varnish servers))

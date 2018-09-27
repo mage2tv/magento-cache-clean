@@ -11,4 +11,5 @@
 
 (defprotocol CacheStorage
   (clean-tag [storage tag] "Deletes all cache records associated with the given tag.")
-  (clean-all [storage] "Delete all cache records and tags."))
+  (clean-all [storage] "Delete all cache records and tags.")
+  (close [storage] "Close connection to storage, called before shutdown."))

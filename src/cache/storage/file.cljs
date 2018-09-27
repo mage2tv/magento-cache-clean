@@ -58,7 +58,9 @@
   (clean-all [this]
     (log/debug "Cleaning dir" cache-dir)
     (when (fs/exists? cache-dir)
-      (fs/rm-contents cache-dir))))
+      (fs/rm-contents cache-dir)))
+
+  (close [this]))
 
 (defn create [config]
   (map->File {:cache-dir (fs/add-trailing-slash (:cache_dir config))}))

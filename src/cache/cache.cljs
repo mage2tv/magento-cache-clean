@@ -63,7 +63,8 @@
   []
   (log/debug "Using :page_cache cache backend")
   (let [cache (get-storage (mage/cache-config :page_cache))]
-    (clean cache))
+    (clean cache)
+    (storage/close cache))
   (let [varnish (varnish/create (mage/varnish-hosts-config))]
     (storage/clean-all varnish)))
 
@@ -76,7 +77,8 @@
     (log/debug "Using :default cache_backend")
     (let [cache (get-storage (mage/cache-config :default))
           cache-types (remove #(= "full_page" %) cache-types)]
-      (apply clean cache cache-types)))
+      (apply clean cache cache-types)
+      (storage/close cache)))
 
   (when (or (empty? cache-types) (some #{"full_page"} cache-types))
     (clean-full-page-cache)))
