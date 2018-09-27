@@ -35,6 +35,15 @@
   (let [filetype (magefile->filetype file)]
     (get filetype->cachetypes filetype [])))
 
+(def get-storage
+  "Note to self: decided against a multi-method because I'm not adding more
+  backends, and an if statement is simpler."
+  (fn [config]
+    (log/debug "Cache storage " config)
+    (if (= "Cm_Cache_Backend_Redis" (:backend config))
+      (redis/create config)
+      (file/create config))))
+
 (defn- clean
   ([cache] (storage/clean-all cache))
   ([cache type]
@@ -44,15 +53,6 @@
      (storage/clean-tag cache prefixed-tag)))
   ([cache type & types]
    (run! #(clean cache %) (into [type] types))))
-
-(def get-storage
-  "Note to self: decided against a multi-method because I'm not adding more
-  backends, and an if statement is simpler."
-  (fn [config]
-    (log/debug "Cache storage " config)
-    (if (= "Cm_Cache_Backend_Redis" (:backend config))
-      (redis/create config)
-      (file/create config))))
 
 (defn- clean-full-page-cache
   "Clean both the full_page cache backend and varnish.

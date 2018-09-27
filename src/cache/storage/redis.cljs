@@ -1,6 +1,7 @@
 (ns cache.storage.redis
   (:require [cache.storage :as storage]
-            [log.log :as log]))
+            [log.log :as log]
+            [cljs.core.async :refer [go-loop timeout <!]]))
 
 (defonce redis (js/require "redis"))
 
@@ -68,12 +69,14 @@
   (.del client (str prefix-tag-id tag))
   (.srem client set-tags tag))
 
-(defrecord Redis [^js/RedisClient client database]
+(defrecord Redis [^js/RedisClient client database n-pending]
   storage/CacheStorage
 
   (clean-tag [this tag]
+    (swap! n-pending inc)
     (let [callback (fn [ids]
-                     (delete-tag-and-ids client tag ids))]
+                     (delete-tag-and-ids client tag ids)
+                     (swap! n-pending dec))]
       (tag->ids client tag callback)))
 
   (clean-all [this]
@@ -81,13 +84,18 @@
     (.flushdb client))
 
   (close [this]
-    (log/debug "Closing redis connection")
-    (.quit client (fn[]))))
+    (go-loop [n @n-pending]
+        (if (zero? n)
+          (do (log/debug "Disconnecting redis client")
+              (.quit client (fn[])))
+          (do (<! (timeout 15))
+              (recur @n-pending))))))
 
 (defn create [config]
   (let [options (connect-options config)
-        client (.createClient redis (clj->js options))]
-    (->Redis client (connect-db config))))
+        client (.createClient redis (clj->js options))
+        n-pending-tasks (atom 0)]
+    (->Redis client (connect-db config) n-pending-tasks)))
 
 
 #_(def client (:client (create {:backend "Cm_Cache_Backend_Redis", :backend_options {:server "localhost", :database 0, :port 6379}})))
