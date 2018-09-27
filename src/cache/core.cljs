@@ -71,6 +71,12 @@ Clean the given cache types. If none are given, clean all cache types.
 (defn help-needed? [args]
   (has-switch? ["-h" "--help"] args))
 
+(defn display-version? [args]
+  (has-switch? ["--version"] args))
+
+(defn display-version []
+  (log/always "0.0.13"))
+
 (defn arg-with-val? [arg]
   (#{"--directory" "-d"} arg))
 
@@ -79,7 +85,8 @@ Clean the given cache types. If none are given, clean all cache types.
      "--verbose" "-v"
      "--debug" "-vv"
      "--silent" "-s"
-     "--help" "-h" } arg))
+     "--help" "-h"
+     "--version"} arg))
 
 (defn remove-switches-and-args-with-vals [args]
   (let [args (vec args)]
@@ -107,10 +114,12 @@ Clean the given cache types. If none are given, clean all cache types.
 
 (defn -main [& args]
   (log/always "Sponsored by https://www.mage2.tv\n")
-  (if (help-needed? args)
-    (help-the-needfull)
-    (try (process args)
-         (catch :default ^Error e
-           (binding [*print-fn* *print-err-fn*]
-             (println "[ERROR]" (or (.-message e) e)))
-           (exit-with-code 1)))))
+  (try
+    (cond
+      (help-needed? args) (help-the-needfull)
+      (display-version? args) (display-version)
+      :else (process args))
+    (catch :default ^Error e
+      (binding [*print-fn* *print-err-fn*]
+        (println "[ERROR]" (or (.-message e) e)))
+      (exit-with-code 1))))
