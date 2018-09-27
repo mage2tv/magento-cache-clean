@@ -7,6 +7,8 @@
 
 (set! *warn-on-infer* true)
 
+(defonce version "0.0.14")
+
 (defn- exit-with-code [code]
   (let [proc ^js/process (js/require "process")]
     (.exit proc code)))
@@ -76,7 +78,7 @@ Clean the given cache types. If none are given, clean all cache types.
   (has-switch? ["--version"] args))
 
 (defn display-version []
-  (log/always "0.0.13"))
+  (log/always version))
 
 (defn arg-with-val? [arg]
   (#{"--directory" "-d"} arg))
