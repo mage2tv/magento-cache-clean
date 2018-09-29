@@ -3,7 +3,8 @@
             [magento.app :as mage]
             [cache.cache :as cache]
             [file.system :as fs]
-            [magento.generated-code :as generated]))
+            [magento.generated-code :as generated]
+            [cache.hotkeys :as hotkeys]))
 
 (defonce in-process-files (atom {}))
 
