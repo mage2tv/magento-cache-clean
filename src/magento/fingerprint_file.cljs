@@ -32,6 +32,7 @@
            ["config.xml" #"urn:magento:module:Magento_Store:etc/config\.xsd"]
            [#"/ui_component/.+\.xml$" #"urn:magento:module:Magento_Ui:etc/ui_configuration\.xsd"]
            ["acl.xml" #"urn:magento:framework:Acl/etc/acl\.xsd"]
+           ["system.xml" #"urn:magento:module:Magento_Config:etc/system_file\.xsd"]
            ["indexer.xml" #"urn:magento:framework:Indexer/etc/indexer\.xsd"]]]
     (tuples->fingerprint-fns ::config t)))
 
