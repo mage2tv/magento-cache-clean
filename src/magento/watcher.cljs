@@ -90,4 +90,5 @@
   (watch-all-modules!)
   (run! watch-theme (mage/theme-dirs))
   (watch-for-new-modules!)
+  (hotkeys/observe-keys!)
   (log/notice "Watcher initialized (Ctrl-C to quit)"))
