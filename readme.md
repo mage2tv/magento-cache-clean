@@ -18,7 +18,7 @@ Please report bugs by opening an issue on the GitHub issue tracker.
 * Supports file, redis and varnish cache backends
 * Removes affected generated code classes when a source file is changed
 * Zero configuration, all required information is read from `app/etc/env.php`
-
+* Hotkeys for quick cache flushes while the watcher is running
 
 ## Installation & Updating
 
@@ -71,6 +71,21 @@ Usually I run the command once with the `--watch` switch when I start
 development, and when I make a change that isn't automatically detected (yet),
 I run `vendor/bin/cache-clean.js` with the given cache types as a drop in
 replacement for `bin/magento cache:clean`.
+
+### Hotkeys
+
+When the watcher is running, segments of the cache can be cleaned with
+individual keystrokes:
+
+|Key|Cache Segment(s)|
+|---|----------------|
+|`c`| `config` |
+|`b`| `block_html` |
+|`l`| `layout` |
+|`f`| `full_page` |
+|`a`| (a for all) |
+|`v`| (v for view) `block_html`, `layout`, `full_page` |
+|`t`| `translate` |
 
 
 ### Prerequisites:
