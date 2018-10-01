@@ -7,7 +7,8 @@
 
 (set! *warn-on-infer* true)
 
-(defonce version "0.0.15")
+
+(defonce version "0.0.16")
 
 (defn- exit-with-code [code]
   (let [proc ^js/process (js/require "process")]
