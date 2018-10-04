@@ -18,7 +18,8 @@
 (defn- prep-stdin [^js/net.Socket stdin]
   (.resume stdin)
   (.setEncoding stdin "utf8")
-  (.setRawMode stdin true))
+  (when (.-isTTY stdin)
+    (.setRawMode stdin true)))
 
 (defn- read-keys [key-chan]
   (let [stdin (.-stdin process)]
