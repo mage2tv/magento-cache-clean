@@ -1,7 +1,7 @@
 (ns cache.hotkeys
   (:require [log.log :as log]
             [cache.cache :as cache]
-            [cljs.core.async :refer [go-loop <! put! chan]]))
+            [cljs.core.async :refer [go-loop <! put! close! chan]]))
 
 (def ctr-c \u0003)
 
@@ -15,11 +15,14 @@
                       "v" ["block_html" "layout" "full_page"] ;; v for view
                       "t" ["translate"]})
 
+(defn- prep-stdin [^js/net.Socket stdin]
+  (.resume stdin)
+  (.setEncoding stdin "utf8")
+  (.setRawMode stdin true))
+
 (defn- read-keys [key-chan]
   (let [stdin (.-stdin process)]
-    (.resume stdin)
-    (.setEncoding stdin "utf8")
-    (.setRawMode stdin true)
+    (prep-stdin stdin)
     (.on stdin "data" (fn [data] (put! key-chan data)))
     (log/debug "Listening for hotkeys")))
 
@@ -38,6 +41,11 @@
 
 (defn observe-keys! []
   (let [key-chan (chan 1)]
-    (read-keys key-chan)
-    (process-keys key-chan)
+    (try
+      (read-keys key-chan)
+      (process-keys key-chan)
+      (catch :default e
+        (close! key-chan)
+        (log/notice "Unable to call stdin.setRawMode:" (str e))
+        (log/notice "Hotkeys disabled.")))
     key-chan))
