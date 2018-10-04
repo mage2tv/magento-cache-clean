@@ -46,6 +46,6 @@
       (process-keys key-chan)
       (catch :default e
         (close! key-chan)
-        (log/notice "Unable to call stdin.setRawMode:" (str e))
+        (log/error "Error initializing hotkey support:" (str e))
         (log/notice "Hotkeys disabled.")))
     key-chan))
