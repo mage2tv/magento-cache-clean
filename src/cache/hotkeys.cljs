@@ -18,35 +18,38 @@
 (defn- prep-stdin [^js/net.Socket stdin]
   (.resume stdin)
   (.setEncoding stdin "utf8")
-  (when (.-isTTY stdin)
-    (.setRawMode stdin true)))
+  (.setRawMode stdin true))
 
-(defn- read-keys [key-chan]
-  (let [stdin (.-stdin process)]
-    (prep-stdin stdin)
-    (.on stdin "data" (fn [data] (put! key-chan data)))
-    (log/debug "Listening for hotkeys")))
+(defn- read-keys [^js/net.Socket stdin key-chan]
+  (prep-stdin stdin)
+  (.on stdin "data" (fn [data] (put! key-chan data)))
+  (log/debug "Listening for hotkeys"))
+
+(defn- check-abort [key]
+  (when (= key ctr-c)
+    (log/notice "Bye!")
+    (.exit process)))
 
 (defn- process-keys [key-chan]
   (go-loop []
     (let [key (<! key-chan)]
-
-      (when (= key ctr-c)
-        (log/notice "Bye!")
-        (.exit process))
-
+      (check-abort key)
       (log/debug "Key pressed:" key)
       (when-let [types (get key->cachetypes key)]
         (cache/clean-cache-types types))
       (recur))))
 
-(defn observe-keys! []
+(defn- init-hotkeys [^js/net.Socket stdin]
   (let [key-chan (chan 1)]
     (try
-      (read-keys key-chan)
+      (read-keys stdin key-chan)
       (process-keys key-chan)
       (catch :default e
         (close! key-chan)
-        (log/error "Error initializing hotkey support:" (str e))
-        (log/notice "Hotkeys disabled.")))
-    key-chan))
+        (log/error "Error initializing hotkey support:" (str e))))))
+
+(defn observe-keys! []
+  (let [stdin (.-stdin process)]
+    (if (.-isTTY stdin)
+      (init-hotkeys stdin)
+      (log/notice "STDIN is not attached to terminal session - hotkeys disabled"))))
