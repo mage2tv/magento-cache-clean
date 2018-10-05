@@ -9,7 +9,7 @@ cache during development.
 For example, if you make a change to a template, it only cleans the
 `block_html` and `full_page` caches, not the `config` or `layout` caches.
 
-The project is very young and only tested on MacOS and Linux.
+The project is only tested on MacOS and Linux.
 Please report bugs by opening an issue on the GitHub issue tracker.
 
 
@@ -90,7 +90,7 @@ individual keystrokes:
 
 ### Prerequisites:
 
-* `node.js` (built on 10.8, but should work with older versions, too).
+* `node.js` (built on 10.8, but should work with older 8.x versions, too).
 * it probably is a good idea to turn on all Magento caches
   `bin/magento cache:enable` to get the full benefit.
 
@@ -105,7 +105,7 @@ cache sections after file changes.
 
 1. Magento uses caching a lot and is faster when the caches are warm.
 2. As a developer I want a quick feedback loop.
-3. Rebuilding the cache is slower than cleaning the cache
+3. Rebuilding the cache takes longer than cleaning the cache
 
 To support the above assumptions, I want to only clean the cache segments I
 really have to after making some changes.
