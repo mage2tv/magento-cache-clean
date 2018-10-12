@@ -94,5 +94,5 @@
   (watch-for-new-modules!)
   (hotkeys/observe-keys!)
   (log/notice "Hot-keys for manual cache cleaning:")
-  (log/notice "[c]onfig, [b]lock_html, [l]ayout, [t]ranslate, [f]ull_page, [v]iew, [a]ll\n")
+  (log/notice "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
   (log/notice "Watcher initialized (Ctrl-C to quit)"))
