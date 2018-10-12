@@ -79,8 +79,10 @@
   (let [config-php-dir (str (mage/base-dir) "app/etc")]
     (log/debug "Monitoring app/etc/config.php for new modules")
     (fs/watch config-php-dir (fn [file]
-                               (if (= "config.php" (fs/basename file))
-                                 (watch-new-modules!))))))
+                               (when (= "config.php" (fs/basename file))
+                                 (watch-new-modules!)
+                                 (cache/clean-cache-types ["config"]))))))
+
 
 (defn stop []
   (fs/stop-all-watches)
