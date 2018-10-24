@@ -45,8 +45,7 @@
         (run! fs/rm files)))))
 
 (defn file-changed [file]
-  (when (and (fs/exists? file)
-             (not (re-find #"___jb_...___" file))
+  (when (and (not (re-find #"___jb_...___" file))
              (not (in-process? file)))
     (set-in-process! file)
     (log/info "Processing" file)
