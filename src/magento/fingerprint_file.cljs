@@ -7,57 +7,54 @@
     (regexp? name-pattern) (re-find name-pattern file)
     :else (= name-pattern (fs/basename file))))
 
-(defn- file-fingerprint-fn [name-pattern content-head-pattern]
+(defn- file-fingerprint-fn [name-pattern]
   (fn [file]
-    (and (match-name? name-pattern file)
-         (fs/exists? file)
-         (or (nil? content-head-pattern)
-             (re-find content-head-pattern (fs/head file))))))
+    (match-name? name-pattern file)))
 
-(defn- tuples->fingerprint-fns [type tuples]
-  (reduce (fn [acc [filename content]]
-            (assoc acc (file-fingerprint-fn filename content) type)) {} tuples))
+(defn- filenames->fingerprint-fns [type filenames]
+  (reduce (fn [acc filename]
+            (assoc acc (file-fingerprint-fn filename) type)) {} filenames))
 
 (defn- config-filetypes []
-  (let [t [["di.xml" #"urn:magento:framework:ObjectManager/etc/config\.xsd"]
-           ["crontab.xml" #"urn:magento:module:Magento_Cron:etc/crontab\.xsd"]
-           ["events.xml" #"urn:magento:framework:Event/etc/events\.xsd"]
-           ["extension_attributes.xml" #"urn:magento:framework:Api/etc/extension_attributes\.xsd"]
-           ["routes.xml" #"urn:magento:framework:App/etc/routes\.xsd"]
-           ["widget.xml" #"urn:magento:module:Magento_Widget:etc/widget\.xsd"]
-           ["product_types.xml" #"urn:magento:module:Magento_Catalog:etc/product_types\.xsd"]
-           ["product_options.xml" #"urn:magento:module:Magento_Catalog:etc/product_options\.xsd"]
-           ["payment.xml" #"urn:magento:module:Magento_Payment:etc/payment\.xsd"]
-           ["search_request.xml" #"urn:magento:framework:Search/etc/search_request\.xsd"]
-           ["config.xml" #"urn:magento:module:Magento_Store:etc/config\.xsd"]
-           [#"/ui_component/.+\.xml$" #"urn:magento:module:Magento_Ui:etc/ui_configuration\.xsd"]
-           ["acl.xml" #"urn:magento:framework:Acl/etc/acl\.xsd"]
-           ["system.xml" #"urn:magento:module:Magento_Config:etc/system_file\.xsd"]
-           ["indexer.xml" #"urn:magento:framework:Indexer/etc/indexer\.xsd"]]]
-    (tuples->fingerprint-fns ::config t)))
+  (let [res [#"/etc(?:/[^/]+|)/di\.xml$"
+             #"/etc/crontab\.xml$"
+             #"/etc(?:/[^/]+|)/events\.xml$"
+             #"/etc/extension_attributes\.xml$"
+             #"/etc/(?:[^/]+)/routes\.xml$"
+             #"/etc/widget\.xml$"
+             #"/etc/product_types\.xml$"
+             #"/etc/product_options\.xml$"
+             #"/etc/payment\.xml$"
+             #"/etc/search_request\.xml$"
+             #"/etc/config\.xml$"
+             #"/ui_component/.+\.xml$"
+             #"/etc/acl\.xml$"
+             #"/etc/adminhtml/system\.xml$"
+             #"/etc/indexer\.xml$"]]
+    (filenames->fingerprint-fns ::config res)))
 
 (defn- layout-filetypes []
-  (let [t [[#"/layout/.+\.xml$"]
-           [#"/page_layout/.+\.xml$"]]]
-    (tuples->fingerprint-fns ::layout t)))
+  (let [res [#"/layout/.+\.xml$"
+             #"/page_layout/.+\.xml$"]]
+    (filenames->fingerprint-fns ::layout res)))
 
 (defn- translation-filetypes []
-  (let [t [[#"/i18n/.+\.csv$" #".+,.+"]]]
-    (tuples->fingerprint-fns ::translation t)))
+  (let [res [#"/i18n/.+\.csv$"]]
+    (filenames->fingerprint-fns ::translation res)))
 
 (defn- template-filetypes []
-  (let [t [[#"/templates/.+\.phtml"]
-           [#"/etc/view.xml" #"urn:magento:framework:Config/etc/view\.xsd"]
-           ["theme.xml" #"urn:magento:framework:Config/etc/theme\.xsd"]]]
-    (tuples->fingerprint-fns ::template t)))
+  (let [res [#"/templates/.+\.phtml$"
+             #"/etc/view\.xml$"
+             #"/theme\.xml$"]]
+    (filenames->fingerprint-fns ::template res)))
 
 (defn- requirejs-config-filetypes []
-  (let [t [["requirejs-config.js"]]]
-    (tuples->fingerprint-fns ::requirejs-config t)))
+  (let [res [#"/view/(?:base|frontend|adminhtml)/requirejs-config\.js$"]]
+    (filenames->fingerprint-fns ::requirejs-config res)))
 
 (defn- menu-filetypes []
-  (let [t [["menu.xml" #"urn:magento:module:Magento_Backend:etc/menu\.xsd"]]]
-    (tuples->fingerprint-fns ::menu t)))
+  (let [res [#"/etc/adminhtml/menu\.xml$"]]
+    (filenames->fingerprint-fns ::menu res)))
 
 (def file->type
   (merge (config-filetypes)
