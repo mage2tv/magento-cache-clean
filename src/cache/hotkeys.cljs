@@ -1,6 +1,7 @@
 (ns cache.hotkeys
   (:require [log.log :as log]
             [cache.cache :as cache]
+            [magento.static-content :as static-content]
             [cljs.core.async :refer [go-loop <! put! close! chan]]))
 
 (def ctr-c \u0003)
@@ -14,6 +15,9 @@
                       "a" [] ;; a for all
                       "v" ["block_html" "layout" "full_page"] ;; v for view
                       "t" ["translate"]})
+
+(def key->static-content-areas {"F" ["frontend"]
+                                "A" ["adminhtml"]})
 
 (defn- prep-stdin [^js/net.Socket stdin]
   (.resume stdin)
@@ -30,13 +34,18 @@
     (log/notice "Bye!")
     (.exit process)))
 
+(defn- process-key [key]
+  (log/debug "Key pressed:" key)
+  (check-abort key)
+  (when-let [types (get key->cachetypes key)]
+    (cache/clean-cache-types types))
+  (doseq [area (get key->static-content-areas key)]
+    (static-content/clean area)))
+
 (defn- process-keys [key-chan]
   (go-loop []
     (let [key (<! key-chan)]
-      (check-abort key)
-      (log/debug "Key pressed:" key)
-      (when-let [types (get key->cachetypes key)]
-        (cache/clean-cache-types types))
+      (process-key key)
       (recur))))
 
 (defn- init-hotkeys [^js/net.Socket stdin]
@@ -44,12 +53,16 @@
     (try
       (read-keys stdin key-chan)
       (process-keys key-chan)
+      true
       (catch :default e
         (close! key-chan)
-        (log/error "Error initializing hotkey support:" (str e))))))
+        (log/error "Error initializing hotkey support:" (str e))
+        false))))
 
 (defn observe-keys! []
   (let [stdin (.-stdin process)]
     (if (.-isTTY stdin)
       (init-hotkeys stdin)
-      (log/notice "STDIN is not attached to terminal session - hotkeys disabled"))))
+      (do
+        (log/notice "STDIN is not attached to terminal session - hotkeys disabled!")
+        false))))
