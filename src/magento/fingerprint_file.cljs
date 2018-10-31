@@ -29,6 +29,7 @@
              #"/etc/config\.xml$"
              #"/ui_component/.+\.xml$"
              #"/etc/acl\.xml$"
+             #"/etc/email_templates\.xml"
              #"/etc/adminhtml/system\.xml$"
              #"/etc/indexer\.xml$"]]
     (filenames->fingerprint-fns ::config res)))
