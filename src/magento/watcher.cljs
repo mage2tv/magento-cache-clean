@@ -1,5 +1,6 @@
 (ns magento.watcher
   (:require [log.log :as log]
+            [clojure.string :as string]
             [magento.app :as mage]
             [cache.cache :as cache]
             [file.system :as fs]
@@ -46,6 +47,7 @@
 
 (defn file-changed [file]
   (when (and (not (re-find #"___jb_...___" file))
+             (not (string/includes? file "/.git/"))
              (not (in-process? file)))
     (set-in-process! file)
     (log/info "Processing" file)
