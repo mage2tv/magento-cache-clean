@@ -8,7 +8,7 @@
   (second (re-find #"(?mi)^\s*namespace\s+([a-z0-9\\]+)" (str php))))
 
 (defn- php-class [php]
-  (second (re-find #"(?mi)^\s*class\s+(\w+)" php)))
+  (second (re-find #"(?mi)^\s*class\s+(\w+)" (str php))))
 
 (defn- file->php-class [file]
   (let [maybe-php (fs/head file 2048)
