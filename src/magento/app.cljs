@@ -18,9 +18,9 @@
     (when-not (fs/exists? app-etc-env)
       (throw (ex-info (str "File app/etc/env.php not found: " app-etc-env) {})))
     (str "php -r "
-         "'echo json_encode("
-         "(require \"" app-etc-env "\") ?? []"
-         ");'")))
+         "\"echo json_encode("
+         "(require '" app-etc-env "') ?? []"
+         ");\"")))
 
 (def read-app-config
   (memoize
@@ -55,9 +55,9 @@
     (when-not (fs/exists? composer-autoload)
       (throw (ex-info (str "Composer autoload.php not found: " composer-autoload) {})))
     (str "php -r "
-         "'require \"" composer-autoload "\"; "
-         "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths(\"" type "\") as $m) "
-         "echo $m.PHP_EOL;'")))
+         "\"require '" composer-autoload "'; "
+         "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
+         "echo \\$m.PHP_EOL;\"")))
 
 (defn- list-component-dirs [magento-basedir type]
   (let [cmd (list-components-cmd magento-basedir type)
