@@ -10,7 +10,7 @@ var path = require('path')
 
 var relative = path.relative
 var lastCwd = process.cwd()
-var cache = {}
+var cache = Object.create(null)
 
 /**
  * Expose cachedPathRelative
