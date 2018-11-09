@@ -13,6 +13,9 @@
 (defn base-dir []
   (fs/add-trailing-slash @magento-basedir))
 
+(defn- unescape-php-var-on-win-os [php]
+  (cond-> php (fs/win?) (string/replace #"\\\$" "$")))
+
 (defn- env-config-cmd []
   (let [app-etc-env (str (base-dir) "app/etc/env.php")]
     (when-not (fs/exists? app-etc-env)
@@ -54,10 +57,11 @@
   (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
     (when-not (fs/exists? composer-autoload)
       (throw (ex-info (str "Composer autoload.php not found: " composer-autoload) {})))
-    (str "php -r "
-         "\"require '" composer-autoload "'; "
-         "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
-         "echo \\$m.PHP_EOL;\"")))
+    (unescape-php-var-on-win-os
+     (str "php -r "
+          "\"require '" composer-autoload "'; "
+          "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
+          "echo \\$m.PHP_EOL;\""))))
 
 (defn- list-component-dirs [magento-basedir type]
   (let [cmd (list-components-cmd magento-basedir type)

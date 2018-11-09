@@ -7,10 +7,10 @@
 
 (defonce watches (atom {}))
 
-(defn- win? []
+(defn win? []
   (= "win32" (.-platform process)))
 
-(defn- mac? []
+(defn mac? []
   (= "darwin" (.-platform process)))
 
 (defn- trailing-slash [s]
