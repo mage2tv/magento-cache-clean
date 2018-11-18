@@ -57,7 +57,8 @@
        (str buffer)))))
 
 (defn rm [file]
-  (.unlinkSync fs file))
+  (when (exists? file)
+    (.unlinkSync fs file)))
 
 (defn rmdir
   "Remove the given directory if it is empty."
