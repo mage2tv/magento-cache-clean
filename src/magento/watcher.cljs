@@ -27,7 +27,8 @@
       true)))
 
 (defn controller? [file]
-  (re-find #"/Controller/.+\.php$" file))
+  (or (re-find #"/Controller/.+\.php$" file)
+      (re-find #"\\Controller\\.+\.php$" file)))
 
 (defn clean-cache-for-new-controller [file]
   (when (and (controller? file) (not (contains? @controllers file)))
@@ -48,6 +49,7 @@
 (defn file-changed [file]
   (when (and (not (re-find #"___jb_...___" file))
              (not (string/includes? file "/.git/"))
+             (not (string/includes? file "\\.git\\"))
              (not (in-process? file)))
     (set-in-process! file)
     (log/info "Processing" file)
