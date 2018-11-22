@@ -35,6 +35,9 @@
   (let [filetype (magefile->filetype file)]
     (get filetype->cachetypes filetype [])))
 
+(defn magefile->cacheids [file]
+  (magefile/file->ids file))
+
 (def get-storage
   "Note to self: decided against a multi-method because I'm not adding more
   backends, and an if statement is simpler."
@@ -82,3 +85,12 @@
 
   (when (or (empty? cache-types) (some #{"full_page"} cache-types))
     (clean-full-page-cache)))
+
+(defn clean-cache-ids [ids]
+  (apply log/debug "Cleaning id(s):" ids)
+  (let [cache (get-storage (mage/cache-config :default))
+        add-cache-id-prefix #(str (storage/magento-instance-cache-id-prefix) %)]
+    (->> ids
+         (map string/upper-case)
+         (map add-cache-id-prefix)
+         (run! #(storage/clean-id cache %)))))

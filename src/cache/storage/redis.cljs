@@ -57,7 +57,7 @@
   (doall (map #(str prefix-key %) ids)))
 
 (defn- delete-cache-ids [^js/RedisClient client ids]
-  (run! #(log/debug "Cleaning id" %) ids)
+  (apply log/debug "Cleaning id(s):" ids)
   (apply js-invoke client "del" (prefix-keys ids))
   (apply js-invoke client "srem" set-ids ids))
 
@@ -78,6 +78,9 @@
                      (delete-tag-and-ids client tag ids)
                      (swap! n-pending dec))]
       (tag->ids client tag callback)))
+
+  (clean-id [this id]
+    (delete-cache-ids client [id]))
 
   (clean-all [this]
     (log/debug "Flushing redis db" database)

@@ -40,8 +40,8 @@
       [])))
 
 (defn- delete [cache-dir id]
-  (log/debug "Cleaning id" id)
   (let [file (id->filepath cache-dir id)]
+    #_(log/debug "cleaning file" file)
     (when (fs/exists? file)
       (fs/rm file))))
 
@@ -54,6 +54,9 @@
       (when (fs/exists? tag-file)
         (run! #(delete cache-dir %) (tag->ids cache-dir tag))
         (fs/rm tag-file))))
+
+  (clean-id [this id]
+    (delete cache-dir id))
 
   (clean-all [this]
     (log/debug "Cleaning dir" cache-dir)

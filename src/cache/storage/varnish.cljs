@@ -66,6 +66,10 @@
   (clean-tag [this tag]
     (run! #(purge-tags! % [tag]) servers))
 
+  (clean-id [this id]
+    (log/notice (str "Deleting specific cache ID is not supported "
+                     "with the varnish backend")))
+
   (clean-all [this]
     (run! purge-all! servers))
 
