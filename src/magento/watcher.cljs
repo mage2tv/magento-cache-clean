@@ -55,6 +55,8 @@
     (log/info "Processing" file)
     (when-let [types (seq (cache/magefile->cachetypes file))]
       (cache/clean-cache-types types))
+    (when-let [ids (cache/magefile->cacheids file)]
+      (cache/clean-cache-ids ids))
     (clean-cache-for-new-controller file)
     (remove-generated-files-based-on! file)))
 
