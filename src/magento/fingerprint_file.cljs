@@ -92,10 +92,10 @@
          (requirejs-config-filetypes)))
 
 (defn- make-file->ids []
-  (let [res [[#"/etc/queue\.xml" ["message_queue_config_cache"]]
-             [#"/etc/queue_consumer\.xml" ["message_queue_consumer_config_cache"]]
-             [#"/etc/queue_publisher\.xml" ["message_queue_publisher_config_cache"]]
-             [#"/etc/queue_topology\.xml" ["message_queue_topology_config_cache"]]]
+  (let [res [[#"[/\\]etc[/\\]queue\.xml" ["message_queue_config_cache"]]
+             [#"[/\\]etc[/\\]queue_consumer\.xml" ["message_queue_consumer_config_cache"]]
+             [#"[/\\]etc[/\\]queue_publisher\.xml" ["message_queue_publisher_config_cache"]]
+             [#"[/\\]etc[/\\]queue_topology\.xml" ["message_queue_topology_config_cache"]]]
         id-fns (map (fn [[re ids]]
                       (fn [file]
                         (when (match-name? re file) ids))) res)]
