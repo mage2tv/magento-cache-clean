@@ -65,7 +65,7 @@
          (menu-filetypes)
          (requirejs-config-filetypes)))
 
-(defn- make-ui-component->ids
+(defn- make-ui-component->ids-fn
   "Return a matcher fn where the returned cache id contains part of the file name."[]
   (let [ui-comp-pattern (path-pattern "/ui_component/(.+)\\.xml$")]
     (fn [file]
@@ -101,6 +101,6 @@
                         (fn [file]
                           #_(prn pattern-string)
                           (when (match-name? re file) ids)))) res)]
-    (apply some-fn (conj id-fns (make-ui-component->ids)))))
+    (apply some-fn (conj id-fns (make-ui-component->ids-fn)))))
 
 (def file->ids (make-file->ids))
