@@ -87,7 +87,7 @@
     (clean-full-page-cache)))
 
 (defn clean-cache-ids [ids]
-  (apply log/debug "Cleaning id(s):" ids)
+  (apply log/notice "Cleaning id(s):" ids)
   (let [cache (get-storage (mage/cache-config :default))
         add-cache-id-prefix #(str (storage/magento-instance-cache-id-prefix) %)]
     (->> ids
