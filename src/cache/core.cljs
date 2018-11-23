@@ -116,7 +116,7 @@ Clean the given cache types. If none are given, clean all cache types.
     (clean-cache-types args)))
 
 (defn -main [& args]
-  (log/always "Sponsored by https://www.mage2.tv\n")
+  (log/always "Release" version "sponsored by https://www.mage2.tv\n")
   (try
     (cond
       (help-needed? args) (help-the-needfull)
