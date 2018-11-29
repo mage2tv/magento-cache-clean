@@ -55,6 +55,7 @@
             (case arg
               ( "-v" "--verbose") 1
               ("-vv" "--debug")   2
+              ("-vvv" "--trace")  3
               ("-s" "--silent")  -1
               0))]
     (reduce + 1 (map arg->verbosity args))))

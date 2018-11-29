@@ -41,8 +41,9 @@
 
 (defn- delete [cache-dir id]
   (let [file (id->filepath cache-dir id)]
-    #_(log/debug "cleaning file" file)
+    (log/trace "Delete cache record if exists:" file)
     (when (fs/exists? file)
+      (log/trace "Deleting existing cache record:" file)
       (fs/rm file))))
 
 (defrecord File [cache-dir id-prefix]
@@ -52,6 +53,7 @@
     (let [tag-file (tag->filepath cache-dir tag)]
       (log/debug "Tag-file" tag-file)
       (when (fs/exists? tag-file)
+        (log/trace "Tag-file found" tag-file)
         (run! #(delete cache-dir %) (tag->ids cache-dir tag))
         (fs/rm tag-file))))
 
@@ -61,6 +63,7 @@
   (clean-all [this]
     (log/debug "Cleaning dir" cache-dir)
     (when (fs/exists? cache-dir)
+      (log/trace "Removing existing dir" cache-dir)
       (fs/rm-contents cache-dir)))
 
   (close [this]))
