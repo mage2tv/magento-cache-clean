@@ -1,7 +1,8 @@
 (ns log.log
   (:require [log.stdout :as impl]))
 
-(def levels {:log/debug 3
+(def levels {:log/trace 4
+             :log/debug 3
              :log/info 2
              :log/notice 1
              :log/error 0
@@ -22,6 +23,9 @@
 
 (defn inc-verbosity! []
   (set-verbosity! (inc @verbosity)))
+
+(defn trace [msg & msgs]
+  (apply out :log/trace msg msgs))
 
 (defn debug [msg & msgs]
   (apply out :log/debug msg msgs))
