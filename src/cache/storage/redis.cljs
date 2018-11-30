@@ -69,7 +69,7 @@
   (.del client (str prefix-tag-id tag))
   (.srem client set-tags tag))
 
-(defrecord Redis [^js/RedisClient client database n-pending]
+(defrecord Redis [^js/RedisClient client database id-prefix n-pending]
   storage/CacheStorage
 
   (clean-tag [this tag]
@@ -96,9 +96,10 @@
 
 (defn create [config]
   (let [options (connect-options config)
+        id-prefix (:id_prefix config)
         client (.createClient redis (clj->js options))
         n-pending-tasks (atom 0)]
-    (->Redis client (connect-db config) n-pending-tasks)))
+    (->Redis client (connect-db config) id-prefix n-pending-tasks)))
 
 
 #_(def client (:client (create {:backend "Cm_Cache_Backend_Redis", :backend_options {:server "localhost", :database 0, :port 6379}})))

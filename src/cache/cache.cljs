@@ -38,20 +38,20 @@
 (defn magefile->cacheids [file]
   (magefile/file->ids file))
 
-(def get-storage
+(defn get-storage
   "Note to self: decided against a multi-method because I'm not adding more
   backends, and an if statement is simpler."
-  (fn [config]
-    (log/debug "Cache storage " config)
-    (if (= "Cm_Cache_Backend_Redis" (:backend config))
-      (redis/create config)
-      (file/create config))))
+  [config]
+  (log/debug "Cache storage " config)
+  (if (= "Cm_Cache_Backend_Redis" (:backend config))
+    (redis/create config)
+    (file/create config)))
 
 (defn- clean
   ([cache] (storage/clean-all cache))
   ([cache type]
    (let [tag (cachetype->tag type)
-         prefixed-tag (str (storage/magento-instance-cache-id-prefix) tag)]
+         prefixed-tag (str (:id-prefix cache) tag)]
      (log/debug "Cleaning tag" tag)
      (storage/clean-tag cache prefixed-tag)))
   ([cache type & types]
@@ -89,7 +89,7 @@
 (defn clean-cache-ids [ids]
   (apply log/notice "Cleaning id(s):" ids)
   (let [cache (get-storage (mage/cache-config :default))
-        add-cache-id-prefix #(str (storage/magento-instance-cache-id-prefix) %)]
+        add-cache-id-prefix #(str (:id-prefix cache) %)]
     (->> ids
          (map string/upper-case)
          (map add-cache-id-prefix)

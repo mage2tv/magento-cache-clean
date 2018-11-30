@@ -45,7 +45,7 @@
     (when (fs/exists? file)
       (fs/rm file))))
 
-(defrecord File [cache-dir]
+(defrecord File [cache-dir id-prefix]
   storage/CacheStorage
 
   (clean-tag [this tag]
@@ -66,4 +66,5 @@
   (close [this]))
 
 (defn create [config]
-  (map->File {:cache-dir (fs/add-trailing-slash (:cache_dir config))}))
+  (map->File {:cache-dir (fs/add-trailing-slash (:cache_dir config))
+              :id-prefix (:id_prefix config)}))

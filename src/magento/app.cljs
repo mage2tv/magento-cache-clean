@@ -1,5 +1,6 @@
 (ns magento.app
   (:require [file.system :as fs]
+            [cache.storage :as storage]
             [clojure.string :as string]
             [goog.json :as json]))
 
@@ -12,6 +13,9 @@
 
 (defn base-dir []
   (fs/add-trailing-slash @magento-basedir))
+
+(defn app-config-dir []
+  (str (fs/realpath (base-dir)) "/app/etc/"))
 
 (defn- unescape-php-var-on-win-os [php]
   (cond-> php (fs/win?) (string/replace #"\\\$" "$")))
@@ -33,21 +37,35 @@
            config (js->clj (json/parse output) :keywordize-keys true)]
        (into {} config)))))
 
-(defn default-cache-config []
-  {:page_cache {:backend "Cm_Cache_Backend_File"
-                :cache_dir (str (base-dir) "var/page_cache")}
-   :default {:backend "Cm_Cache_Backend_File"
-             :cache_dir (str (base-dir) "var/cache")}})
+(defn default-cache-id-prefix []
+  (str (subs (storage/md5 (str (fs/realpath (base-dir)) "/app/etc/")) 0 3) "_"))
+
+(defn default-cache-dir [cache-type]
+  (let [dir (if (= :page_cache cache-type) "page_cache" "cache")]
+    (str (base-dir) "var/" dir)))
 
 (defn read-cache-config []
   (let [config (read-app-config)]
     (get-in config [:cache :frontend])))
 
-(defn cache-config [cache-type]
-  (let [config (read-cache-config)]
-    (or (get config cache-type)
-        (get (default-cache-config) cache-type)
-        (get (default-cache-config) :default))))
+(defn file-cache-backend? [config]
+  (or (not (:backend config))
+      (= :backend "Cm_Cache_Backend_File")))
+
+(defn missing-cache-dir? [config]
+  (and (file-cache-backend? config) (not (:cache_dir config))))
+
+(defn add-default-config-values [config cache-type]
+  (cond-> config
+    (file-cache-backend? config) (assoc :backend "Cm_Cache_Backend_File")
+    (missing-cache-dir? config) (assoc :cache_dir (default-cache-dir cache-type))
+    (not (:id_prefix config)) (assoc :id_prefix (default-cache-id-prefix))))
+
+(defn cache-config
+  "Given the cache type :default or :page_cache returns the configuration"
+  [cache-type]
+  (let [config (get (read-cache-config) cache-type {})]
+    (add-default-config-values config cache-type)))
 
 (defn varnish-hosts-config []
   (let [config (read-app-config)]
