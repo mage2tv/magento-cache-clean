@@ -2,15 +2,22 @@
   (:require [file.system :as fs]
             [clojure.string :as string]))
 
-(defn windowsify [path]
+(defn windowsify-pattern [path]
   (string/replace path "/" "\\\\"))
+
+(defn windowsify-path [path]
+  (string/replace path "/" "\\"))
 
 (defn path-pattern [path-pattern]
   (re-pattern (cond-> path-pattern
-                (fs/win?) windowsify)))
+                (fs/win?) windowsify-pattern)))
+
+(defn os-consistent-path [path]
+  (cond-> path
+    (fs/win?) windowsify-path))
 
 (defn- match-name? [path-pattern file]
-  (re-find path-pattern file))
+  (re-find path-pattern (os-consistent-path file)))
 
 (defn- file-fingerprint-fn [name-pattern]
   (fn [file]
@@ -69,8 +76,9 @@
   "Return a matcher fn where the returned cache id contains part of the file name."[]
   (let [ui-comp-pattern (path-pattern "/ui_component/(.+)\\.xml$")]
     (fn [file]
-      (when-let [m (re-find ui-comp-pattern file)]
-        [(str "ui_component_configuration_data_" (second m))]))))
+      (let [file (os-consistent-path file)]
+        (when-let [m (re-find ui-comp-pattern file)]
+          [(str "ui_component_configuration_data_" (second m))])))))
 
 (defn- make-file->ids
   "Configure the mapping of file name regex to cache-id's to be cleaned on
@@ -99,8 +107,8 @@
         id-fns (map (fn [[pattern-string ids]]
                       (let [re (path-pattern pattern-string)]
                         (fn [file]
-                          #_(prn pattern-string)
-                          (when (match-name? re file) ids)))) res)]
+                          (let [file file]
+                            (when (match-name? re file) ids))))) res)]
     (apply some-fn (conj id-fns (make-ui-component->ids-fn)))))
 
 (def file->ids (make-file->ids))
