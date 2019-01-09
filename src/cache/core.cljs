@@ -9,6 +9,27 @@
 
 (defonce version "0.0.28")
 
+(defn node-version-str []
+  (let [proc ^js/process (js/require "process")]
+    (.-version proc)))
+
+(defn node-version
+  ([]
+   (map second (re-seq #"(\d+)" (node-version-str))))
+  ([part]
+   (let [parts {:major 0
+                :minor 1
+                :patch 2}]
+     (nth (node-version) (parts part)))))
+
+(defn node-version-compatible? [major-version]
+  (< 7 major-version))
+
+(defn check-node-compatibility! []
+  (when-not (node-version-compatible? (node-version :major))
+    (throw (ex-info (str "Node version " (node-version-str) " incompatible - please use node 8 or newer")
+                    {:node-version (node-version)}))))
+
 (defn- exit-with-code [code]
   (let [proc ^js/process (js/require "process")]
     (.exit proc code)))
@@ -115,14 +136,18 @@ Clean the given cache types. If none are given, clean all cache types.
     (watcher/start)
     (clean-cache-types args)))
 
+(defn handle-error! [^Error e]
+  (binding [*print-fn* *print-err-fn*]
+    (println "[ERROR]" (or (.-message e) e)))
+  (exit-with-code 1))
+
 (defn -main [& args]
   (log/always "Release" version "sponsored by https://www.mage2.tv\n")
   (try
+    (check-node-compatibility!)
     (cond
       (help-needed? args) (help-the-needfull)
       (display-version? args) (display-version)
       :else (process args))
     (catch :default ^Error e
-      (binding [*print-fn* *print-err-fn*]
-        (println "[ERROR]" (or (.-message e) e)))
-      (exit-with-code 1))))
+      (handle-error! e))))
