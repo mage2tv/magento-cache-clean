@@ -32,7 +32,8 @@
 
 (defn clean-cache-for-new-controller [file]
   (when (and (controller? file) (not (contains? @controllers file)))
-    (cache/clean-cache-types ["config", "full_page"])
+    (cache/clean-cache-ids ["app_action_list"])
+    (cache/clean-cache-types ["full_page"])
     (swap! controllers conj file)))
 
 (defn- without-base-path [file]
