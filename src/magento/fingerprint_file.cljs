@@ -10,7 +10,7 @@
                 (fs/win?) windowsify)))
 
 (defn- match-name? [path-pattern file]
-  (re-find path-pattern file))
+  (and (string? file) (re-find path-pattern file)))
 
 (defn- file-fingerprint-fn [name-pattern]
   (fn [file]

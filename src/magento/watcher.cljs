@@ -48,7 +48,8 @@
         (run! fs/rm files)))))
 
 (defn file-changed [file]
-  (when (and (not (re-find #"___jb_...___" file))
+  (when (and (string? file)
+             (not (re-find #"___jb_...___" file))
              (not (string/includes? file "/.git/"))
              (not (string/includes? file "\\.git\\"))
              (not (in-process? file)))
