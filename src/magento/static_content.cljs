@@ -15,6 +15,9 @@
 (defn view-preprocessed-area-dir [area]
   (str (view-preprocessed-base-dir) area))
 
+(defn static-content-theme-locale-dirs [area]
+  )
+
 (defn rm-dir [dir]
   (when (fs/dir? dir)
     (fs/rmdir-recursive dir)
