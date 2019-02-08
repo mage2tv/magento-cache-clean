@@ -1,5 +1,6 @@
 (ns file.system
-  (:refer-clojure :exclude [exists?]))
+  (:refer-clojure :exclude [exists?])
+  (:require [clojure.string :as string]))
 
 (defonce fs (js/require "fs"))
 (defonce path (js/require "path"))
@@ -111,7 +112,11 @@
 
 (defn- watch-recursive-manually [dir callback]
   (let [wrapped-callback (fn [file]
-                           (when (and (dir? file) (not (contains? @watches file)))
+                           ;; filter out git dir for inotify on Linux.
+                           ;; See https://github.com/mage2tv/magento-cache-clean/issues/29
+                           (when (and (not (string/includes? file "/.git/"))
+                                      (dir? file)
+                                      (not (contains? @watches file)))
                              (watch-recursive-manually file callback))
                            (callback file))
         watches (doall (map #(watch % wrapped-callback) (dir-tree dir)))]
