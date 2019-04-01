@@ -2,6 +2,7 @@
   (:require [file.system :as fs]
             [cache.storage :as storage]
             [log.log :as log]
+            [cache.config :as config]
             [clojure.string :as string]
             [goog.json :as json]))
 
@@ -18,25 +19,10 @@
 (defn app-config-dir []
   (str (base-dir) "app/etc/"))
 
-(defn- unescape-php-var-on-win-os [php]
-  (cond-> php (fs/win?) (string/replace #"\\\$" "$")))
+(def *read-app-config* (memoize config/read-app-config))
 
-(defn- env-config-cmd []
-  (let [app-etc-env (str (app-config-dir) "env.php")]
-    (when-not (fs/exists? app-etc-env)
-      (throw (ex-info (str "File app/etc/env.php not found: " app-etc-env) {})))
-    (str "php -r "
-         "\"echo json_encode("
-         "(require '" app-etc-env "') ?? []"
-         ");\"")))
-
-(def read-app-config
-  (memoize
-   (fn []
-     (let [cmd (env-config-cmd)
-           output (.execSync child-process cmd)
-           config (js->clj (json/parse output) :keywordize-keys true)]
-       (into {} config)))))
+(defn read-app-config []
+  (*read-app-config* (base-dir)))
 
 (def default-cache-id-prefix
   (memoize
@@ -77,23 +63,8 @@
   (let [config (read-app-config)]
     (get config :http_cache_hosts)))
 
-(defn- list-components-cmd [magento-basedir type]
-  (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
-    (when-not (fs/exists? composer-autoload)
-      (throw (ex-info (str "Composer autoload.php not found: " composer-autoload) {})))
-    (unescape-php-var-on-win-os
-     (str "php -r "
-          "\"require '" composer-autoload "'; "
-          "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
-          "echo \\$m.PHP_EOL;\""))))
-
-(defn- list-component-dirs [magento-basedir type]
-  (let [cmd (list-components-cmd magento-basedir type)
-        output (.execSync child-process cmd)]
-    (string/split-lines output)))
-
 (defn module-dirs []
-  (list-component-dirs (base-dir) "module"))
+  (config/list-component-dirs (base-dir) "module"))
 
 (defn theme-dirs []
-  (list-component-dirs (base-dir) "theme"))
+  (config/list-component-dirs (base-dir) "theme"))
