@@ -1,5 +1,6 @@
 (ns cache.config.php
   (:require [file.system :as fs]
+            [log.log :as log]
             [goog.json :as json]
             [clojure.string :as string]))
 
@@ -17,6 +18,7 @@
          ");\"")))
 
 (defn read-app-config [magento-basedir]
+  (log/debug "Reading app config by shelling out to php")
   (let [cmd (env-config-cmd magento-basedir)
         output (.execSync child-process cmd)
         config (js->clj (json/parse output) :keywordize-keys true)]
@@ -37,6 +39,7 @@
           "echo \\$m.PHP_EOL;\""))))
 
 (defn list-component-dirs [magento-basedir type]
+  (log/debug (str "Listing " type "s by shelling out to php"))
   (let [magento-basedir (fs/add-trailing-slash magento-basedir)
         cmd (list-components-cmd magento-basedir type)
         output (.execSync child-process cmd)]

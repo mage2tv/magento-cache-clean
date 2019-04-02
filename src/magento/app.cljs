@@ -19,10 +19,10 @@
 (defn app-config-dir []
   (str (base-dir) "app/etc/"))
 
-(def *read-app-config* (memoize config/read-app-config))
+(def memoized-app-config (memoize config/read-app-config))
 
 (defn read-app-config []
-  (*read-app-config* (base-dir)))
+  (memoized-app-config (base-dir)))
 
 (def default-cache-id-prefix
   (memoize
