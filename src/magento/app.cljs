@@ -1,6 +1,7 @@
 (ns magento.app
   (:require [file.system :as fs]
             [cache.storage :as storage]
+            [log.log :as log]
             [clojure.string :as string]
             [goog.json :as json]))
 
@@ -38,7 +39,10 @@
        (into {} config)))))
 
 (defn default-cache-id-prefix []
-  (str (subs (storage/md5 (str (fs/realpath (base-dir)) "/app/etc/")) 0 3) "_"))
+  (let [path (str (fs/realpath (base-dir)) "/app/etc/")
+        id-prefix (str (subs (storage/md5 path) 0 3) "_")]
+    (log/always "Calculated cache ID prefix" id-prefix "from" path)
+    id-prefix))
 
 (defn default-cache-dir [cache-type]
   (let [dir (if (= :page_cache cache-type) "page_cache" "cache")]
