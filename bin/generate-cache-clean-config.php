@@ -28,14 +28,14 @@ require $composer_autoload;
 
 $registrar = new \Magento\Framework\Component\ComponentRegistrar();
 
-$relativate = function (string $path) use ($magento_basedir) {
+$relativize = function (string $path) use ($magento_basedir) {
     return substr($path, strlen($magento_basedir) + 1);
 };
 
 $config = [
    'app' => require $magento_env,
-   'modules' => map($relativate, values($registrar->getPaths('module'))),
-   'themes' => map($relativate, values($registrar->getPaths('theme'))),
+   'modules' => map($relativize, values($registrar->getPaths('module'))),
+   'themes' => map($relativize, values($registrar->getPaths('theme'))),
 ];
 
 if (! is_dir(dirname($output_file))) {
