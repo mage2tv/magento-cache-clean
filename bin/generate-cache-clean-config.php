@@ -1,6 +1,9 @@
 <?php declare(strict_types=1);
 
-$magento_basedir = rtrim($argv[1] ?? '.', '/');
+use function array_values as values;
+use function array_map as map;
+
+$magento_basedir = realpath($argv[1] ?? '.');
 
 $magento_env = $magento_basedir . '/app/etc/env.php';
 $composer_autoload = $magento_basedir . '/vendor/autoload.php';
@@ -25,10 +28,14 @@ require $composer_autoload;
 
 $registrar = new \Magento\Framework\Component\ComponentRegistrar();
 
+$relativate = function (string $path) use ($magento_basedir) {
+    return substr($path, strlen($magento_basedir) + 1);
+};
+
 $config = [
    'app' => require $magento_env,
-   'modules' => array_values($registrar->getPaths('module')),
-   'themes' => array_values($registrar->getPaths('theme')),
+   'modules' => map($relativate, values($registrar->getPaths('module'))),
+   'themes' => map($relativate, values($registrar->getPaths('theme'))),
 ];
 
 if (! is_dir(dirname($output_file))) {
