@@ -10,13 +10,13 @@
 (defonce magento-basedir (atom "./"))
 
 (defn set-base-dir! [dir]
-  (reset! magento-basedir dir))
+  (reset! magento-basedir (fs/add-trailing-slash (string/replace dir "\\" "/"))))
 
 (defn base-dir []
-  (fs/add-trailing-slash @magento-basedir))
+  (deref magento-basedir))
 
 (defn app-config-dir []
-  (str (fs/realpath (base-dir)) "/app/etc/"))
+  (str (fs/realpath (base-dir)) "app/etc/"))
 
 (defn- unescape-php-var-on-win-os [php]
   (cond-> php (fs/win?) (string/replace #"\\\$" "$")))
@@ -38,11 +38,13 @@
            config (js->clj (json/parse output) :keywordize-keys true)]
        (into {} config)))))
 
-(defn default-cache-id-prefix []
-  (let [path (str (fs/realpath (base-dir)) "/app/etc/")
-        id-prefix (str (subs (storage/md5 path) 0 3) "_")]
-    (log/always "Calculated cache ID prefix" id-prefix "from" path)
-    id-prefix))
+(def default-cache-id-prefix
+  (memoize
+   (fn []
+     (let [path (app-config-dir)
+           id-prefix (str (subs (storage/md5 path) 0 3) "_")]
+       (log/debug "Calculated default cache ID prefix" id-prefix "from" path)
+       id-prefix))))
 
 (defn default-cache-dir [cache-type]
   (let [dir (if (= :page_cache cache-type) "page_cache" "cache")]
