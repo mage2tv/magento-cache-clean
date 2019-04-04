@@ -28,19 +28,31 @@
 (defn- unescape-php-var-on-win-os [php]
   (cond-> php (fs/win?) (string/replace #"\\\$" "$")))
 
-(defn- list-components-cmd [magento-basedir type]
+(defn- list-components-cmd
+  "Returns the PHP command to run to output a list of all Magento components of the given type.
+
+  Currently the base path is removed from the beginning of the paths, only to be added
+  again later in `list-component-dirs`. This doesn't make sense, except that I'm thinking
+  about allowing a different Magento base dir path for PHP commands to be specified by
+  the user. In that case the magento-basedir provided to this method would be a
+  different one than the one added back on later.
+  If I decide against this feature then I can remove this logic again and let PHP
+  return complete paths directly again.
+  Reference https://github.com/mage2tv/magento-cache-clean/issues/33#issuecomment-479791859"
+  [magento-basedir type]
   (let [composer-autoload (str magento-basedir "vendor/autoload.php")]
     (when-not (fs/exists? composer-autoload)
       (throw (ex-info (str "Composer autoload.php not found: " composer-autoload) {})))
     (unescape-php-var-on-win-os
      (str "php -r "
           "\"require '" composer-autoload "'; "
+          "\\$bp = strlen(dirname(dirname(realpath('" composer-autoload "')))) + 1; "
           "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
-          "echo \\$m.PHP_EOL;\""))))
+          "echo substr(\\$m, \\$bp).PHP_EOL;\""))))
 
 (defn list-component-dirs [magento-basedir type]
   (log/debug (str "Listing " type "s by shelling out to php"))
   (let [magento-basedir (fs/add-trailing-slash magento-basedir)
         cmd (list-components-cmd magento-basedir type)
         output (.execSync child-process cmd)]
-    (string/split-lines output)))
+    (map #(str magento-basedir %) (string/split-lines output))))
