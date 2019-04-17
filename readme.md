@@ -98,6 +98,54 @@ the `F`rontend area or clean the `G`enerated code directory.
   `bin/magento cache:enable` to get the full benefit.
 
 
+## Containers & VMs
+
+There are a couple of issues that can arrise when working with a virtualized
+environment in regards to the `cache-clean.js` watcher.
+
+For example, when the node based watcher is run in a different container than
+PHP based Magento, the file system path to the Magento directory might be
+different for each containers.
+
+Another scenario might be that the Magento directory is a NFS mount in a VM,
+which does not support inotify events.
+For that reason you might choose to run the watcher on the host system instead
+of inside the VM, but again the file system path to Magento might be different
+there.
+
+The reason this can prevent the watcher from running is because it runs PHP to
+get a list of the cache configuration and a list of modules and themes.
+The directories will be the path of the system that PHP is running in.
+
+To solve the issue, it is possible to generate a dump of the required
+information in PHP by running the included `generate-cache-clean-config.php`
+script.
+
+The script assumes it is run in a Magento base directory, or the Magento
+directory can be passed as an argument:
+
+```bash
+$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php
+# or
+$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php path/to/magento
+```
+
+The configuration dump is written to the file `var/cache-clean-config.json`.
+
+When the watcher is run while the JSON file is present, it will read the
+information from the file instead of shelling out to PHP.
+
+You can also use this can also be used to manually tweak what modules to watch
+for changes. For example, you could exclude all core modules.
+
+
+### Docker
+
+The following comment from Dimitar IvanovTryzens might be helpful how to run
+the watcher in a docker context:
+https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-479660779
+
+
 ## Rationale
 
 This utility aims to improve the Magento developer experience by shortening the
@@ -136,7 +184,7 @@ Automating selective cache cleaning improves the developer experience.
   actions by pressing `STRG+SHIFT+A`, then search for "registry...", then
   enable `nodejs.console.use.terminal` and restart the watcher process.
 
-* Not tested on Windows, please open an issue if you want to contribute.
+* Not tested a lot on Windows, please open an issue if you want to contribute.
 
 * If you run into the error `Error NOSPC` on Linux, run the command:
 
