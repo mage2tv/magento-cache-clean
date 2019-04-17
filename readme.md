@@ -129,6 +129,10 @@ Automating selective cache cleaning improves the developer experience.
   Depending on a given setup, it might be possible to run the watcher on the
   host system instead.
 
+* If you run the task in PHPStorm and the hotkeys are not working, search for
+  actions by pressing `STRG+SHIFT+A`, then search for "registry...", then
+  enable `nodejs.console.use.terminal` and restart the watcher process.
+
 * Not tested on Windows, please open an issue if you want to contribute.
 
 * If you run into the error `Error NOSPC` on Linux, run the command:
