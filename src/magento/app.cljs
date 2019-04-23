@@ -16,13 +16,13 @@
   (deref magento-basedir))
 
 (defn app-config-dir []
-  (str (fs/realpath (base-dir)) "app/etc/"))
+  (str (base-dir) "app/etc/"))
 
 (defn- unescape-php-var-on-win-os [php]
   (cond-> php (fs/win?) (string/replace #"\\\$" "$")))
 
 (defn- env-config-cmd []
-  (let [app-etc-env (str (base-dir) "app/etc/env.php")]
+  (let [app-etc-env (str (app-config-dir) "env.php")]
     (when-not (fs/exists? app-etc-env)
       (throw (ex-info (str "File app/etc/env.php not found: " app-etc-env) {})))
     (str "php -r "
@@ -41,7 +41,7 @@
 (def default-cache-id-prefix
   (memoize
    (fn []
-     (let [path (app-config-dir)
+     (let [path (fs/add-trailing-slash (fs/realpath (app-config-dir)))
            id-prefix (str (subs (storage/md5 path) 0 3) "_")]
        (log/debug "Calculated default cache ID prefix" id-prefix "from" path)
        id-prefix))))
