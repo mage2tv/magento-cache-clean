@@ -19,6 +19,8 @@
 (def key->static-content-areas {"F" ["frontend"]
                                 "A" ["adminhtml"]})
 
+(def key-generated-code "G")
+
 (defn- prep-stdin [^js/net.Socket stdin]
   (.resume stdin)
   (.setEncoding stdin "utf8")
@@ -40,7 +42,9 @@
   (when-let [types (get key->cachetypes key)]
     (cache/clean-cache-types types))
   (doseq [area (get key->static-content-areas key)]
-    (static-content/clean area)))
+    (static-content/clean area))
+  (when (= key-generated-code key)
+    (magento.generated-code/clean)))
 
 (defn- process-keys [key-chan]
   (go-loop []

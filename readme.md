@@ -87,6 +87,9 @@ individual keystrokes:
 |`v`| (v for view) `block_html`, `layout`, `full_page` |
 |`t`| `translate` |
 
+There also are hotkeys to clean the static assets in the `A`dminhtml or
+the `F`rontend area or clean the `G`enerated code directory.
+
 
 ### Prerequisites:
 

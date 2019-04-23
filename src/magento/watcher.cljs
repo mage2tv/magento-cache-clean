@@ -95,13 +95,17 @@
   (fs/stop-all-watches)
   (log/always "Stopped watching"))
 
+(defn show-hotkeys []
+  (log/notice "Hot-keys for manual cache cleaning:")
+  (log/notice "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
+  (log/notice "Hot-key for cleaning all generated code: [G]")
+  (log/notice "Hot-keys for cleaning static content areas:")
+  (log/notice "[F]rontend [A]dminhtml\n"))
+
 (defn start []
   (watch-all-modules!)
   (run! watch-theme (mage/theme-dirs))
   (watch-for-new-modules!)
   (when (hotkeys/observe-keys!)
-    (log/notice "Hot-keys for manual cache cleaning:")
-    (log/notice "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
-    (log/notice "Hot-keys for cleaning static content areas:")
-    (log/notice "[F]rontend [A]dminhtml\n"))
+    (show-hotkeys))
   (log/notice "Watcher initialized (Ctrl-C to quit)"))
