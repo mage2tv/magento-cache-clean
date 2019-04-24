@@ -97,55 +97,6 @@ the `F`rontend area or clean the `G`enerated code directory.
 * it probably is a good idea to turn on all Magento caches
   `bin/magento cache:enable` to get the full benefit.
 
-
-## Containers & VMs
-
-There are a couple of issues that can arrise when working with a virtualized
-environment in regards to the `cache-clean.js` watcher.
-
-For example, when the node based watcher is run in a different container than
-PHP based Magento, the file system path to the Magento directory might be
-different for each containers.
-
-Another scenario might be that the Magento directory is a NFS mount in a VM,
-which does not support inotify events.
-For that reason you might choose to run the watcher on the host system instead
-of inside the VM, but again the file system path to Magento might be different
-there.
-
-The reason this can prevent the watcher from running is because it runs PHP to
-get a list of the cache configuration and a list of modules and themes.
-The directories will be the path of the system that PHP is running in.
-
-To solve the issue, it is possible to generate a dump of the required
-information in PHP by running the included `generate-cache-clean-config.php`
-script.
-
-The script assumes it is run in a Magento base directory, or the Magento
-directory can be passed as an argument:
-
-```bash
-$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php
-# or
-$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php path/to/magento
-```
-
-The configuration dump is written to the file `var/cache-clean-config.json`.
-
-When the watcher is run while the JSON file is present, it will read the
-information from the file instead of shelling out to PHP.
-
-You can also use this can also be used to manually tweak what modules to watch
-for changes. For example, you could exclude all core modules.
-
-
-### Docker
-
-The following comment from Dimitar IvanovTryzens might be helpful how to run
-the watcher in a docker context:
-https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-479660779
-
-
 ## Rationale
 
 This utility aims to improve the Magento developer experience by shortening the
@@ -192,6 +143,88 @@ Automating selective cache cleaning improves the developer experience.
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
 
+## Docker & VMs
+
+This section is about common issues that can happen when using the watcher in a
+virtualized development setup.
+
+There are a couple of issues that can arrise when working with a virtualized
+environment in regards to the `cache-clean.js` watcher.
+
+For example, when the node based watcher is run in a different container than
+PHP based Magento, the file system path to the Magento directory might be
+different for each container.
+
+A similar scenario would be where the Magento directory is a local mount of a
+directory exported from a virtual machine: the file system path to the Magento
+base directory might be different in the VM and on the host system.
+
+Another scenario could be that the Magento base directory is a NFS mount in a VM,
+which does not support inotify events.
+
+So for a number of reasons you might choose to run the watcher in a system that
+is different from the system where Magento is running.
+
+Top enable such scenarios, two things should might be necessary, depending on
+your specific setup.
+
+First, a cache `id_prefix` might need to be configured in the `app/etc/env.php`
+file in Magento. Here is an example how that looks for the file cache storage:
+
+
+```
+    'cache' => [
+        'page_cache' => [
+            'id_prefix' => 'a04_',
+            'cache_dir' => 'page_cache',
+        ],
+        'default' => [
+            'id_prefix' => 'a04_'
+        ]
+    ],
+```
+
+You can also add the ID prefix for other cache storage backends.
+The value of the ID prefix doesn't matter, as long as it's 3 alphanumeric
+characters followed by an underscore.
+
+The second thing that might prevent the watcher from running is because
+it runs PHP to get a list of the cache configuration and a list of modules and
+themes.
+The directories are listed as the path of the system that PHP is running in.
+But again, that might not match the file system where node is running.
+
+To solve the issue, it is possible to generate a dump of the required
+information in PHP by running the included `generate-cache-clean-config.php`
+script.
+
+The script assumes it is run in a Magento base directory, or the Magento
+directory can be passed as an argument:
+
+```bash
+$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php
+# or
+$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php path/to/magento
+```
+
+The configuration dump is written to the file `var/cache-clean-config.json`.
+
+When the watcher is run with the JSON file present, it will read the
+information from the file instead of shelling out to PHP.
+
+You can also use this can also be used to manually tweak what modules to watch
+for changes. For example, you could choose exclude all core modules.
+
+
+### More on Docker
+
+The following comments from Dimitar IvanovTryzens might be helpful how to run
+the watcher in a docker context:
+https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-479660779
+https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-480562053
+
+I might extract them into a separate document at one point, but for now I hope
+that is enough.
 
 ## Building
 
@@ -215,8 +248,10 @@ clear the complete cache whenever a XML file is modified.
 The only downside of that solution is that it always flushes the full cache and
 only works with redis.
 
+Thank you also to everybody who gave feedback, shared ideas and helped test new
+features! This tool would be impossible without you!
 
 ## Copyright & License
 
-Copyright 2018 by Vinai Kopp, distributed under the BSD-3-Clause license (see
+Copyright 2019 by Vinai Kopp, distributed under the BSD-3-Clause license (see
 the LICENSE file in this repository).
