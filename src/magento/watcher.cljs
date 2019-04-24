@@ -99,8 +99,7 @@
   (log/notice "Hot-keys for manual cache cleaning:")
   (log/notice "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
   (log/notice "Hot-key for cleaning all generated code: [G]")
-  (log/notice "Hot-keys for cleaning static content areas:")
-  (log/notice "[F]rontend [A]dminhtml\n"))
+  (log/notice "Hot-keys for cleaning static content areas: [F]rontend [A]dminhtml\n"))
 
 (defn start []
   (watch-all-modules!)
