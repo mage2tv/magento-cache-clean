@@ -7,7 +7,7 @@
 
 (set! *warn-on-infer* true)
 
-(defonce version "0.0.41")
+(defonce version "0.0.42")
 
 (defn node-version-str []
   (let [proc ^js/process (js/require "process")]
