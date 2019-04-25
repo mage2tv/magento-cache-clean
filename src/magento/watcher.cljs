@@ -3,6 +3,7 @@
             [clojure.string :as string]
             [magento.app :as mage]
             [cache.cache :as cache]
+            [cache.config :as cache-config]
             [file.system :as fs]
             [magento.generated-code :as generated]
             [cache.hotkeys :as hotkeys]))
@@ -83,13 +84,11 @@
   (watch-all-modules!))
 
 (defn watch-for-new-modules! []
-  (let [config-php-dir (str (mage/base-dir) "app/etc")]
-    (log/debug "Monitoring app/etc/config.php for new modules")
-    (fs/watch config-php-dir (fn [file]
-                               (when (= "config.php" (fs/basename file))
-                                 (watch-new-modules!)
-                                 (cache/clean-cache-types ["config"]))))))
-
+  (cache-config/watch-for-new-modules!
+   (mage/base-dir)
+   (fn []
+     (watch-new-modules!)
+     (cache/clean-cache-types ["config"]))))
 
 (defn stop []
   (fs/stop-all-watches)

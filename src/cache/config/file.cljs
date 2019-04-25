@@ -34,3 +34,10 @@
   (log/debug (str "Reading app config from " config-file-name))
   (let [config (get-config-from-dump magento-basedir)]
     (:app config)))
+
+(defn watch-for-new-modules! [magento-basedir callback]
+  (let [config-file (config-file magento-basedir)
+        dir (fs/dirname config-file)
+        file (fs/basename config-file)]
+    (log/debug "Monitoring" config-file  "for new modules")
+    (fs/watch dir #(when (= file (fs/basename %)) (callback)))))

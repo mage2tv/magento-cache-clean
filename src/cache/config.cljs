@@ -26,3 +26,9 @@
   [magento-basedir type]
   (let [list-component-dirs (list-components-fn magento-basedir)]
     (list-component-dirs type)))
+
+(defn watch-for-new-modules! [magento-basedir callback]
+  (file/watch-for-new-modules! magento-basedir
+                               #(when (use-dump? magento-basedir) (callback)))
+  (php/watch-for-new-modules! magento-basedir
+                              #(when-not (use-dump? magento-basedir) (callback))))

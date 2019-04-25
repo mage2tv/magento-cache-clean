@@ -56,3 +56,14 @@
         cmd (list-components-cmd magento-basedir type)
         output (.execSync child-process cmd)]
     (map #(str magento-basedir %) (string/split-lines output))))
+
+
+(defn app-config-dir [magento-basedir]
+  (str magento-basedir "app/etc"))
+
+(defn watch-for-new-modules! [magento-basedir callback]
+  (let [config-php-dir (app-config-dir magento-basedir)]
+    (log/debug "Monitoring app/etc/config.php for new modules")
+    (fs/watch config-php-dir (fn [file]
+                               (when (= "config.php" (fs/basename file))
+                                 (callback))))))
