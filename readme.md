@@ -188,10 +188,11 @@ You can also add the ID prefix for other cache storage backends.
 The value of the ID prefix doesn't matter, as long as it's 3 alphanumeric
 characters followed by an underscore.
 
-The second thing that might prevent the watcher from running is because
-it runs PHP to get a list of the cache configuration and a list of modules and
+The second thing that might prevent the watcher from running happens because
+it runs PHP to get the Magento cache configuration and a list of modules and
 themes.
-The directories are listed as the path of the system that PHP is running in.
+The module and theme directories are listed as the file system path for the
+system that PHP is running in.
 But again, that might not match the file system where node is running.
 
 To solve the issue, it is possible to generate a dump of the required
@@ -220,8 +221,9 @@ for changes. For example, you could choose exclude all core modules.
 
 The following comments from Dimitar IvanovTryzens might be helpful how to run
 the watcher in a docker context:
-https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-479660779
-https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-480562053
+
+* https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-479660779
+* https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-480562053
 
 I might extract them into a separate document at one point, but for now I hope
 that is enough.
