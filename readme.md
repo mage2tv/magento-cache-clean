@@ -165,11 +165,14 @@ which does not support inotify events.
 So for a number of reasons you might choose to run the watcher in a system that
 is different from the system where Magento is running.
 
-To enable such scenarios, two things should might be necessary, depending on
-your specific setup.
+To enable such scenarios, two things might be necessary, depending on your
+specific setup.
 
 First, a cache `id_prefix` might need to be configured in the `app/etc/env.php`
-file in Magento. Here is an example how that looks for the file cache storage:
+file in Magento.
+If no ID prefix is configured, Magento calculates one based on the Magento base path,
+so it would be different on the host and the guest system.
+Here is an example how that looks for the file cache storage:
 
 
 ```
