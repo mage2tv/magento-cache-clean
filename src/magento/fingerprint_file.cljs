@@ -94,6 +94,7 @@
              ["/etc/frontend/sections\\.xml$" ["sections_invalidation_config"]]
              ["/etc/email_templates\\.xml$" ["email_templates"]]
              ["/etc/webapi\\.xml" ["webapi_config"]]
+             ["/etc/schema.graphqls" ["magento_framework_graphqlschemastitching_config_data"]]
              ;; the following need to be tested before removing them from the
              ;; cbnfig cache type above
              #_["/etc/acl\\.xml$" ["provider_acl_resources_cache"]]
