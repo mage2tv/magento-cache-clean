@@ -165,11 +165,14 @@ which does not support inotify events.
 So for a number of reasons you might choose to run the watcher in a system that
 is different from the system where Magento is running.
 
-Top enable such scenarios, two things should might be necessary, depending on
-your specific setup.
+To enable such scenarios, two things might be necessary, depending on your
+specific setup.
 
 First, a cache `id_prefix` might need to be configured in the `app/etc/env.php`
-file in Magento. Here is an example how that looks for the file cache storage:
+file in Magento.
+If no ID prefix is configured, Magento calculates one based on the Magento base path,
+so it would be different on the host and the guest system.
+Here is an example how that looks for the file cache storage:
 
 
 ```
@@ -213,7 +216,7 @@ The configuration dump is written to the file `var/cache-clean-config.json`.
 When the watcher is run with the JSON file present, it will read the
 information from the file instead of shelling out to PHP.
 
-You can also use this can also be used to manually tweak what modules to watch
+You can also use this to manually tweak what modules to watch
 for changes. For example, you could choose exclude all core modules.
 
 
