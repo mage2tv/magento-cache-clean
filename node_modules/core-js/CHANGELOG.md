@@ -1,4 +1,18 @@
 ## Changelog
+##### 2.6.9 [LEGACY] - 2019.05.27
+- Some fixes and improvements of the `postinstall` script like support `npm` color config ([#556](https://github.com/zloirock/core-js/issues/556)) or adding support of `ADBLOCK` env variable
+
+##### 2.6.8 [LEGACY] - 2019.05.22
+- Added a workaround of a strange `npx` bug on `postinstall`, [#551](https://github.com/zloirock/core-js/issues/551)
+
+##### 2.6.7 [LEGACY] - 2019.05.21
+- Added one more workaround of alternative not completely correct `Symbol` polyfills, [#550](https://github.com/zloirock/core-js/issues/550), [#554](https://github.com/zloirock/core-js/issues/554)
+
+##### 2.6.6 [LEGACY] - 2019.05.20
+- Fixed IE8- non-enumerable properties support in `Object.{ assign, entries, values }`, [#541](https://github.com/zloirock/core-js/issues/541)
+- Fixed support of primitives in `Object.getOwnPropertySymbols` in Chrome 38 / 39, [#539](https://github.com/zloirock/core-js/issues/539)
+- Show a message on `postinstall`
+
 ##### 2.6.5 - 2019.02.15
 - Fixed buggy `String#padStart` and `String#padEnd` mobile Safari implementations, [#414](https://github.com/zloirock/core-js/issues/414).
 
