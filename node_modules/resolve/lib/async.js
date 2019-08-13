@@ -25,6 +25,17 @@ var defaultIsDir = function isDirectory(dir, cb) {
     });
 };
 
+var maybeUnwrapSymlink = function maybeUnwrapSymlink(x, opts, cb) {
+    if (opts && opts.preserveSymlinks === false) {
+        fs.realpath(x, function (realPathErr, realPath) {
+            if (realPathErr && realPathErr.code !== 'ENOENT') cb(realPathErr);
+            else cb(null, realPathErr ? x : realPath);
+        });
+    } else {
+        cb(null, x);
+    }
+};
+
 module.exports = function resolve(x, options, callback) {
     var cb = callback;
     var opts = options;
@@ -54,14 +65,14 @@ module.exports = function resolve(x, options, callback) {
     // ensure that `basedir` is an absolute path at this point, resolving against the process' current working directory
     var absoluteStart = path.resolve(basedir);
 
-    if (opts.preserveSymlinks === false) {
-        fs.realpath(absoluteStart, function (realPathErr, realStart) {
-            if (realPathErr && realPathErr.code !== 'ENOENT') cb(err);
-            else init(realPathErr ? absoluteStart : realStart);
-        });
-    } else {
-        init(absoluteStart);
-    }
+    maybeUnwrapSymlink(
+        absoluteStart,
+        opts,
+        function (err, realStart) {
+            if (err) cb(err);
+            else init(realStart);
+        }
+    );
 
     var res;
     function init(basedir) {
@@ -74,8 +85,15 @@ module.exports = function resolve(x, options, callback) {
         } else loadNodeModules(x, basedir, function (err, n, pkg) {
             if (err) cb(err);
             else if (core[x]) return cb(null, x);
-            else if (n) cb(null, n, pkg);
-            else {
+            else if (n) {
+                return maybeUnwrapSymlink(n, opts, function (err, realN) {
+                    if (err) {
+                        cb(err);
+                    } else {
+                        cb(null, realN, pkg);
+                    }
+                });
+            } else {
                 var moduleError = new Error("Cannot find module '" + x + "' from '" + parent + "'");
                 moduleError.code = 'MODULE_NOT_FOUND';
                 cb(moduleError);
@@ -88,8 +106,15 @@ module.exports = function resolve(x, options, callback) {
         else if (m) cb(null, m, pkg);
         else loadAsDirectory(res, function (err, d, pkg) {
             if (err) cb(err);
-            else if (d) cb(null, d, pkg);
-            else {
+            else if (d) {
+                maybeUnwrapSymlink(d, opts, function (err, realD) {
+                    if (err) {
+                        cb(err);
+                    } else {
+                        cb(null, realD, pkg);
+                    }
+                });
+            } else {
                 var moduleError = new Error("Cannot find module '" + x + "' from '" + parent + "'");
                 moduleError.code = 'MODULE_NOT_FOUND';
                 cb(moduleError);

@@ -25,6 +25,19 @@ var defaultIsDir = function isDirectory(dir) {
     return stat.isDirectory();
 };
 
+var maybeUnwrapSymlink = function maybeUnwrapSymlink(x, opts) {
+    if (opts && opts.preserveSymlinks === false) {
+        try {
+            return fs.realpathSync(x);
+        } catch (realPathErr) {
+            if (realPathErr.code !== 'ENOENT') {
+                throw realPathErr;
+            }
+        }
+    }
+    return x;
+};
+
 module.exports = function (x, options) {
     if (typeof x !== 'string') {
         throw new TypeError('Path must be a string.');
@@ -42,28 +55,18 @@ module.exports = function (x, options) {
     opts.paths = opts.paths || [];
 
     // ensure that `basedir` is an absolute path at this point, resolving against the process' current working directory
-    var absoluteStart = path.resolve(basedir);
-
-    if (opts.preserveSymlinks === false) {
-        try {
-            absoluteStart = fs.realpathSync(absoluteStart);
-        } catch (realPathErr) {
-            if (realPathErr.code !== 'ENOENT') {
-                throw realPathErr;
-            }
-        }
-    }
+    var absoluteStart = maybeUnwrapSymlink(path.resolve(basedir), opts);
 
     if ((/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/).test(x)) {
         var res = path.resolve(absoluteStart, x);
         if (x === '..' || x.slice(-1) === '/') res += '/';
         var m = loadAsFileSync(res) || loadAsDirectorySync(res);
-        if (m) return m;
+        if (m) return maybeUnwrapSymlink(m, opts);
     } else if (core[x]) {
         return x;
     } else {
         var n = loadNodeModulesSync(x, absoluteStart);
-        if (n) return n;
+        if (n) return maybeUnwrapSymlink(n, opts);
     }
 
     if (core[x]) return x;
