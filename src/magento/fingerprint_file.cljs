@@ -45,6 +45,7 @@
 
 (defn- template-filetypes []
   (let [res ["/templates/.+\\.phtml$"
+             "/templates/.+\\.twig$"
              "/etc/view\\.xml$"
              "/theme\\.xml$"]]
     (filenames->fingerprint-fns ::template res)))
