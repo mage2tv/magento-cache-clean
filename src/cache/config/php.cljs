@@ -65,5 +65,6 @@
   (let [config-php-dir (app-config-dir magento-basedir)]
     (log/debug "Monitoring app/etc/config.php for new modules")
     (fs/watch config-php-dir (fn [file]
-                               (when (= "config.php" (fs/basename file))
+                               (when (or (= "config.php" (fs/basename file))
+                                         (= "env.php" (fs/basename file)))
                                  (callback))))))
