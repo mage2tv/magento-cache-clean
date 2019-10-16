@@ -166,6 +166,8 @@ $ clj -m figwheel.main -O advanced -bo build
 $ chmod +x bin/cache-clean.js
 ```
 
+Or, install Clojure and simply run `make`.
+
 ## Thanks
 
 Thanks to [Mage2 TV](https://www.mage2.tv/) for sponsoring the development of
