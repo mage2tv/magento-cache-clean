@@ -143,93 +143,18 @@ Automating selective cache cleaning improves the developer experience.
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
 
+* Since Magento 2.1 there is a [bug](https://github.com/magento/magento2/pull/24153) that causes the full page cache records to
+  be written to the var/cache directory instead of var/page_cache.
+  There is an easy workaround, namely removing all cache configuration from
+  the default /etc/env.php. The bug only affects the default config with the
+  file system cache backend. Redis or Varnish are not affected.
+  The bug should be fixed in Magento 2.3.4.
+
+
 ## Docker & VMs
 
-This section is about common issues that can happen when using the watcher in a
-virtualized development setup.
+More information in the [Docker & VM readme](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/docker-and-vm.md).
 
-There are a couple of issues that can arrise when working with a virtualized
-environment in regards to the `cache-clean.js` watcher.
-
-For example, when the node based watcher is run in a different container than
-PHP based Magento, the file system path to the Magento directory might be
-different for each container.
-
-A similar scenario would be where the Magento directory is a local mount of a
-directory exported from a virtual machine: the file system path to the Magento
-base directory might be different in the VM and on the host system.
-
-Another scenario could be that the Magento base directory is a NFS mount in a VM,
-which does not support inotify events.
-
-So for a number of reasons you might choose to run the watcher in a system that
-is different from the system where Magento is running.
-
-To enable such scenarios, two things might be necessary, depending on your
-specific setup.
-
-First, a cache `id_prefix` might need to be configured in the `app/etc/env.php`
-file in Magento.
-If no ID prefix is configured, Magento calculates one based on the Magento base path,
-so it would be different on the host and the guest system.
-Here is an example how that looks for the file cache storage:
-
-
-```
-    'cache' => [
-        'page_cache' => [
-            'id_prefix' => 'a04_',
-            'cache_dir' => 'page_cache',
-        ],
-        'default' => [
-            'id_prefix' => 'a04_'
-        ]
-    ],
-```
-
-You can also add the ID prefix for other cache storage backends.
-The value of the ID prefix doesn't matter, as long as it's 3 alphanumeric
-characters followed by an underscore.
-
-The second thing that might prevent the watcher from running happens because
-it runs PHP to get the Magento cache configuration and a list of modules and
-themes.
-The module and theme directories are listed as the file system path for the
-system that PHP is running in.
-But again, that might not match the file system where node is running.
-
-To solve the issue, it is possible to generate a dump of the required
-information in PHP by running the included `generate-cache-clean-config.php`
-script.
-
-The script assumes it is run in a Magento base directory, or the Magento
-directory can be passed as an argument:
-
-```bash
-$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php
-# or
-$ php vendor/mage2tv/magento-cache-clean/bin/generate-cache-clean-config.php path/to/magento
-```
-
-The configuration dump is written to the file `var/cache-clean-config.json`.
-
-When the watcher is run with the JSON file present, it will read the
-information from the file instead of shelling out to PHP.
-
-You can also use this to manually tweak what modules to watch
-for changes. For example, you could choose exclude all core modules.
-
-
-### More on Docker
-
-The following comments from Dimitar IvanovTryzens might be helpful how to run
-the watcher in a docker context:
-
-* https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-479660779
-* https://github.com/mage2tv/magento-cache-clean/issues/31#issuecomment-480562053
-
-I might extract them into a separate document at one point, but for now I hope
-that is enough.
 
 ## Building
 
