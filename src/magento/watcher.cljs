@@ -53,6 +53,7 @@
              (not (re-find #"___jb_...___" file))
              (not (string/includes? file "/.git/"))
              (not (string/includes? file "\\.git\\"))
+             (not (string/includes? file "/.mutagen-temporary"))
              (not (in-process? file)))
     (set-in-process! file)
     (log/info "Processing" file)
