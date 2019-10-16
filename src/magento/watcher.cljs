@@ -67,22 +67,33 @@
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
 
-(defn watch-module [module-dir]
+(defn watch-module [log-fn module-dir]
   (when (and (fs/exists? module-dir) (not (fs/watched? module-dir)))
     (fs/watch-recursive module-dir #(file-changed %))
     (swap! controllers into (module-controllers module-dir))
-    (log/debug "Watching module" (fs/basename module-dir))))
+    (log-fn module-dir)))
 
 (defn watch-theme [theme-dir]
   (fs/watch-recursive theme-dir #(file-changed %))
   (log/debug "Watching theme" (fs/basename theme-dir)))
 
-(defn watch-all-modules! []
-  (run! watch-module (mage/module-dirs)))
+(defn pretty-module-name [module-dir]
+  (let [module-parent-dir-name (fs/basename (fs/dirname module-dir))
+        module-dir-name (fs/basename module-dir)]
+    (str module-parent-dir-name "/" module-dir-name)))
+
+(defn log-watching-new-module [module-dir]
+  (log/notice "Watching new module" (pretty-module-name module-dir)))
+
+(defn log-watching-module [module-dir]
+  (log/debug "Watching module" (pretty-module-name module-dir)))
+
+(defn watch-all-modules! [log-fn]
+  (run! #(watch-module log-fn %) (mage/module-dirs)))
 
 (defn watch-new-modules! []
   (log/debug "Checking for new modules...")
-  (watch-all-modules!))
+  (watch-all-modules! log-watching-new-module))
 
 (defn watch-for-new-modules! []
   (cache-config/watch-for-new-modules!
@@ -102,7 +113,7 @@
   (log/notice "Hot-keys for cleaning static content areas: [F]rontend [A]dminhtml\n"))
 
 (defn start []
-  (watch-all-modules!)
+  (watch-all-modules! log-watching-module)
   (run! watch-theme (mage/theme-dirs))
   (watch-for-new-modules!)
   (when (hotkeys/observe-keys!)
