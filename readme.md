@@ -35,14 +35,17 @@ composer remove --dev mage2tv/magento-cache-clean
 composer require --dev mage2tv/magento-cache-clean
 ```
 
+The tool is commonly installed globally using `composer global require ...`.
+
+
 ## Usage
 
 In your Magento directory, run `vendor/bin/cache-clean.js --watch`
 
 Press `Ctrl-C` to exit the watcher process.
 
-The script can be used as a faster drop in replacement of `bin/magento cache:clean`,
-too. For example:
+The script can also be used as a faster drop in replacement of `bin/magento cache:clean`.
+For example:
 
 ``` shell
 vendor/bin/cache-clean.js config full_page
@@ -97,30 +100,6 @@ the `F`rontend area or clean the `G`enerated code directory.
 * it probably is a good idea to turn on all Magento caches
   `bin/magento cache:enable` to get the full benefit.
 
-## Rationale
-
-This utility aims to improve the Magento developer experience by shortening the
-feedback loop during development through automating the removal of affected
-cache sections after file changes.
-
-**Assumptions:**
-
-1. Magento uses caching a lot and is faster when the caches are warm.
-2. As a developer I want a quick feedback loop.
-3. Rebuilding the cache takes longer than cleaning the cache
-
-To support the above assumptions, I want to only clean the cache segments I
-really have to after making some changes.
-
-For example, if I make a change to a template, I only want to flush the
-`block_html` and `full_page` caches, not the `config` or `layout` caches.
-
-Thinking about what cache types need to be cleaned after a change and typing the
-exact command takes time, and it also gets very repetitive, so many developers
-simply nuke the whole cache after every change.
-
-Automating selective cache cleaning improves the developer experience.
-
 
 ## Known issues
 
@@ -151,22 +130,18 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
   The bug should be fixed in Magento 2.3.4.
 
 
-## Docker & VMs
+## More information
 
-More information in the [Docker & VM readme](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/docker-and-vm.md).
+* Some words on using the watcher with [Docker & VMs](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/docker-and-vm.md).
 
 
-## Building
+* The [Rationale](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/rationale.md) explains the reasons I wrote the utility.
 
-The tool is written in ClojureScript.
-To build, install Clojure 1.9 or later (e.g. `brew install clojure`) and run
+* How to [build](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/building.md) the tool from source.
 
-```shell
-$ clj -m figwheel.main -O advanced -bo build
-$ chmod +x bin/cache-clean.js
-```
-
-Or, install Clojure and simply run `make`.
+* Integrating the watcher with PHPStorm:
+  * [Setting up the watcher as a PHPStorm startup task](https://www.mage2.tv/content/fundamentals/magento-cli-tool/configuring-the-magento-cache-clean.js-utility-phpstorm-startup-task/).
+  * [Enabling the hotkeys in PHPStorm](https://www.mage2.tv/content/fundamentals/magento-cli-tool/enabling-the-hotkeys-for-the-cache-clean.js-utility-in-phpstorm/).
 
 ## Thanks
 
