@@ -140,7 +140,7 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 * How to [build](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/building.md) the tool from source.
 
 * Integrating the watcher with PHPStorm:
-  * [Mage2 TV] [how to set up the watcher as a PHPStorm startup task](https://www.mage2.tv/content/fundamentals/magento-cli-tool/configuring-the-magento-cache-clean.js-utility-phpstorm-startup-task/).
+  * [Mage2 TV] [How to set up the watcher as a PHPStorm startup task](https://www.mage2.tv/content/fundamentals/magento-cli-tool/configuring-the-magento-cache-clean.js-utility-phpstorm-startup-task/).
   * [Mage2 TV] [How to enable the hotkeys in PHPStorm](https://www.mage2.tv/content/fundamentals/magento-cli-tool/enabling-the-hotkeys-for-the-cache-clean.js-utility-in-phpstorm/).
 
 ## Thanks
