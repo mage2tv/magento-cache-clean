@@ -97,7 +97,7 @@ the `F`rontend area or clean the `G`enerated code directory.
 ### Prerequisites:
 
 * `node.js` (built on 10.8, but should work with older 8.x versions, too).
-* it probably is a good idea to turn on all Magento caches
+* It probably is a good idea to turn on all Magento caches
   `bin/magento cache:enable` to get the full benefit.
 
 
@@ -123,11 +123,12 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 ```
 
 * Since Magento 2.1 there is a [bug](https://github.com/magento/magento2/pull/24153) that causes the full page cache records to
-  be written to the var/cache directory instead of var/page_cache.
+  be written to the `var/cache` directory instead of `var/page_cache`.
+  This issue causes the cache cleaner behavior to be erratic.
   There is an easy workaround, namely removing all cache configuration from
-  the default /etc/env.php. The bug only affects the default config with the
+  the default `app/etc/env.php`. The bug only affects the default config with the
   file system cache backend. Redis or Varnish are not affected.
-  The bug should be fixed in Magento 2.3.4.
+  The bug will be fixed in the (currently upcoming) Magento 2.3.4 release.
 
 
 ## More information
@@ -161,4 +162,4 @@ features! This tool would be impossible without you!
 ## Copyright & License
 
 Copyright 2019 by Vinai Kopp, distributed under the BSD-3-Clause license (see
-the LICENSE file in this repository).
+the [LICENSE](https://github.com/mage2tv/magento-cache-clean/blob/master/LICENSE) file).
