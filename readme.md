@@ -10,7 +10,7 @@ For example, if you make a change to a template, it only cleans the
 `block_html` and `full_page` caches, not the `config` or `layout` caches.
 
 The project is only tested on MacOS and Linux.
-Please report bugs by opening an issue on the GitHub issue tracker.
+Please report bugs by opening an issue on the [GitHub issue tracker](https://github.com/mage2tv/magento-cache-clean/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
 
 
 ## Features
