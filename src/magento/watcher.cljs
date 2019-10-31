@@ -40,13 +40,25 @@
 (defn- without-base-path [file]
   (subs file (count (mage/base-dir))))
 
-(defn remove-generated-files-based-on! [file]
-  (when (= ".php" (subs file (- (count file) 4)))
-    (let [files (generated/php-file->generated-code-files file)]
+(defn remove-generated-files-based-on-php! [php-file]
+  (when (= ".php" (subs php-file (- (count php-file) 4)))
+    (let [files (generated/php-file->generated-code-files php-file)]
       (when (seq files)
-        (apply log/info "Removing generated code"
-               (interpose ", " (map without-base-path files)))
+        (log/info "Removing generated code"
+               (apply str (interpose ", " (map without-base-path files))))
         (run! fs/rm files)))))
+
+(defn remove-generated-extension-attributes [file]
+  (if (= "extension_attributes.xml" (fs/basename file))
+    (let [files (generated/generated-extension-attribute-classes)]
+      (when (seq files)
+        (log/info "Removing generated extension attributes classes"
+               (apply str (interpose ", " (map without-base-path files))))
+        (run! fs/rm files)))))
+
+(defn remove-generated-files-based-on! [file]
+  (remove-generated-files-based-on-php! file)
+  (remove-generated-extension-attributes file))
 
 (defn file-changed [file]
   (when (and (string? file)

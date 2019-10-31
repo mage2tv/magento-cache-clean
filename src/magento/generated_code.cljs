@@ -49,7 +49,7 @@
 (defn- php-class->generated-file [generated-code-dir class-name]
   (str generated-code-dir (php-class->file class-name)))
 
-(defn- generated-files [php-class]
+(defn- generated-files-for-class [php-class]
   (when-let [dir (generated-code-dir (app/base-dir))]
     (->> php-class
          maybe-generated-classes
@@ -58,7 +58,11 @@
 
 (defn php-file->generated-code-files [php-file]
   (when-let [php-class (file->php-class php-file)]
-    (generated-files php-class)))
+    (generated-files-for-class php-class)))
+
+(defn generated-extension-attribute-classes []
+  (when-let [dir (generated-code-dir (app/base-dir))]
+    (->> dir fs/file-tree (filter #(string/ends-with? % "Extension.php")))))
 
 (defn clean []
   (if-let [dir (generated-code-dir (app/base-dir))]
