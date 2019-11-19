@@ -87,7 +87,7 @@
 
 (defn watch-theme [theme-dir]
   (fs/watch-recursive theme-dir #(file-changed %))
-  (log/debug "Watching theme" (fs/basename theme-dir)))
+  (log/debug :without-time "Watching theme" (fs/basename theme-dir)))
 
 (defn pretty-module-name [module-dir]
   (let [module-parent-dir-name (fs/basename (fs/dirname module-dir))
@@ -98,13 +98,13 @@
   (log/notice "Watching new module" (pretty-module-name module-dir)))
 
 (defn log-watching-module [module-dir]
-  (log/debug "Watching module" (pretty-module-name module-dir)))
+  (log/debug :without-time "Watching module" (pretty-module-name module-dir)))
 
 (defn watch-all-modules! [log-fn]
   (run! #(watch-module log-fn %) (mage/module-dirs)))
 
 (defn watch-new-modules! []
-  (log/debug "Checking for new modules...")
+  (log/debug :without-time "Checking for new modules...")
   (watch-all-modules! log-watching-new-module))
 
 (defn watch-for-new-modules! []
@@ -119,10 +119,10 @@
   (log/always "Stopped watching"))
 
 (defn show-hotkeys []
-  (log/notice "Hot-keys for manual cache cleaning:")
-  (log/notice "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
-  (log/notice "Hot-key for cleaning all generated code: [G]")
-  (log/notice "Hot-keys for cleaning static content areas: [F]rontend [A]dminhtml\n"))
+  (log/notice :without-time "Hot-keys for manual cache cleaning:")
+  (log/notice :without-time "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
+  (log/notice :without-time "Hot-key for cleaning all generated code: [G]")
+  (log/notice :without-time "Hot-keys for cleaning static content areas: [F]rontend [A]dminhtml\n"))
 
 (defn start []
   (watch-all-modules! log-watching-module)
@@ -130,4 +130,4 @@
   (watch-for-new-modules!)
   (when (hotkeys/observe-keys!)
     (show-hotkeys))
-  (log/notice "Watcher initialized (Ctrl-C to quit)"))
+  (log/notice :without-time "Watcher initialized (Ctrl-C to quit)"))

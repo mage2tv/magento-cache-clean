@@ -23,7 +23,7 @@
     (not= "/" (subs path 0 1)) (str basedir)))
 
 (defn list-component-dirs [magento-basedir type]
-  (log/debug (str "Listing " type "s from " config-file-name))
+  (log/debug :without-time (str "Listing " type "s from " config-file-name))
   (let [config (get-config-from-dump magento-basedir)]
     (map #(make-path-absolute (fs/add-trailing-slash magento-basedir) %)
          (case type
@@ -31,7 +31,7 @@
            "theme" (:themes config)))))
 
 (defn read-app-config [magento-basedir]
-  (log/debug (str "Reading app config from " config-file-name))
+  (log/debug :without-time (str "Reading app config from " config-file-name))
   (let [config (get-config-from-dump magento-basedir)]
     (:app config)))
 
@@ -39,5 +39,5 @@
   (let [config-file (config-file magento-basedir)
         dir (fs/dirname config-file)
         file (fs/basename config-file)]
-    (log/debug "Monitoring" config-file  "for new modules")
+    (log/debug :without-time "Monitoring" config-file  "for new modules")
     (fs/watch dir #(when (= file (fs/basename %)) (callback)))))

@@ -18,7 +18,7 @@
          ");\"")))
 
 (defn read-app-config [magento-basedir]
-  (log/debug "Reading app config by shelling out to php")
+  (log/debug :without-time "Reading app config by shelling out to php")
   (let [cmd (env-config-cmd magento-basedir)
         output (.execSync child-process cmd)
         config (js->clj (json/parse output) :keywordize-keys true)]
@@ -51,7 +51,7 @@
           "echo substr(\\$m, \\$bp).PHP_EOL;\""))))
 
 (defn list-component-dirs [magento-basedir type]
-  (log/debug (str "Listing " type "s by shelling out to php"))
+  (log/debug :without-time (str "Listing " type "s by shelling out to php"))
   (let [magento-basedir (fs/add-trailing-slash magento-basedir)
         cmd (list-components-cmd magento-basedir type)
         output (.execSync child-process cmd)]
@@ -63,7 +63,7 @@
 
 (defn watch-for-new-modules! [magento-basedir callback]
   (let [config-php-dir (app-config-dir magento-basedir)]
-    (log/debug "Monitoring app/etc/config.php for new modules")
+    (log/debug :without-time "Monitoring app/etc/config.php for new modules")
     (fs/watch config-php-dir (fn [file]
                                (when (or (= "config.php" (fs/basename file))
                                          (= "env.php" (fs/basename file)))

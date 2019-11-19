@@ -29,11 +29,11 @@
 (defn- read-keys [^js/net.Socket stdin key-chan]
   (prep-stdin stdin)
   (.on stdin "data" (fn [data] (put! key-chan data)))
-  (log/debug "Listening for hotkeys"))
+  (log/debug :without-time "Listening for hotkeys"))
 
 (defn- check-abort [key]
   (when (= key ctr-c)
-    (log/notice "Bye!")
+    (log/notice :without-time "Bye!")
     (.exit process)))
 
 (defn- process-key [key]
@@ -60,7 +60,7 @@
       true
       (catch :default e
         (close! key-chan)
-        (log/error "Error initializing hotkey support:" (str e))
+        (log/error :without-time "Error initializing hotkey support:" (str e))
         false))))
 
 (defn observe-keys! []
@@ -68,5 +68,5 @@
     (if (.-isTTY stdin)
       (init-hotkeys stdin)
       (do
-        (log/notice "STDIN is not attached to terminal session - hotkeys disabled!")
+        (log/notice :without-time "STDIN is not attached to terminal session - hotkeys disabled!")
         false))))
