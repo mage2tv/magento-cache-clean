@@ -50,18 +50,21 @@
            "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
            "echo substr(\\$m, \\$bp).PHP_EOL;\""))))
 
-(defn list-component-dirs [magento-basedir type]
+(defn *list-component-dirs [magento-basedir type]
   (log/debug :without-time (str "Listing " type "s by shelling out to php"))
+  (let [magento-basedir (fs/add-trailing-slash magento-basedir)
+        cmd (list-components-cmd magento-basedir type)
+        output (.execSync child-process cmd)]
+    (map #(str magento-basedir %) (string/split-lines output))))
+
+(defn list-component-dirs [magento-basedir type]
+  ;; PHP can fail hard. For example, composer might try to require an registration.php file
+  ;; that doesn't exist any more, e.g. after switching git branches. To handle such cases gracefully,
+  ;; the error is caught and an empty seq is returned.
   (try
-    ;; PHP can fail hard. For example, composer might try to require an registration.php file
-    ;; that doesn't exist any more, e.g. after switching git branches. To handle such cases gracefully,
-    ;; the error is caught and an empty seq is returned.
-    (let [magento-basedir (fs/add-trailing-slash magento-basedir)
-          cmd (list-components-cmd magento-basedir type)
-          output (.execSync child-process cmd)]
-      (map #(str magento-basedir %) (string/split-lines output)))
+    (*list-component-dirs magento-basedir type)
     (catch :default e
-      (log/error (str "ERROR: failed shelling out to PHP to read the " type " list."))
+      (log/error (str "ERROR: failed shelling out to php for reading the " type " list."))
       (log/notice "ERROR Details:" (or (.-message e) e))
            '())))
 
