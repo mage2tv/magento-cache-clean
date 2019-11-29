@@ -44,18 +44,26 @@
     (when-not (fs/exists? composer-autoload)
       (throw (ex-info (str "Composer autoload.php not found: " composer-autoload) {})))
     (unescape-php-var-on-win-os
-     (str "php -r "
-          "\"require '" composer-autoload "'; "
-          "\\$bp = strlen(dirname(dirname(realpath('" composer-autoload "')))) + 1; "
-          "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
-          "echo substr(\\$m, \\$bp).PHP_EOL;\""))))
+      (str "php -r "
+           "\"require '" composer-autoload "'; "
+           "\\$bp = strlen(dirname(dirname(realpath('" composer-autoload "')))) + 1; "
+           "foreach ((new \\Magento\\Framework\\Component\\ComponentRegistrar)->getPaths('" type "') as \\$m) "
+           "echo substr(\\$m, \\$bp).PHP_EOL;\""))))
 
 (defn list-component-dirs [magento-basedir type]
   (log/debug :without-time (str "Listing " type "s by shelling out to php"))
-  (let [magento-basedir (fs/add-trailing-slash magento-basedir)
-        cmd (list-components-cmd magento-basedir type)
-        output (.execSync child-process cmd)]
-    (map #(str magento-basedir %) (string/split-lines output))))
+  (try
+    ;; PHP can fail hard. For example, composer might try to require an registration.php file
+    ;; that doesn't exist any more, e.g. after switching git branches. To handle such cases gracefully,
+    ;; the error is caught and an empty seq is returned.
+    (let [magento-basedir (fs/add-trailing-slash magento-basedir)
+          cmd (list-components-cmd magento-basedir type)
+          output (.execSync child-process cmd)]
+      (map #(str magento-basedir %) (string/split-lines output)))
+    (catch :default e
+      (log/error (str "ERROR: failed shelling out to PHP to read the " type " list."))
+      (log/notice "ERROR Details:" (or (.-message e) e))
+           '())))
 
 
 (defn app-config-dir [magento-basedir]
