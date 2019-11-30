@@ -3,6 +3,7 @@
             [clojure.string :as string]
             [magento.app :as mage]
             [cache.cache :as cache]
+            [cache.config :as cache-config]
             [file.system :as fs]
             [magento.generated-code :as generated]
             [cache.hotkeys :as hotkeys]))
@@ -39,19 +40,32 @@
 (defn- without-base-path [file]
   (subs file (count (mage/base-dir))))
 
-(defn remove-generated-files-based-on! [file]
-  (when (= ".php" (subs file (- (count file) 4)))
-    (let [files (generated/php-file->generated-code-files file)]
+(defn remove-generated-files-based-on-php! [php-file]
+  (when (= ".php" (subs php-file (- (count php-file) 4)))
+    (let [files (generated/php-file->generated-code-files php-file)]
       (when (seq files)
-        (apply log/info "Removing generated code"
-               (interpose ", " (map without-base-path files)))
+        (log/info "Removing generated code"
+               (apply str (interpose ", " (map without-base-path files))))
         (run! fs/rm files)))))
+
+(defn remove-generated-extension-attributes [file]
+  (if (= "extension_attributes.xml" (fs/basename file))
+    (let [files (generated/generated-extension-attribute-classes)]
+      (when (seq files)
+        (log/info "Removing generated extension attributes classes"
+               (apply str (interpose ", " (map without-base-path files))))
+        (run! fs/rm files)))))
+
+(defn remove-generated-files-based-on! [file]
+  (remove-generated-files-based-on-php! file)
+  (remove-generated-extension-attributes file))
 
 (defn file-changed [file]
   (when (and (string? file)
              (not (re-find #"___jb_...___" file))
              (not (string/includes? file "/.git/"))
              (not (string/includes? file "\\.git\\"))
+             (not (string/includes? file "/.mutagen-temporary"))
              (not (in-process? file)))
     (set-in-process! file)
     (log/info "Processing" file)
@@ -65,43 +79,55 @@
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
 
-(defn watch-module [module-dir]
+(defn watch-module [log-fn module-dir]
   (when (and (fs/exists? module-dir) (not (fs/watched? module-dir)))
     (fs/watch-recursive module-dir #(file-changed %))
     (swap! controllers into (module-controllers module-dir))
-    (log/debug "Watching module" (fs/basename module-dir))))
+    (log-fn module-dir)))
 
 (defn watch-theme [theme-dir]
   (fs/watch-recursive theme-dir #(file-changed %))
-  (log/debug "Watching theme" (fs/basename theme-dir)))
+  (log/debug :without-time "Watching theme" (fs/basename theme-dir)))
 
-(defn watch-all-modules! []
-  (run! watch-module (mage/module-dirs)))
+(defn pretty-module-name [module-dir]
+  (let [module-parent-dir-name (fs/basename (fs/dirname module-dir))
+        module-dir-name (fs/basename module-dir)]
+    (str module-parent-dir-name "/" module-dir-name)))
+
+(defn log-watching-new-module [module-dir]
+  (log/notice "Watching new module" (pretty-module-name module-dir)))
+
+(defn log-watching-module [module-dir]
+  (log/debug :without-time "Watching module" (pretty-module-name module-dir)))
+
+(defn watch-all-modules! [log-fn]
+  (run! #(watch-module log-fn %) (mage/module-dirs)))
 
 (defn watch-new-modules! []
-  (log/debug "Checking for new modules...")
-  (watch-all-modules!))
+  (log/debug :without-time "Checking for new modules...")
+  (watch-all-modules! log-watching-new-module))
 
 (defn watch-for-new-modules! []
-  (let [config-php-dir (str (mage/base-dir) "app/etc")]
-    (log/debug "Monitoring app/etc/config.php for new modules")
-    (fs/watch config-php-dir (fn [file]
-                               (when (= "config.php" (fs/basename file))
-                                 (watch-new-modules!)
-                                 (cache/clean-cache-types ["config"]))))))
-
+  (cache-config/watch-for-new-modules!
+   (mage/base-dir)
+   (fn []
+     (watch-new-modules!)
+     (cache/clean-cache-types ["config"]))))
 
 (defn stop []
   (fs/stop-all-watches)
   (log/always "Stopped watching"))
 
+(defn show-hotkeys []
+  (log/notice :without-time "Hot-keys for manual cache cleaning:")
+  (log/notice :without-time "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
+  (log/notice :without-time "Hot-key for cleaning all generated code: [G]")
+  (log/notice :without-time "Hot-keys for cleaning static content areas: [F]rontend [A]dminhtml\n"))
+
 (defn start []
-  (watch-all-modules!)
+  (watch-all-modules! log-watching-module)
   (run! watch-theme (mage/theme-dirs))
   (watch-for-new-modules!)
   (when (hotkeys/observe-keys!)
-    (log/notice "Hot-keys for manual cache cleaning:")
-    (log/notice "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
-    (log/notice "Hot-keys for cleaning static content areas:")
-    (log/notice "[F]rontend [A]dminhtml\n"))
-  (log/notice "Watcher initialized (Ctrl-C to quit)"))
+    (show-hotkeys))
+  (log/notice :without-time "Watcher initialized (Ctrl-C to quit)"))

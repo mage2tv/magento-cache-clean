@@ -7,7 +7,7 @@
 
 (set! *warn-on-infer* true)
 
-(defonce version "0.0.33")
+(defonce version "1.0.6")
 
 (defn node-version-str []
   (let [proc ^js/process (js/require "process")]
@@ -68,7 +68,7 @@
       (throw (ex-info "Unable to determine the Magento directory" {})))
     (when-not (fs/dir? basedir)
       (throw (ex-info (str "The Magento directory \"" basedir "\" does not exist") {})))
-    (log/info "Magento dir" basedir)
+    (log/info :without-time "Magento dir" basedir)
     basedir))
 
 (defn find-log-level [args]
@@ -99,7 +99,7 @@ Clean the given cache types. If none are given, clean all cache types.
   (has-switch? ["--version"] args))
 
 (defn display-version []
-  (log/always version))
+  (log/always :without-time version))
 
 (defn arg-with-val? [arg]
   (#{"--directory" "-d"} arg))
@@ -142,7 +142,7 @@ Clean the given cache types. If none are given, clean all cache types.
   (exit-with-code 1))
 
 (defn -main [& args]
-  (log/always "Release" version "sponsored by https://www.mage2.tv\n")
+  (log/always :without-time "Release" version "sponsored by https://www.mage2.tv\n")
   (try
     (check-node-compatibility!)
     (cond

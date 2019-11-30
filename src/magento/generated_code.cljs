@@ -21,7 +21,8 @@
   (str (string/replace php-class "\\" "/") ".php"))
 
 (defn generated-code-dir [base-dir]
-  (some fs/dir? [(str base-dir "generated/code") (str base-dir "var/generated")]))
+  (let [candidates [(str base-dir "generated/code") (str base-dir "var/generated")]]
+    (some fs/dir? candidates)))
 
 (defn- interface? [type]
   (= "Interface" (subs type (- (count type) (count "Interface")))))
@@ -48,7 +49,7 @@
 (defn- php-class->generated-file [generated-code-dir class-name]
   (str generated-code-dir (php-class->file class-name)))
 
-(defn- generated-files [php-class]
+(defn- generated-files-for-class [php-class]
   (when-let [dir (generated-code-dir (app/base-dir))]
     (->> php-class
          maybe-generated-classes
@@ -57,4 +58,14 @@
 
 (defn php-file->generated-code-files [php-file]
   (when-let [php-class (file->php-class php-file)]
-    (generated-files php-class)))
+    (generated-files-for-class php-class)))
+
+(defn generated-extension-attribute-classes []
+  (when-let [dir (generated-code-dir (app/base-dir))]
+    (->> dir fs/file-tree (filter #(string/ends-with? % "Extension.php")))))
+
+(defn clean []
+  (if-let [dir (generated-code-dir (app/base-dir))]
+    (do (log/notice "Removing generated code from " dir)
+        (fs/rmdir-recursive dir))
+    (log/debug "No generated code directory found")))

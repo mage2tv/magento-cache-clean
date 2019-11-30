@@ -19,6 +19,8 @@
 (def key->static-content-areas {"F" ["frontend"]
                                 "A" ["adminhtml"]})
 
+(def key-generated-code "G")
+
 (defn- prep-stdin [^js/net.Socket stdin]
   (.resume stdin)
   (.setEncoding stdin "utf8")
@@ -27,11 +29,11 @@
 (defn- read-keys [^js/net.Socket stdin key-chan]
   (prep-stdin stdin)
   (.on stdin "data" (fn [data] (put! key-chan data)))
-  (log/debug "Listening for hotkeys"))
+  (log/debug :without-time "Listening for hotkeys"))
 
 (defn- check-abort [key]
   (when (= key ctr-c)
-    (log/notice "Bye!")
+    (log/notice :without-time "Bye!")
     (.exit process)))
 
 (defn- process-key [key]
@@ -40,7 +42,9 @@
   (when-let [types (get key->cachetypes key)]
     (cache/clean-cache-types types))
   (doseq [area (get key->static-content-areas key)]
-    (static-content/clean area)))
+    (static-content/clean area))
+  (when (= key-generated-code key)
+    (magento.generated-code/clean)))
 
 (defn- process-keys [key-chan]
   (go-loop []
@@ -56,7 +60,7 @@
       true
       (catch :default e
         (close! key-chan)
-        (log/error "Error initializing hotkey support:" (str e))
+        (log/error :without-time "Error initializing hotkey support:" (str e))
         false))))
 
 (defn observe-keys! []
@@ -64,5 +68,5 @@
     (if (.-isTTY stdin)
       (init-hotkeys stdin)
       (do
-        (log/notice "STDIN is not attached to terminal session - hotkeys disabled!")
+        (log/notice :without-time "STDIN is not attached to terminal session - hotkeys disabled!")
         false))))

@@ -25,11 +25,11 @@
 
 (def filetype->cachetypes
   {::magefile/config ["config"]
-   ::magefile/translation ["translate"]
+   ::magefile/translation ["translate" "full_page"]
    ::magefile/layout ["layout" "full_page"]
    ::magefile/template ["block_html" "full_page"]
-   ::magefile/requirejs-config ["full_page"]
-   ::magefile/menu ["config" "block_html"]})
+   ::magefile/menu ["config" "block_html"]
+   ::magefile/fpc ["full_page"]})
 
 (defn magefile->cachetypes [file]
   (let [filetype (magefile->filetype file)]

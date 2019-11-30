@@ -1,3 +1,16 @@
+## v.1.5.0 - 10 May, 2019
+
+Features
+
+-  Updated the commands list
+-  Added support for `XREAD` and `XREADGROUP` in `.getKeyIndexes()`
+
+## v.1.4.0 - 8 Oct, 2018
+
+Features
+
+-  Updated the commands list
+
 ## v.1.3.5 - 28 Feb, 2018
 
 Bugfix

@@ -41,7 +41,7 @@
 
 (defn- delete [cache-dir id]
   (let [file (id->filepath cache-dir id)]
-    #_(log/debug "cleaning file" file)
+    (log/debug "cleaning file" file)
     (when (fs/exists? file)
       (fs/rm file))))
 

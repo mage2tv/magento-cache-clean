@@ -45,17 +45,19 @@
 
 (defn- template-filetypes []
   (let [res ["/templates/.+\\.phtml$"
+             "/templates/.+\\.twig$"
              "/etc/view\\.xml$"
              "/theme\\.xml$"]]
     (filenames->fingerprint-fns ::template res)))
 
-(defn- requirejs-config-filetypes []
-  (let [res ["/view/(?:base|frontend|adminhtml)/requirejs-config\\.js$"]]
-    (filenames->fingerprint-fns ::requirejs-config res)))
-
 (defn- menu-filetypes []
   (let [res ["/etc/adminhtml/menu\\.xml$"]]
     (filenames->fingerprint-fns ::menu res)))
+
+(defn- full-page-cache-only-filetypes []
+  (let [res ["/etc/frontend/sections\\.xml$" ;; section names list in head
+             "/view/(?:base|frontend|adminhtml)/requirejs-config\\.js$"]]
+    (filenames->fingerprint-fns ::fpc res)))
 
 (def file->type
   (merge (config-filetypes)
@@ -63,7 +65,7 @@
          (translation-filetypes)
          (template-filetypes)
          (menu-filetypes)
-         (requirejs-config-filetypes)))
+         (full-page-cache-only-filetypes)))
 
 (defn- make-ui-component->ids-fn
   "Return a matcher fn where the returned cache id contains part of the file name."[]
@@ -93,8 +95,10 @@
              ["/etc/frontend/sections\\.xml$" ["sections_invalidation_config"]]
              ["/etc/email_templates\\.xml$" ["email_templates"]]
              ["/etc/webapi\\.xml" ["webapi_config"]]
+             ["/etc/schema.graphqls" ["magento_framework_graphqlschemastitching_config_data"]]
+             ["/etc/catalog_attributes\\.xml" ["catalog_attributes"]]
              ;; the following need to be tested before removing them from the
-             ;; cbnfig cache type above
+             ;; config cache type above
              #_["/etc/acl\\.xml$" ["provider_acl_resources_cache"]]
              ]
         id-fns (map (fn [[pattern-string ids]]
