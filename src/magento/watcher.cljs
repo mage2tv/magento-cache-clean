@@ -6,6 +6,7 @@
             [cache.config :as cache-config]
             [file.system :as fs]
             [magento.generated-code :as generated]
+            [magento.static-content :as static]
             [cache.hotkeys :as hotkeys]))
 
 (defonce in-process-files (atom {}))
@@ -49,16 +50,22 @@
         (run! fs/rm files)))))
 
 (defn remove-generated-extension-attributes [file]
-  (if (= "extension_attributes.xml" (fs/basename file))
+  (when (= "extension_attributes.xml" (fs/basename file))
     (let [files (generated/generated-extension-attribute-classes)]
       (when (seq files)
         (log/info "Removing generated extension attributes classes"
                (apply str (interpose ", " (map without-base-path files))))
         (run! fs/rm files)))))
 
+(defn remove-generated-js-translation-json! [file]
+  (when (or (string/ends-with? file ".csv"))
+    (log/info "Removing compiled frontend js-translation.json files.")
+    (run! fs/rm (static/js-translation-files "frontend"))))
+
 (defn remove-generated-files-based-on! [file]
   (remove-generated-files-based-on-php! file)
-  (remove-generated-extension-attributes file))
+  (remove-generated-extension-attributes file)
+  (remove-generated-js-translation-json! file))
 
 (defn file-changed [file]
   (when (and (string? file)

@@ -16,7 +16,21 @@
   (str (view-preprocessed-base-dir) area))
 
 (defn static-content-theme-locale-dirs [area]
-  )
+  (filter fs/dir? (fs/ls-dive (static-content-area-dir area) 2)))
+
+(defn view-preprocessed-theme-locale-dirs [area]
+  (filter fs/dir? (fs/ls-dive (view-preprocessed-area-dir area) 2)))
+
+(defn- static-files-in-locale-dir [area file]
+  (let [dirs (into (static-content-theme-locale-dirs area)
+                   (view-preprocessed-theme-locale-dirs area))]
+    (filter #(= file (fs/basename %)) (mapcat fs/ls dirs))))
+
+(defn js-translation-files [area]
+  (static-files-in-locale-dir area "js-translation.json"))
+
+(defn requirejs-config-files [area]
+  (static-files-in-locale-dir area "requirejs-config.js"))
 
 (defn rm-dir [dir]
   (when (fs/dir? dir)
@@ -30,5 +44,4 @@
   (rm-dir (view-preprocessed-area-dir "app"))
   (rm-dir (view-preprocessed-area-dir "vendor")))
 
-#_(defn- requirejs-config-files [area]
-  )
+
