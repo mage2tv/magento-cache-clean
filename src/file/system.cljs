@@ -26,6 +26,9 @@
 (defn dir? [s]
   (and (exists? s) (.. fs (lstatSync s) isDirectory) s))
 
+(defn file? [s]
+  (and (exists? s) (.. fs (lstatSync s) isFile) s))
+
 (defn symlink? [s]
   (.. fs (lstatSync s) isSymbolicLink))
 
@@ -65,6 +68,21 @@
   "Remove the given directory if it is empty."
   [dir]
   (.rmdirSync fs dir))
+
+(defn ls
+  "Return seq of items in given directory"
+  [dir]
+  (into [] (map #(str (trailing-slash dir) %)) (.readdirSync fs dir)))
+
+(defn ls-dive
+  "Return seq of items in all n levels deep subdirectories of dir"
+  [dir n]
+  (loop [dirs [dir]
+         to-dive n]
+    (let [items (mapcat #(ls %) dirs)]
+      (if (< 0 to-dive)
+        (recur (filter dir? items) (dec to-dive))
+        items))))
 
 (defn dir-tree
   "Return a seq of all directories within and including the given dir"

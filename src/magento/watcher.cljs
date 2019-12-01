@@ -32,6 +32,23 @@
   (or (re-find #"/Controller/.+\.php$" file)
       (re-find #"\\Controller\\.+\.php$" file)))
 
+
+(defn- contains-js-translation?
+  "Return true if the given file potentially contains js translation code"
+  [file]
+  (when (and (fs/file? file)
+             (or (string/ends-with? file ".phtml")
+                 (string/ends-with? file ".html")
+                 (string/ends-with? file ".js")))
+    (let [contents (fs/slurp file)]
+      (or (and (or (string/ends-with? file ".html") (string/ends-with? file ".phtml"))
+               (or (string/includes? contents "i18n:")
+                   (string/includes? contents ".mage.__(")
+                   (string/includes? contents "$t(")))
+          (and (string/ends-with? file ".html")
+               (or (string/includes? contents "translate=")
+                   (string/includes? contents "translate args=")))))))
+
 (defn clean-cache-for-new-controller [file]
   (when (and (controller? file) (not (contains? @controllers file)))
     (cache/clean-cache-ids ["app_action_list"])
@@ -41,31 +58,35 @@
 (defn- without-base-path [file]
   (subs file (count (mage/base-dir))))
 
-(defn remove-generated-files-based-on-php! [php-file]
+(defn check-remove-generated-files-based-on-php! [php-file]
   (when (= ".php" (subs php-file (- (count php-file) 4)))
     (let [files (generated/php-file->generated-code-files php-file)]
       (when (seq files)
         (log/info "Removing generated code"
-               (apply str (interpose ", " (map without-base-path files))))
+                  (apply str (interpose ", " (map without-base-path files))))
         (run! fs/rm files)))))
 
-(defn remove-generated-extension-attributes [file]
+(defn check-remove-generated-extension-attributes! [file]
   (when (= "extension_attributes.xml" (fs/basename file))
     (let [files (generated/generated-extension-attribute-classes)]
       (when (seq files)
         (log/info "Removing generated extension attributes classes"
-               (apply str (interpose ", " (map without-base-path files))))
+                  (apply str (interpose ", " (map without-base-path files))))
         (run! fs/rm files)))))
 
-(defn remove-generated-js-translation-json! [file]
-  (when (or (string/ends-with? file ".csv"))
-    (log/info "Removing compiled frontend js-translation.json files.")
-    (run! fs/rm (static/js-translation-files "frontend"))))
+(defn remove-generated-js-translation-json! []
+  (log/info "Removing compiled frontend js-translation.json files.")
+  (run! fs/rm (static/js-translation-files "frontend")))
+
+(defn check-remove-generated-js-translation-json! [file]
+  (when (or (string/ends-with? file ".csv")
+            (contains-js-translation? file))
+    (remove-generated-js-translation-json!)))
 
 (defn remove-generated-files-based-on! [file]
-  (remove-generated-files-based-on-php! file)
-  (remove-generated-extension-attributes file)
-  (remove-generated-js-translation-json! file))
+  (check-remove-generated-files-based-on-php! file)
+  (check-remove-generated-extension-attributes! file)
+  (check-remove-generated-js-translation-json! file))
 
 (defn file-changed [file]
   (when (and (string? file)
@@ -116,10 +137,10 @@
 
 (defn watch-for-new-modules! []
   (cache-config/watch-for-new-modules!
-   (mage/base-dir)
-   (fn []
-     (watch-new-modules!)
-     (cache/clean-cache-types ["config"]))))
+    (mage/base-dir)
+    (fn []
+      (watch-new-modules!)
+      (cache/clean-cache-types ["config"]))))
 
 (defn stop []
   (fs/stop-all-watches)
