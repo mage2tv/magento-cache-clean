@@ -88,13 +88,23 @@
   (check-remove-generated-extension-attributes! file)
   (check-remove-generated-js-translation-json! file))
 
+(defn compiled-requirejs-config? [file]
+  (let [requirejs-config-files (into #{} (static/requirejs-config-files "frontend"))]
+    (contains? requirejs-config-files file)))
+
+(defn removed-requirejs-config? [file]
+  (and (not (fs/exists? file)) (compiled-requirejs-config? file)))
+
+(defn process-changed-file? [file]
+  (and (string? file)
+       (not (re-find #"___jb_...___" file))
+       (not (string/includes? file "/.git/"))
+       (not (string/includes? file "\\.git\\"))
+       (not (string/includes? file "/.mutagen-temporary"))
+       (not (in-process? file))))
+
 (defn file-changed [file]
-  (when (and (string? file)
-             (not (re-find #"___jb_...___" file))
-             (not (string/includes? file "/.git/"))
-             (not (string/includes? file "\\.git\\"))
-             (not (string/includes? file "/.mutagen-temporary"))
-             (not (in-process? file)))
+  (when (process-changed-file? file)
     (set-in-process! file)
     (log/info "Processing" file)
     (when-let [types (seq (cache/magefile->cachetypes file))]
@@ -102,7 +112,9 @@
     (when-let [ids (cache/magefile->cacheids file)]
       (cache/clean-cache-ids ids))
     (clean-cache-for-new-controller file)
-    (remove-generated-files-based-on! file)))
+    (remove-generated-files-based-on! file)
+    (when (removed-requirejs-config? file)
+      (cache/clean-cache-types "full_page"))))
 
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
