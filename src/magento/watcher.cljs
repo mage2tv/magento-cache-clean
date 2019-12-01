@@ -75,7 +75,7 @@
         (run! fs/rm files)))))
 
 (defn remove-generated-js-translation-json! []
-  (log/info "Removing compiled frontend js-translation.json files.")
+  (log/info "Removing compiled frontend js-translation.json files")
   (run! fs/rm (static/js-translation-files "frontend")))
 
 (defn check-remove-generated-js-translation-json! [file]
