@@ -89,8 +89,9 @@
   (check-remove-generated-js-translation-json! file))
 
 (defn compiled-requirejs-config? [file]
-  (let [requirejs-config-files (into #{} (static/requirejs-config-files "frontend"))]
-    (contains? requirejs-config-files file)))
+  (when (= "requirejs-config.js" (fs/basename file))
+    (let [static-theme-dirs (into #{} (map fs/realpath) (static/static-content-theme-locale-dirs "frontend"))]
+      (contains? static-theme-dirs (fs/dirname file)))))
 
 (defn removed-requirejs-config? [file]
   (and (not (fs/exists? file)) (compiled-requirejs-config? file)))
@@ -112,21 +113,19 @@
     (when-let [ids (cache/magefile->cacheids file)]
       (cache/clean-cache-ids ids))
     (clean-cache-for-new-controller file)
-    (remove-generated-files-based-on! file)
-    (when (removed-requirejs-config? file)
-      (cache/clean-cache-types "full_page"))))
+    (remove-generated-files-based-on! file)))
 
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
 
 (defn watch-module [log-fn module-dir]
   (when (and (fs/exists? module-dir) (not (fs/watched? module-dir)))
-    (fs/watch-recursive module-dir #(file-changed %))
+    (fs/watch-recursive module-dir file-changed)
     (swap! controllers into (module-controllers module-dir))
     (log-fn module-dir)))
 
 (defn watch-theme [theme-dir]
-  (fs/watch-recursive theme-dir #(file-changed %))
+  (fs/watch-recursive theme-dir file-changed)
   (log/debug :without-time "Watching theme" (fs/basename theme-dir)))
 
 (defn pretty-module-name [module-dir]
@@ -154,6 +153,18 @@
       (watch-new-modules!)
       (cache/clean-cache-types ["config"]))))
 
+(defn static-file-changed [file]
+  (when (process-changed-file? file)
+    (set-in-process! file)
+    (log/info "Processing" file)
+    (when (removed-requirejs-config? file)
+      (cache/clean-cache-types ["full_page"]))))
+
+(defn watch-pub-static-frontend! []
+  (let [dir (static/static-content-area-dir "frontend")]
+    (log/debug :without-time "Watching static files in" dir)
+    (fs/watch-recursive dir static-file-changed)))
+
 (defn stop []
   (fs/stop-all-watches)
   (log/always "Stopped watching"))
@@ -167,6 +178,7 @@
 (defn start []
   (watch-all-modules! log-watching-module)
   (run! watch-theme (mage/theme-dirs))
+  (watch-pub-static-frontend!)
   (watch-for-new-modules!)
   (when (hotkeys/observe-keys!)
     (show-hotkeys))
