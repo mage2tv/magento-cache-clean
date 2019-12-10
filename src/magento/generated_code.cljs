@@ -10,10 +10,13 @@
 (defn- php-class [php]
   (second (re-find #"(?mi)^\s*class\s+(\w+)" (str php))))
 
+(defn- php-interface [php]
+  (second (re-find #"(?mi)^\s*interface\s+(\w+)" (str php))))
+
 (defn- file->php-class [file]
   (let [maybe-php (fs/head file 2048)
         namespace (php-namespace maybe-php)
-        class (php-class maybe-php)]
+        class (or (php-class maybe-php) (php-interface maybe-php))]
     (when (and namespace class)
       (str "\\" namespace "\\" class))))
 
