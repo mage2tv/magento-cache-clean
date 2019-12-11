@@ -37,7 +37,7 @@
 (defn maybe-generated-classes [base-class]
   (let [generated-types [(str base-class "Converter")
                          (str base-class "InterfaceFactory")
-                         (str base-class "Factory")
+                         ;;(str base-class "Factory") ;; factories don't need to be cleaned
                          (str base-class "\\Interceptor")
                          (str base-class "\\Logger")
                          (str base-class "Mapper")
