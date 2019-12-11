@@ -163,8 +163,10 @@
 
 (defn watch-pub-static-frontend! []
   (let [dir (static/static-content-area-dir "frontend")]
-    (log/debug :without-time "Watching static files in" dir)
-    (fs/watch-recursive dir static-file-changed)))
+    ;; temporary workaround until branch "branch-switching" is merged
+    (when (fs/dir? dir)
+      (log/debug :without-time "Watching static files in" dir)
+      (fs/watch-recursive dir static-file-changed))))
 
 (defn stop []
   (fs/stop-all-watches)
