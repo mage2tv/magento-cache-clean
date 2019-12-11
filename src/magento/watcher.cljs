@@ -62,7 +62,7 @@
   (when (= ".php" (subs php-file (- (count php-file) 4)))
     (let [files (generated/php-file->generated-code-files php-file)]
       (when (seq files)
-        (log/info "Removing generated code"
+        (log/notice "Removing generated code"
                   (apply str (interpose ", " (map without-base-path files))))
         (run! fs/rm files)))))
 
