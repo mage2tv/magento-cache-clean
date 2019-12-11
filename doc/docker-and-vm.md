@@ -4,7 +4,7 @@ This document is about common issues that can happen when using the watcher in a
 virtualized development setup, e.g. docker or vagrant.
 
 In many situations the cache watcher "just works" when run inside the container.
-For example, if you are using [Warden][https://warden.dev], you can run the utility
+For example, if you are using [Warden](https://warden.dev), you can run the utility
 after running `warden shell`:
 ```
 $ composer global install mage2tv/magento-cache-clean
