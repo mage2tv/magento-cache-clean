@@ -102,6 +102,7 @@
        (not (string/includes? file "/.git/"))
        (not (string/includes? file "\\.git\\"))
        (not (string/includes? file "/.mutagen-temporary"))
+       (not (string/ends-with? file ".unison.tmp"))
        (not (string/ends-with? file "~"))
        (not (in-process? file))))
 
