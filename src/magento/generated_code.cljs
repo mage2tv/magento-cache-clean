@@ -69,6 +69,6 @@
 
 (defn clean []
   (if-let [dir (generated-code-dir (app/base-dir))]
-    (do (log/notice "Removing generated code from " dir)
+    (do (log/notice "Removing generated code from" dir)
         (fs/rmdir-recursive dir))
     (log/debug "No generated code directory found")))
