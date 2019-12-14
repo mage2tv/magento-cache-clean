@@ -91,6 +91,7 @@
 (defn remove-generated-extension-attributes-php! [base-dir]
   (let [files (generated-extension-attribute-classes base-dir)]
     (when (seq files)
-      (log/notice "Removing generated extension attributes classes from" (str base-dir ":\n")
-                  (apply str (interpose ", " (map #(without-base-path base-dir %) files))))
+      (log/notice "Removing all generated extension attributes classes")
+      (log/debug (str "In base dir " base-dir ":\n")
+                 (apply str (interpose ", " (map #(without-base-path base-dir %) files))))
       (run! fs/rm files))))
