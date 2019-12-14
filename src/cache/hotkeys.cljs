@@ -2,7 +2,6 @@
   (:require [log.log :as log]
             [cache.cache :as cache]
             [magento.static-content :as static-content]
-            [magento.app :as mage]
             [cljs.core.async :refer [go-loop <! put! close! chan]]))
 
 (def ctr-c \u0003)
@@ -37,37 +36,37 @@
     (log/notice :without-time "Bye!")
     (.exit process)))
 
-(defn- process-key [key]
+(defn- process-key [base-dir key]
   (log/debug "Key pressed:" key)
   (check-abort key)
   (when-let [types (get key->cachetypes key)]
     (cache/clean-cache-types types))
   (doseq [area (get key->static-content-areas key)]
-    (static-content/clean (mage/base-dir) area))
+    (static-content/clean base-dir area))
   (when (= key-generated-code key)
-    (magento.generated-code/clean (mage/base-dir))))
+    (magento.generated-code/clean base-dir)))
 
-(defn- process-keys [key-chan]
+(defn- process-keys [base-dir key-chan]
   (go-loop []
     (let [key (<! key-chan)]
-      (process-key key)
+      (process-key base-dir key)
       (recur))))
 
-(defn- init-hotkeys [^js/net.Socket stdin]
+(defn- init-hotkeys [base-dir ^js/net.Socket stdin]
   (let [key-chan (chan 1)]
     (try
       (read-keys stdin key-chan)
-      (process-keys key-chan)
+      (process-keys base-dir key-chan)
       true
       (catch :default e
         (close! key-chan)
         (log/error :without-time "Error initializing hotkey support:" (str e))
         false))))
 
-(defn observe-keys! []
+(defn observe-keys! [base-dir]
   (let [stdin (.-stdin process)]
     (if (.-isTTY stdin)
-      (init-hotkeys stdin)
+      (init-hotkeys base-dir stdin)
       (do
         (log/notice :without-time "STDIN is not attached to terminal session - hotkeys disabled!")
         false))))

@@ -185,6 +185,6 @@
   (run! watch-theme (mage/theme-dirs))
   (watch-pub-static-frontend!)
   (watch-for-new-modules!)
-  (when (hotkeys/observe-keys!)
+  (when (hotkeys/observe-keys! (mage/base-dir))
     (show-hotkeys))
   (log/notice :without-time "Watcher initialized (Ctrl-C to quit)"))
