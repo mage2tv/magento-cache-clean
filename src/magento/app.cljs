@@ -26,6 +26,10 @@
            (filter #(string/starts-with? (fs/basename %) "sandbox-"))
            (map fs/add-trailing-slash)))))
 
+(defn all-base-dirs []
+  (let [base-dir (base-dir)]
+    (into [base-dir] (integration-test-base-dirs base-dir))))
+
 (def memoized-app-config (memoize config/read-app-config))
 
 (defn read-app-config [base-dir]

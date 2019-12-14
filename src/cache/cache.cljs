@@ -82,15 +82,11 @@
   (when (or (empty? cache-types) (some #{"full_page"} cache-types))
     (clean-full-page-cache base-dir)))
 
-(defn- cache-base-dirs []
-  (let [base-dir (mage/base-dir)]
-    (into [base-dir] (mage/integration-test-base-dirs base-dir))))
-
 (defn clean-cache-types [cache-types]
   (if (seq cache-types)
     (apply log/notice "Cleaning cache type(s)" cache-types)
     (log/notice "Flushing all caches"))
-  (run! #(clean-cache-types-with-base-dir % cache-types) (cache-base-dirs)))
+  (run! #(clean-cache-types-with-base-dir % cache-types) (mage/all-base-dirs)))
 
 (defn- clean-cache-ids-with-base-dir [base-dir ids]
   (let [cache (get-storage (mage/cache-config base-dir :default))
@@ -102,4 +98,4 @@
 
 (defn clean-cache-ids [ids]
   (apply log/notice "Cleaning id(s):" ids)
-  (run! #(clean-cache-ids-with-base-dir % ids) (cache-base-dirs)))
+  (run! #(clean-cache-ids-with-base-dir % ids) (mage/all-base-dirs)))

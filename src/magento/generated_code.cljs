@@ -71,8 +71,26 @@
     (->> dir fs/file-tree (filter #(or (string/ends-with? % "Extension.php")
                                        (string/ends-with? % "ExtensionInterface.php"))))))
 
+(defn- without-base-path [base-dir file]
+  (subs file (count base-dir)))
+
+
 (defn clean [base-dir]
   (if-let [dir (generated-code-dir base-dir)]
     (do (log/notice "Removing generated code from" dir)
         (fs/rmdir-recursive dir))
     (log/debug "No generated code directory found")))
+
+(defn remove-generated-files-based-on-php! [base-dir php-file]
+  (let [files (php-file->generated-code-files base-dir php-file)]
+    (when (seq files)
+      (log/notice "Removing generated code from" (str base-dir ":\n")
+                  (apply str (interpose ", " (map #(without-base-path base-dir %) files))))
+      (run! fs/rm files))))
+
+(defn remove-generated-extension-attributes-php! [base-dir]
+  (let [files (generated-extension-attribute-classes base-dir)]
+    (when (seq files)
+      (log/notice "Removing generated extension attributes classes from" (str base-dir ":\n")
+                  (apply str (interpose ", " (map #(without-base-path base-dir %) files))))
+      (run! fs/rm files))))

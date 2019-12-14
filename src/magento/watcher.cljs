@@ -60,19 +60,11 @@
 
 (defn check-remove-generated-files-based-on-php! [php-file]
   (when (= ".php" (subs php-file (- (count php-file) 4)))
-    (let [files (generated/php-file->generated-code-files (mage/base-dir) php-file)]
-      (when (seq files)
-        (log/notice "Removing generated code"
-                  (apply str (interpose ", " (map without-base-path files))))
-        (run! fs/rm files)))))
+    (run! #(generated/remove-generated-files-based-on-php! % php-file) (mage/all-base-dirs))))
 
-(defn check-remove-generated-extension-attributes! [file]
+(defn check-remove-generated-extension-attributes-php! [file]
   (when (= "extension_attributes.xml" (fs/basename file))
-    (let [files (generated/generated-extension-attribute-classes (mage/base-dir))]
-      (when (seq files)
-        (log/notice "Removing generated extension attributes classes"
-                  (apply str (interpose ", " (map without-base-path files))))
-        (run! fs/rm files)))))
+    (run! generated/remove-generated-extension-attributes-php! (mage/all-base-dirs))))
 
 (defn remove-generated-js-translation-json! []
   (log/info "Removing compiled frontend js-translation.json files")
@@ -85,7 +77,7 @@
 
 (defn remove-generated-files-based-on! [file]
   (check-remove-generated-files-based-on-php! file)
-  (check-remove-generated-extension-attributes! file)
+  (check-remove-generated-extension-attributes-php! file)
   (check-remove-generated-js-translation-json! file))
 
 (defn compiled-requirejs-config? [file]
