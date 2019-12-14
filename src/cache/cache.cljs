@@ -10,26 +10,26 @@
 
 (defn- cachetype->tag [type]
   (or
-   (get {"collections" "COLLECTION_DATA"
-         "config_webservices" "WEBSERVICE"
-         "layout" "LAYOUT_GENERAL_CACHE_TAG"
-         "full_page" "FPC"
-         "config_integration_consolidated" "INTEGRATION_CONSOLIDATED"
-         "config_integration_api" "INTEGRATION_API_CONFIG"
-         "config_integration" "INTEGRATION"} type)
-   (string/upper-case type)))
+    (get {"collections"                     "COLLECTION_DATA"
+          "config_webservices"              "WEBSERVICE"
+          "layout"                          "LAYOUT_GENERAL_CACHE_TAG"
+          "full_page"                       "FPC"
+          "config_integration_consolidated" "INTEGRATION_CONSOLIDATED"
+          "config_integration_api"          "INTEGRATION_API_CONFIG"
+          "config_integration"              "INTEGRATION"} type)
+    (string/upper-case type)))
 
 (defn- magefile->filetype [file]
   (reduce (fn [_ [filetype? type]]
             (when (filetype? file) (reduced type))) nil magefile/file->type))
 
 (def filetype->cachetypes
-  {::magefile/config ["config"]
+  {::magefile/config      ["config"]
    ::magefile/translation ["translate" "full_page"]
-   ::magefile/layout ["layout" "full_page"]
-   ::magefile/template ["block_html" "full_page"]
-   ::magefile/menu ["config" "block_html"]
-   ::magefile/fpc ["full_page"]})
+   ::magefile/layout      ["layout" "full_page"]
+   ::magefile/template    ["block_html" "full_page"]
+   ::magefile/menu        ["config" "block_html"]
+   ::magefile/fpc         ["full_page"]})
 
 (defn magefile->cachetypes [file]
   (let [filetype (magefile->filetype file)]
@@ -63,34 +63,39 @@
 
   Knowing if varnish is enabled or not would require DB access
   which I want to avoid to keep things snappy."
-  []
+  [base-dir]
   (log/debug "Using :page_cache cache backend")
-  (let [cache (get-storage (mage/cache-config (mage/base-dir) :page_cache))]
+  (let [cache (get-storage (mage/cache-config base-dir :page_cache))]
     (clean cache)
     (storage/close cache))
   (let [varnish (varnish/create (mage/varnish-hosts-config))]
     (storage/clean-all varnish)))
 
-(defn clean-cache-types [cache-types]
-  (if (seq cache-types)
-    (apply log/notice "Cleaning cache type(s)" cache-types)
-    (log/notice "Flushing all caches"))
-
+(defn- clean-cache-types-with-base-dir [base-dir cache-types]
   (when (or (empty? cache-types) (not= ["full_page"] cache-types))
     (log/debug "Using :default cache_backend")
-    (let [cache (get-storage (mage/cache-config (mage/base-dir) :default))
+    (let [cache (get-storage (mage/cache-config base-dir :default))
           cache-types (remove #(= "full_page" %) cache-types)]
       (apply clean cache cache-types)
       (storage/close cache)))
 
   (when (or (empty? cache-types) (some #{"full_page"} cache-types))
-    (clean-full-page-cache)))
+    (clean-full-page-cache base-dir)))
 
-(defn clean-cache-ids [ids]
-  (apply log/notice "Cleaning id(s):" ids)
-  (let [cache (get-storage (mage/cache-config (mage/base-dir) :default))
+(defn clean-cache-types [cache-types]
+  (if (seq cache-types)
+    (apply log/notice "Cleaning cache type(s)" cache-types)
+    (log/notice "Flushing all caches"))
+  (clean-cache-types-with-base-dir (mage/base-dir) cache-types))
+
+(defn- clean-cache-ids-with-base-dir [base-dir ids]
+  (let [cache (get-storage (mage/cache-config base-dir :default))
         add-cache-id-prefix #(str (:id-prefix cache) %)]
     (->> ids
          (map string/upper-case)
          (map add-cache-id-prefix)
          (run! #(storage/clean-id cache %)))))
+
+(defn clean-cache-ids [ids]
+  (apply log/notice "Cleaning id(s):" ids)
+  (clean-cache-ids-with-base-dir (mage/base-dir) ids))
