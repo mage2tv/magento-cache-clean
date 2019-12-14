@@ -24,6 +24,7 @@
     (when (fs/dir? tests-tmp-base-dir)
       (->> (fs/ls tests-tmp-base-dir)
            (filter #(string/starts-with? (fs/basename %) "sandbox-"))
+           (filter #(fs/file? (str % "/etc/env.php")))
            (map fs/add-trailing-slash)))))
 
 (defn all-base-dirs []
