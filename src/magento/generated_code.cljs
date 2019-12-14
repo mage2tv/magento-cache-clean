@@ -1,6 +1,5 @@
 (ns magento.generated-code
   (:require [file.system :as fs]
-            [magento.app :as app]
             [log.log :as log]
             [clojure.string :as string]))
 
@@ -52,28 +51,28 @@
 (defn- php-class->generated-file [generated-code-dir class-name]
   (str generated-code-dir (php-class->file class-name)))
 
-(defn- generated-files-for-class [php-class]
-  (when-let [dir (generated-code-dir (app/base-dir))]
+(defn- generated-files-for-class [base-dir php-class]
+  (when-let [dir (generated-code-dir base-dir)]
     (->> php-class
          maybe-generated-classes
          (map #(php-class->generated-file dir %))
          (filter fs/exists?))))
 
-(defn php-file->generated-code-files [php-file]
+(defn php-file->generated-code-files [base-dir php-file]
   (when-let [php-class (file->php-class php-file)]
-    (generated-files-for-class php-class)))
+    (generated-files-for-class base-dir php-class)))
 
 (defn generated-extension-attribute-classes
   "Return list of all generated files related to extension_attributes.xml contents.
   The ExtensionFactory.php is not included as it doesn't change depending on extension
   attributes configuration."
-  []
-  (when-let [dir (generated-code-dir (app/base-dir))]
+  [base-dir]
+  (when-let [dir (generated-code-dir base-dir)]
     (->> dir fs/file-tree (filter #(or (string/ends-with? % "Extension.php")
                                        (string/ends-with? % "ExtensionInterface.php"))))))
 
-(defn clean []
-  (if-let [dir (generated-code-dir (app/base-dir))]
+(defn clean [base-dir]
+  (if-let [dir (generated-code-dir base-dir)]
     (do (log/notice "Removing generated code from" dir)
         (fs/rmdir-recursive dir))
     (log/debug "No generated code directory found")))

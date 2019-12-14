@@ -2,6 +2,7 @@
   (:require [log.log :as log]
             [cache.cache :as cache]
             [magento.static-content :as static-content]
+            [magento.app :as mage]
             [cljs.core.async :refer [go-loop <! put! close! chan]]))
 
 (def ctr-c \u0003)
@@ -44,7 +45,7 @@
   (doseq [area (get key->static-content-areas key)]
     (static-content/clean area))
   (when (= key-generated-code key)
-    (magento.generated-code/clean)))
+    (magento.generated-code/clean (mage/base-dir))))
 
 (defn- process-keys [key-chan]
   (go-loop []
