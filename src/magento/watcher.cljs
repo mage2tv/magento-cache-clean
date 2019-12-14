@@ -70,7 +70,7 @@
   (when (= "extension_attributes.xml" (fs/basename file))
     (let [files (generated/generated-extension-attribute-classes)]
       (when (seq files)
-        (log/info "Removing generated extension attributes classes"
+        (log/notice "Removing generated extension attributes classes"
                   (apply str (interpose ", " (map without-base-path files))))
         (run! fs/rm files)))))
 
