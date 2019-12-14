@@ -6,15 +6,22 @@
 
 (defonce child-process (js/require "child_process"))
 
+(defn- integration-test-base-dir? [dir]
+  (string/includes? dir "dev/tests/integration/tmp/sandbox-"))
+
+(defn- etc-env-php-file [base-dir]
+  (let [dir (fs/add-trailing-slash base-dir)]
+    (if (integration-test-base-dir? dir)
+      (str dir "etc/env.php")
+      (str dir "app/etc/env.php"))))
 
 (defn- env-config-cmd [magento-basedir]
-  (let [magento-basedir (fs/add-trailing-slash magento-basedir)
-        app-etc-env (str magento-basedir "app/etc/env.php")]
-    (when-not (fs/exists? app-etc-env)
-      (throw (ex-info (str "File app/etc/env.php not found: " app-etc-env) {})))
+  (let [etc-env-php-file (etc-env-php-file magento-basedir)]
+    (when-not (fs/exists? etc-env-php-file)
+      (throw (ex-info (str "File env.php not found: " etc-env-php-file) {})))
     (str "php -r "
          "\"echo json_encode("
-         "(require '" app-etc-env "') ?? []"
+         "(require '" etc-env-php-file "') ?? []"
          ");\"")))
 
 (defn read-app-config [magento-basedir]
@@ -66,7 +73,7 @@
     (catch :default e
       (log/error (str "ERROR: failed shelling out to php for reading the " type " list."))
       (log/notice "ERROR Details:" (or (.-message e) e))
-           '())))
+      '())))
 
 
 (defn app-config-dir [magento-basedir]

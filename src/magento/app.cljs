@@ -19,6 +19,13 @@
 (defn app-config-dir [base-dir]
   (str base-dir "app/etc/"))
 
+(defn integration-test-base-dirs [base-dir]
+  (let [tests-tmp-base-dir (str base-dir "dev/tests/integration/tmp")]
+    (when (fs/dir? tests-tmp-base-dir)
+      (->> (fs/ls tests-tmp-base-dir)
+           (filter #(string/starts-with? (fs/basename %) "sandbox-"))
+           (map fs/add-trailing-slash)))))
+
 (def memoized-app-config (memoize config/read-app-config))
 
 (defn read-app-config [base-dir]
