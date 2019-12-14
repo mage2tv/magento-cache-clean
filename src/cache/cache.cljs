@@ -65,7 +65,7 @@
   which I want to avoid to keep things snappy."
   []
   (log/debug "Using :page_cache cache backend")
-  (let [cache (get-storage (mage/cache-config :page_cache))]
+  (let [cache (get-storage (mage/cache-config (mage/base-dir) :page_cache))]
     (clean cache)
     (storage/close cache))
   (let [varnish (varnish/create (mage/varnish-hosts-config))]
@@ -78,7 +78,7 @@
 
   (when (or (empty? cache-types) (not= ["full_page"] cache-types))
     (log/debug "Using :default cache_backend")
-    (let [cache (get-storage (mage/cache-config :default))
+    (let [cache (get-storage (mage/cache-config (mage/base-dir) :default))
           cache-types (remove #(= "full_page" %) cache-types)]
       (apply clean cache cache-types)
       (storage/close cache)))
@@ -88,7 +88,7 @@
 
 (defn clean-cache-ids [ids]
   (apply log/notice "Cleaning id(s):" ids)
-  (let [cache (get-storage (mage/cache-config :default))
+  (let [cache (get-storage (mage/cache-config (mage/base-dir) :default))
         add-cache-id-prefix #(str (:id-prefix cache) %)]
     (->> ids
          (map string/upper-case)

@@ -55,9 +55,9 @@
 
 (defn cache-config
   "Given the cache type :default or :page_cache returns the configuration"
-  [cache-type]
-  (let [config (get (read-cache-config (base-dir)) cache-type {})]
-    (add-default-config-values (base-dir) config cache-type)))
+  [base-dir cache-type]
+  (let [config (get (read-cache-config base-dir) cache-type {})]
+    (add-default-config-values base-dir config cache-type)))
 
 (defn varnish-hosts-config []
   (let [config (read-app-config (base-dir))]
