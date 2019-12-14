@@ -16,28 +16,28 @@
 (defn base-dir []
   (deref magento-basedir))
 
-(defn app-config-dir []
-  (str (base-dir) "app/etc/"))
+(defn app-config-dir [base-dir]
+  (str base-dir "app/etc/"))
 
 (def memoized-app-config (memoize config/read-app-config))
 
-(defn read-app-config []
-  (memoized-app-config (base-dir)))
+(defn read-app-config [base-dir]
+  (memoized-app-config base-dir))
 
 (def default-cache-id-prefix
   (memoize
-   (fn []
-     (let [path (fs/add-trailing-slash (fs/realpath (app-config-dir)))
+   (fn [base-dir]
+     (let [path (fs/add-trailing-slash (fs/realpath (app-config-dir base-dir)))
            id-prefix (str (subs (storage/md5 path) 0 3) "_")]
        (log/debug "Calculated default cache ID prefix" id-prefix "from" path)
        id-prefix))))
 
-(defn default-cache-dir [cache-type]
+(defn default-cache-dir [base-dir cache-type]
   (let [dir (if (= :page_cache cache-type) "page_cache" "cache")]
-    (str (base-dir) "var/" dir)))
+    (str base-dir "var/" dir)))
 
-(defn read-cache-config []
-  (let [config (read-app-config)]
+(defn read-cache-config [base-dir]
+  (let [config (read-app-config base-dir)]
     (get-in config [:cache :frontend])))
 
 (defn file-cache-backend? [config]
@@ -47,20 +47,20 @@
 (defn missing-cache-dir? [config]
   (and (file-cache-backend? config) (not (:cache_dir config))))
 
-(defn add-default-config-values [config cache-type]
+(defn add-default-config-values [base-dir config cache-type]
   (cond-> config
     (file-cache-backend? config) (assoc :backend "Cm_Cache_Backend_File")
-    (missing-cache-dir? config) (assoc :cache_dir (default-cache-dir cache-type))
-    (not (:id_prefix config)) (assoc :id_prefix (default-cache-id-prefix))))
+    (missing-cache-dir? config) (assoc :cache_dir (default-cache-dir base-dir cache-type))
+    (not (:id_prefix config)) (assoc :id_prefix (default-cache-id-prefix base-dir))))
 
 (defn cache-config
   "Given the cache type :default or :page_cache returns the configuration"
   [cache-type]
-  (let [config (get (read-cache-config) cache-type {})]
-    (add-default-config-values config cache-type)))
+  (let [config (get (read-cache-config (base-dir)) cache-type {})]
+    (add-default-config-values (base-dir) config cache-type)))
 
 (defn varnish-hosts-config []
-  (let [config (read-app-config)]
+  (let [config (read-app-config (base-dir))]
     (get config :http_cache_hosts)))
 
 (defn module-dirs []
