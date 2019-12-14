@@ -22,7 +22,6 @@
 
 (defn- config-filetypes []
   (let [res ["/etc(?:/[^/]+|)/di\\.xml$"
-             "/etc/extension_attributes\\.xml$"
              "/etc/(?:[^/]+)/routes\\.xml$"
              "/etc/widget\\.xml$"
              "/etc/product_types\\.xml$"
@@ -98,6 +97,7 @@
              ["/etc/schema.graphqls" ["magento_framework_graphqlschemastitching_config_data"]]
              ["/etc/catalog_attributes\\.xml" ["catalog_attributes"]]
              ["/etc/sales\\.xml" ["sales_totals_config_cache"]]
+             ["/etc/extension_attributes\\.xml" ["extension_attributes_config"]]
              ;; the following need to be tested before removing them from the
              ;; config cache type above
              #_["/etc/acl\\.xml$" ["provider_acl_resources_cache"]]
