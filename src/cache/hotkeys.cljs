@@ -43,7 +43,7 @@
   (when-let [types (get key->cachetypes key)]
     (cache/clean-cache-types types))
   (doseq [area (get key->static-content-areas key)]
-    (static-content/clean area))
+    (static-content/clean (mage/base-dir) area))
   (when (= key-generated-code key)
     (magento.generated-code/clean (mage/base-dir))))
 

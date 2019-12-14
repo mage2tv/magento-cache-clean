@@ -76,7 +76,7 @@
 
 (defn remove-generated-js-translation-json! []
   (log/info "Removing compiled frontend js-translation.json files")
-  (run! fs/rm (static/js-translation-files "frontend")))
+  (run! fs/rm (static/js-translation-files (mage/base-dir) "frontend")))
 
 (defn check-remove-generated-js-translation-json! [file]
   (when (or (string/ends-with? file ".csv")
@@ -90,7 +90,8 @@
 
 (defn compiled-requirejs-config? [file]
   (when (= "requirejs-config.js" (fs/basename file))
-    (let [static-theme-dirs (into #{} (map fs/realpath) (static/static-content-theme-locale-dirs "frontend"))]
+    (let [static-content-dirs (static/static-content-theme-locale-dirs (mage/base-dir) "frontend")
+          static-theme-dirs (into #{} (map fs/realpath) static-content-dirs)]
       (contains? static-theme-dirs (fs/dirname file)))))
 
 (defn removed-requirejs-config? [file]
@@ -163,7 +164,7 @@
       (cache/clean-cache-types ["full_page"]))))
 
 (defn watch-pub-static-frontend! []
-  (let [dir (static/static-content-area-dir "frontend")]
+  (let [dir (static/static-content-area-dir (mage/base-dir) "frontend")]
     ;; temporary workaround until branch "branch-switching" is merged
     (when (fs/dir? dir)
       (log/debug :without-time "Watching static files in" dir)
