@@ -63,9 +63,14 @@
   (when-let [php-class (file->php-class php-file)]
     (generated-files-for-class php-class)))
 
-(defn generated-extension-attribute-classes []
+(defn generated-extension-attribute-classes
+  "Return list of all generated files related to extension_attributes.xml contents.
+  The ExtensionFactory.php is not included as it doesn't change depending on extension
+  attributes configuration."
+  []
   (when-let [dir (generated-code-dir (app/base-dir))]
-    (->> dir fs/file-tree (filter #(string/ends-with? % "Extension.php")))))
+    (->> dir fs/file-tree (filter #(or (string/ends-with? % "Extension.php")
+                                       (string/ends-with? % "ExtensionInterface.php"))))))
 
 (defn clean []
   (if-let [dir (generated-code-dir (app/base-dir))]
