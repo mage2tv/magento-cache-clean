@@ -20,7 +20,7 @@
 
 (defn- make-path-absolute [basedir path]
   (cond->> path
-    (not= "/" (subs path 0 1)) (str basedir)))
+           (not= "/" (subs path 0 1)) (str basedir)))
 
 (defn list-component-dirs [magento-basedir type]
   (log/debug :without-time (str "Listing " type "s from " config-file-name))
@@ -39,5 +39,9 @@
   (let [config-file (config-file magento-basedir)
         dir (fs/dirname config-file)
         file (fs/basename config-file)]
-    (log/debug :without-time "Monitoring" config-file  "for new modules")
-    (fs/watch dir #(when (= file (fs/basename %)) (callback)))))
+
+    (if-not (fs/file? config-file)
+      (log/debug :without-time "Config dump file" config-file "not found")
+      (do
+        (log/debug :without-time "Monitoring" config-file "for new modules")
+        (fs/watch dir #(when (= file (fs/basename %)) (callback)))))))
