@@ -29,7 +29,6 @@
              "/etc/payment\\.xml$"
              "/etc/search_request\\.xml$"
              "/etc/config\\.xml$"
-             "/etc/acl\\.xml$"
              "/etc/indexer\\.xml$"]]
     (filenames->fingerprint-fns ::config res)))
 
