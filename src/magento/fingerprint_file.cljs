@@ -98,9 +98,7 @@
              ["/etc/catalog_attributes\\.xml" ["catalog_attributes"]]
              ["/etc/sales\\.xml" ["sales_totals_config_cache"]]
              ["/etc/extension_attributes\\.xml" ["extension_attributes_config"]]
-             ;; the following need to be tested before removing them from the
-             ;; config cache type above
-             #_["/etc/acl\\.xml$" ["provider_acl_resources_cache"]]
+             ["/etc/acl\\.xml$" ["provider_acl_resources_cache"]]
              ]
         id-fns (map (fn [[pattern-string ids]]
                       (let [re (path-pattern pattern-string)]
