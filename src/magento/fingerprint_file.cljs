@@ -22,7 +22,6 @@
 
 (defn- config-filetypes []
   (let [res ["/etc(?:/[^/]+|)/di\\.xml$"
-             "/etc/(?:[^/]+)/routes\\.xml$"
              "/etc/widget\\.xml$"
              "/etc/product_types\\.xml$"
              "/etc/product_options\\.xml$"
