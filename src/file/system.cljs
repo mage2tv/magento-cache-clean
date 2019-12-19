@@ -79,7 +79,7 @@
   [dir n]
   (loop [dirs [dir]
          to-dive n]
-    (let [items (mapcat #(ls %) dirs)]
+    (let [items (mapcat ls (filter dir? dirs))]
       (if (< 0 to-dive)
         (recur (filter dir? items) (dec to-dive))
         items))))
@@ -142,7 +142,7 @@
     #js {:close #(run! (fn [watch] (.close watch)) watches)}))
 
 (defn watch-recursive [dir callback]
-  (if (not (dir? dir))
+  (if-not (dir? dir)
     (watch dir callback)
     (if (recursive-watch-supported?)
       (watch dir #js {:recursive true} callback)
@@ -165,7 +165,7 @@
 (defn rm-contents
   "Remove everything inside the given directory, but keep the directory itself."
   [dir]
-  (when (not (dir? dir))
+  (when-not (dir? dir)
     (throw (ex-info (str "Error: \"" dir "\" is not a directory") {:dir dir})))
   (let [items (map #(str (trailing-slash dir) %) (.readdirSync fs dir))]
     (run! rm (filter (complement dir?) items))
