@@ -72,7 +72,7 @@
     (*list-component-dirs magento-basedir type)
     (catch :default e
       (log/error (str "ERROR: failed shelling out to php for reading the " type " list."))
-      (log/notice "ERROR Details:" (or (.-message e) e))
+      (log/info "ERROR Details:" (or (.-message e) e))
       '())))
 
 
