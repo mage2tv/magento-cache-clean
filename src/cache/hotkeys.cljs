@@ -2,6 +2,7 @@
   (:require [log.log :as log]
             [cache.cache :as cache]
             [magento.static-content :as static-content]
+            [magento.generated-code]
             [cljs.core.async :refer [go-loop <! put! close! chan]]))
 
 (def ctr-c \u0003)

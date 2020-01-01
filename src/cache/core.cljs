@@ -151,3 +151,6 @@ Clean the given cache types. If none are given, clean all cache types.
       :else (process args))
     (catch :default ^Error e
       (handle-error! e))))
+
+(comment
+  (-main "-w" "-vv" "-d" "/Users/vinai/Workspace/mage2tv/m2ce"))

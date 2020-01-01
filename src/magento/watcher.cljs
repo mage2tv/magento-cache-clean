@@ -162,6 +162,12 @@
       (log/debug :without-time "Watching static files in" dir)
       (fs/watch-recursive dir static-file-changed))))
 
+(defn watch-app-i18n! []
+  (let [i18n-dir (str (mage/base-dir) "app/i18n")]
+    (when (fs/dir? i18n-dir)
+      (log/debug :without-time "Watching app/i18n")
+      (fs/watch-recursive i18n-dir file-changed))))
+
 (defn stop []
   (fs/stop-all-watches)
   (log/always "Stopped watching"))
@@ -176,6 +182,7 @@
   (watch-all-modules! log-watching-module)
   (run! watch-theme (mage/theme-dirs))
   (watch-pub-static-frontend!)
+  (watch-app-i18n!)
   (watch-for-new-modules!)
   (when (hotkeys/observe-keys! (mage/base-dir))
     (show-hotkeys))
