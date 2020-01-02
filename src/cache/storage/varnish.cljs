@@ -23,9 +23,9 @@
 (defn- handle-varnish-response [res]
   (let [status (int (.-statusCode res))]
     (when-not (= 200 status)
-      (log/debug "Varnish response code" status))
+      (log/notice "Varnish response code" status))
     (.on res "data" #(when-not (= 200 status)
-                       (log/debug "Response:" %)))))
+                       (log/notice "Response:" %)))))
 
 (defn- handle-varnish-error [e]
   (log/debug "Varnish request error: " (.-message e))
