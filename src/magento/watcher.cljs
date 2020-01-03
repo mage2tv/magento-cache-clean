@@ -163,9 +163,9 @@
       (fs/watch-recursive dir static-file-changed))))
 
 (defn watch-app-i18n! []
-  (let [i18n-dir (str (mage/base-dir) "app/i18n")]
-    (when (fs/dir? i18n-dir)
-      (log/debug :without-time "Watching app/i18n")
+  (let [i18n-dir (str (mage/base-dir) "app/i18n/")]         ;; trailing slash is important to deref symlink
+    (when (fs/exists? i18n-dir)                             ;; check with exists? instead of dir? to include symlinks
+      (log/debug :without-time "Watching app/i18n/")
       (fs/watch-recursive i18n-dir file-changed))))
 
 (defn stop []
