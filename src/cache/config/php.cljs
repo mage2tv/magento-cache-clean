@@ -72,7 +72,10 @@
     (*list-component-dirs magento-basedir type)
     (catch :default e
       (log/error (str "ERROR: failed shelling out to php for reading the " type " list."))
-      (log/info "ERROR Details:" (or (.-message e) e))
+      ;; Cut off first line with failed CLI php command
+      (let [lines (string/split-lines (or (.-message e) e))]
+        (log/info "ERROR Details:" (first (rest lines)))
+        (log/debug "ERROR Details:" (string/join "\n" (rest (rest lines)))))
       '())))
 
 
