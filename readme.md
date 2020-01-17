@@ -116,7 +116,7 @@ the `F`rontend area or clean the `G`enerated code directory.
 
 * Not tested a lot on Windows, please open an issue if you want to contribute.
 
-* If you run into the error `Error NOSPC` on Linux, run the command:
+* If you run into the error `Error NOSPC` or `ENOSPC: System limit for number of file watchers reached` on Linux, run the command:
 
 ``` shell
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
