@@ -31,16 +31,16 @@
 (defn requirejs-config-files [base-dir area]
   (static-files-in-locale-dir base-dir area "requirejs-config.js"))
 
-(defn- rm-dir [dir]
+(defn- rm-files [dir]
   (when (fs/dir? dir)
-    (fs/rmdir-recursive dir)
-    (log/debug "Removed" dir)))
+    (fs/rm-files-recursive dir)
+    (log/debug "Removed files in" dir)))
 
 (defn clean [base-dir area]
   (log/notice "Removing static content area" area)
-  (rm-dir (static-content-area-dir base-dir area))
-  (rm-dir (view-preprocessed-area-dir base-dir area))
-  (rm-dir (view-preprocessed-area-dir base-dir "app"))
-  (rm-dir (view-preprocessed-area-dir base-dir "vendor")))
+  (rm-files (static-content-area-dir base-dir area))
+  (rm-files (view-preprocessed-area-dir base-dir area))
+  (rm-files (view-preprocessed-area-dir base-dir "app"))
+  (rm-files (view-preprocessed-area-dir base-dir "vendor")))
 
 

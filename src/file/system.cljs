@@ -176,3 +176,10 @@
   [dir]
   (rm-contents dir)
   (rmdir dir))
+
+(defn rm-files-recursive
+  "Remove all files recursively inside the given directory, but keep all directories in place."
+  [dir]
+  (let [items (map #(str (trailing-slash dir) %) (.readdirSync fs dir))]
+    (run! rm (filter (complement dir?) items))
+    (run! rm-files-recursive (filter dir? items))))
