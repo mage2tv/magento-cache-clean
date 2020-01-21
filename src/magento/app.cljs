@@ -4,7 +4,8 @@
             [log.log :as log]
             [cache.config :as config]
             [clojure.string :as string]
-            [goog.json :as json]))
+            [goog.json :as json]
+            [clojure.string :as str]))
 
 (defonce child-process (js/require "child_process"))
 
@@ -38,11 +39,11 @@
 
 (def default-cache-id-prefix
   (memoize
-   (fn [base-dir]
-     (let [path (fs/add-trailing-slash (fs/realpath (app-config-dir base-dir)))
-           id-prefix (str (subs (storage/md5 path) 0 3) "_")]
-       (log/debug "Calculated default cache ID prefix" id-prefix "from" path)
-       id-prefix))))
+    (fn [base-dir]
+      (let [path (fs/add-trailing-slash (fs/realpath (app-config-dir base-dir)))
+            id-prefix (str (subs (storage/md5 path) 0 3) "_")]
+        (log/debug "Calculated default cache ID prefix" id-prefix "from" path)
+        id-prefix))))
 
 (defn default-cache-dir [base-dir cache-type]
   (let [dir (if (= :page_cache cache-type) "page_cache" "cache")]
@@ -56,14 +57,45 @@
   (or (not (:backend config))
       (= :backend "Cm_Cache_Backend_File")))
 
-(defn missing-cache-dir? [config]
-  (and (file-cache-backend? config) (not (:cache_dir config))))
+(defn file-potentially-containing-fpc-dir-bug
+  "Reference https://github.com/magento/magento2/pull/22228"
+  [base-dir]
+  (let [candidates ["lib/internal/Magento/Framework/App/Cache/Frontend/Pool.php"
+                    "vendor/magento/framework/App/Cache/Frontend/Pool.php"]]
+    (->> (map #(str base-dir %) candidates)
+         (filter fs/exists?)
+         first)))
+
+(defn fpc-dir-bug-present?
+  "Reference https://github.com/magento/magento2/pull/22228"
+  [base-dir]
+  (when-let [file (file-potentially-containing-fpc-dir-bug base-dir)]
+    (not (str/includes? (fs/slurp file) "array_replace_recursive($"))))
+
+(defn workaround-fpc-dir-bug?
+  "Reference https://github.com/magento/magento2/pull/22228"
+  [base-dir config cache-type]
+  (when
+    (and (= :page_cache cache-type)
+         (not (:cache_dir config))
+         (:id_prefix config)
+         (file-cache-backend? config)
+         (fpc-dir-bug-present? base-dir))
+    (log/notice :without-time (str "NOTICE: Workaround for FPC cache dir bug enabled!\n"
+                                   "Please read https://github.com/mage2tv/magento-cache-clean/blob/master/doc/fpc-dir-bug.md"))
+    true))
+
+(defn missing-cache-dir? [base-dir config cache-type]
+  (and (file-cache-backend? config)
+       (not (:cache_dir config))
+       (not (workaround-fpc-dir-bug? base-dir config cache-type))))
 
 (defn add-default-config-values [base-dir config cache-type]
   (cond-> config
-    (file-cache-backend? config) (assoc :backend "Cm_Cache_Backend_File")
-    (missing-cache-dir? config) (assoc :cache_dir (default-cache-dir base-dir cache-type))
-    (not (:id_prefix config)) (assoc :id_prefix (default-cache-id-prefix base-dir))))
+          (file-cache-backend? config) (assoc :backend "Cm_Cache_Backend_File")
+          (workaround-fpc-dir-bug? base-dir config cache-type) (assoc :cache_dir (str base-dir "var/cache"))
+          (missing-cache-dir? base-dir config cache-type) (assoc :cache_dir (default-cache-dir base-dir cache-type))
+          (not (:id_prefix config)) (assoc :id_prefix (default-cache-id-prefix base-dir))))
 
 (defn cache-config
   "Given the cache type :default or :page_cache returns the configuration"

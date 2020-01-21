@@ -122,7 +122,7 @@ the `F`rontend area or clean the `G`enerated code directory.
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
 
-* Since Magento 2.1 there is a [bug](https://github.com/magento/magento2/pull/24153) that causes the full page cache records to
+* Since Magento 2.1 there is a [bug](https://github.com/magento/magento2/pull/22228) that causes the full page cache records to
   be written to the `var/cache` directory instead of `var/page_cache`.
   This issue causes the cache cleaner behavior to be erratic.
   There is an easy workaround, namely removing all cache configuration from
