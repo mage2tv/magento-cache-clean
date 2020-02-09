@@ -32,7 +32,32 @@
   (let [base-dir (base-dir)]
     (into [base-dir] (integration-test-base-dirs base-dir))))
 
-(def memoized-app-config (memoize config/read-app-config))
+(def ^:private lookup-sentinel (js-obj))
+
+(defn now []
+  (.getTime (js/Date.)))
+
+(defn memoized-timed
+  "Returns a memoized version of a referentially transparent function for s seconds.
+  The memoized version of the function keeps a cache of the mapping from arguments
+  to results and, when calls with the same arguments are repeated often, has
+  higher performance at the expense of higher memory use."
+  [sec f]
+  (let [mem (atom {})]
+
+    (fn [& args]
+      (let [[expires v] (get @mem args [0 lookup-sentinel])]
+        (if (or (identical? v lookup-sentinel)
+                (> (now) expires))
+          (let [ret (apply f args)
+                expires (+ (now) (* sec 1000))]
+            (swap! mem assoc args [expires ret])
+            ret)
+          v)))))
+
+(def memoized-app-config
+  (let [memoize-secs 30]
+    (memoized-timed memoize-secs config/read-app-config)))
 
 (defn read-app-config [base-dir]
   (memoized-app-config base-dir))
@@ -106,6 +131,21 @@
 (defn varnish-hosts-config []
   (let [config (read-app-config (base-dir))]
     (get config :http_cache_hosts)))
+
+(defn disabled-caches []
+  (let [config (:cache_types (read-app-config (base-dir)))]
+    (reduce (fn [r [cache-type enabled?]]
+              (if (= 0 enabled?)
+                (conj r cache-type)
+                r)) [] config)))
+
+(defn some-cache-disabled? []
+  (not (empty? (disabled-caches))))
+
+(defn all-caches-disabled? []
+  (let [config (:cache_types (read-app-config (base-dir)))]
+    (= 0 (reduce + (vals config)))))
+
 
 (defn module-dirs []
   (config/list-component-dirs (base-dir) "module"))

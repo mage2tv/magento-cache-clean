@@ -28,10 +28,24 @@
       (set-not-in-process! file)
       true)))
 
+(defn show-all-caches-disabled-notice []
+  (when (mage/all-caches-disabled?)
+    (log/notice :without-time "NOTE: All caches are currently disabled.")
+    (log/notice :without-time "NOTE: Consider enabling all caches while running this utility.")))
+
+(defn show-some-caches-disabled-notice []
+  (when (mage/some-cache-disabled?)
+    (log/notice :without-time "Consider enabling the currently disabled caches:")
+    (log/notice :without-time (string/join ", " (map name (mage/disabled-caches))))))
+
+(defn show-disabled-caches-notice []
+  (if (mage/all-caches-disabled?)
+    (show-all-caches-disabled-notice)
+    (show-some-caches-disabled-notice)))
+
 (defn controller? [file]
   (or (re-find #"/Controller/.+\.php$" file)
       (re-find #"\\Controller\\.+\.php$" file)))
-
 
 (defn- contains-js-translation?
   "Return true if the given file potentially contains js translation code"
@@ -108,7 +122,8 @@
     (when-let [ids (cache/magefile->cacheids file)]
       (cache/clean-cache-ids ids))
     (clean-cache-for-new-controller file)
-    (remove-generated-files-based-on! file)))
+    (remove-generated-files-based-on! file)
+    (show-disabled-caches-notice)))
 
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
@@ -184,6 +199,7 @@
   (watch-pub-static-frontend!)
   (watch-app-i18n!)
   (watch-for-new-modules!)
+  (show-disabled-caches-notice)
   (when (hotkeys/observe-keys! (mage/base-dir))
     (show-hotkeys))
   (log/notice :without-time "Watcher initialized (Ctrl-C to quit)"))
