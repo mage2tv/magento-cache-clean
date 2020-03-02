@@ -89,3 +89,6 @@
                                (when (or (= "config.php" (fs/basename file))
                                          (= "env.php" (fs/basename file)))
                                  (callback))))))
+
+(defn mtime [base-dir]
+  (fs/mtime (etc-env-php-file base-dir)))

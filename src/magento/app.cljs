@@ -37,7 +37,7 @@
 (defn now []
   (.getTime (js/Date.)))
 
-(defn memoized-timed
+(defn memoized-secs
   "Returns a memoized version of a referentially transparent function for s seconds.
   The memoized version of the function keeps a cache of the mapping from arguments
   to results and, when calls with the same arguments are repeated often, has
@@ -55,9 +55,26 @@
             ret)
           v)))))
 
+(defn memoized-by [by-fn f]
+  "Returns a memoized version of a function while
+  the return value of by-fn stays the same.
+  When by-fn returns a different value, f is executed again and the value is memoized
+  as long as by-fn returns the same value."
+  (let [mem (atom {})]
+    (fn [& args]
+      (let [[pred-v v] (get @mem args [lookup-sentinel lookup-sentinel])]
+        (let [new-pred-v (by-fn)]
+          (if (not= pred-v new-pred-v)
+            (let [ret (apply f args)]
+              (swap! mem assoc args [new-pred-v ret])
+              ret)
+            v))))))
+
+;; see https://github.com/mage2tv/magento-cache-clean/issues/71#issuecomment-584044808
 (def memoized-app-config
-  (let [memoize-secs 30]
-    (memoized-timed memoize-secs config/read-app-config)))
+  (memoized-by
+    #(memoized-secs 10 config/mtime)
+    config/read-app-config))
 
 (defn read-app-config [base-dir]
   (memoized-app-config base-dir))

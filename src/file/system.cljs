@@ -32,6 +32,10 @@
 (defn symlink? [s]
   (.. fs (lstatSync s) isSymbolicLink))
 
+(defn mtime [s]
+  (when (exists? s)
+    (.. fs (lstatSync s) -mtimeMs)))
+
 (defn realpath [file]
   (if (exists? file)
     (.realpathSync fs file)

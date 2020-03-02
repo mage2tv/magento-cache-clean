@@ -45,3 +45,6 @@
       (do
         (log/debug :without-time "Monitoring" config-file "for new modules")
         (fs/watch dir #(when (= file (fs/basename %)) (callback)))))))
+
+(defn mtime [magento-basedir]
+  (fs/mtime (config-file magento-basedir)))

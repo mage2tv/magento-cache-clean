@@ -123,7 +123,7 @@
       (cache/clean-cache-ids ids))
     (clean-cache-for-new-controller file)
     (remove-generated-files-based-on! file)
-    (show-disabled-caches-notice)))
+    (show-all-caches-disabled-notice)))
 
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))

@@ -32,3 +32,7 @@
                                #(when (use-dump? magento-basedir) (callback)))
   (php/watch-for-new-modules! magento-basedir
                               #(when-not (use-dump? magento-basedir) (callback))))
+
+(defn mtime [magento-basedir]
+  (let [mtime (file-or-php magento-basedir file/mtime php/mtime)]
+    (mtime magento-basedir)))
