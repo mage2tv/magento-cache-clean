@@ -1,7 +1,6 @@
 ## Using the watcher from code instead of the CLI
 
 *This feature is currently experimental.*
-
 The API should be considered *alpha* stability.
 
 ### Quickstart
@@ -16,7 +15,7 @@ cache.watcher.watch();
 ### Howto
 
 First, the file with the exported functions needs to be included.
-This is not a native node application, so the exports are global functions on the `cache.watcher` namespace.
+This is not a native node application, so the exports are global functions on the `cache.watcher` pseudo "namespace".
 
 Assuming the package is installed as a Magento development dependency, and the current working directory is that dir, the functions can be imported into the global namespace via:
 
@@ -24,7 +23,7 @@ Assuming the package is installed as a Magento development dependency, and the c
 require('vendor/mage2tv/magento-cache-clean/export/watcher');
 ```
 
-Then the Magento base directory needs to be set
+Then the Magento base directory needs to be set:
 
 ```js
 cache.watcher.set_base_dir('/path/to/magento');
