@@ -71,14 +71,19 @@
     (log/info :without-time "Magento dir" basedir)
     basedir))
 
+(defn find-log-level-as-arg [args]
+  (find-arg ["--verbosity"] args))
+
 (defn find-log-level [args]
-  (letfn [(arg->verbosity [arg]
-            (case arg
-              ( "-v" "--verbose") 1
-              ("-vv" "--debug")   2
-              ("-s" "--silent")  -1
-              0))]
-    (reduce + 1 (map arg->verbosity args))))
+  (or
+    (find-log-level-as-arg args)
+    (letfn [(arg->verbosity [arg]
+              (case arg
+                ("-v" "--verbose") 1
+                ("-vv" "--debug") 2
+                ("-s" "--silent") -1
+                0))]
+      (reduce + 1 (map arg->verbosity args)))))
 
 (defn help-the-needfull []
   (println "Usage: cache-clean.js [options and flags] [cache-types...]
@@ -102,7 +107,7 @@ Clean the given cache types. If none are given, clean all cache types.
   (log/always :without-time version))
 
 (defn arg-with-val? [arg]
-  (#{"--directory" "-d"} arg))
+  (#{"--directory" "-d" "--verbosity"} arg))
 
 (defn switch? [arg]
   (#{"--watch" "-w"
