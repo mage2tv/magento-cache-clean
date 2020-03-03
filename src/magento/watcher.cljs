@@ -31,7 +31,7 @@
 (defn show-all-caches-disabled-notice []
   (when (mage/all-caches-disabled?)
     (log/notice :without-time "NOTE: All caches are currently disabled.")
-    (log/notice :without-time "NOTE: Consider enabling all caches while running this utility.")))
+    (log/notice :without-time "NOTE: Consider enabling all caches while running this utility.\n")))
 
 (defn show-some-caches-disabled-notice []
   (when (mage/some-cache-disabled?)

@@ -1,0 +1,6 @@
+{:main cache.run
+ :target :nodejs
+ :infer-externs true
+ :npm-deps {:redis "2.8.0"}
+ :install-deps true
+ :output-to "bin/cache-clean.js"}
