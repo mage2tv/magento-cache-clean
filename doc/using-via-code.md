@@ -1,13 +1,13 @@
 ## Using the watcher from code instead of the CLI
 
-*This feature is currently experimental in release 1.0.24.*
+This feature is currently *experimental* in release 1.0.24.
 The API should be considered *alpha* stability.
 
 ### Quickstart
 
 ```js
-require('vendor/mage2tv/magento-cache-clean/export/watcher');
-cache.watcher.set_base_dir('.');
+require('./vendor/mage2tv/magento-cache-clean/export/watcher');
+cache.watcher.set_base_dir('./');
 cache.watcher.set_log_level(1);
 cache.watcher.watch();
 ```
@@ -19,7 +19,7 @@ First, the file with the exported functions needs to be included.
 Assuming the package is installed as a Magento development dependency, and the current working directory is that dir, the functions can be imported into the global namespace via:
 
 ```js
-require('vendor/mage2tv/magento-cache-clean/export/watcher');
+require('./vendor/mage2tv/magento-cache-clean/export/watcher');
 ```
 
 This is not a native node application, so the exports are global functions on the `cache.watcher` pseudo "namespace".
