@@ -3,6 +3,9 @@
 This feature is currently *experimental* in release 1.0.24.  
 The API should be considered *alpha* stability.
 
+**NOTE**: See the upcoming changes in the API here:  
+https://github.com/mage2tv/magento-cache-clean/issues/61#issuecomment-599447942
+
 ### Quickstart
 
 ```js
