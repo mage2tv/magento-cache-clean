@@ -97,5 +97,6 @@
          (run! #(storage/clean-id cache %)))))
 
 (defn clean-cache-ids [ids]
-  (apply log/notice "Cleaning id(s):" ids)
-  (run! #(clean-cache-ids-with-base-dir % ids) (mage/all-base-dirs)))
+  (when (seq ids)
+    (apply log/notice "Cleaning id(s):" ids)
+    (run! #(clean-cache-ids-with-base-dir % ids) (mage/all-base-dirs))))
