@@ -3,9 +3,6 @@
 The API should be considered *beta* stability. It might still change in future in a backward incompatible manner.
 
 
-**NOTE**: See the upcoming changes in the API here:  
-https://github.com/mage2tv/magento-cache-clean/issues/61#issuecomment-599447942
-
 ### Quickstart
 
 ```js
