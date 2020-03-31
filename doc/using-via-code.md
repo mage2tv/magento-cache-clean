@@ -41,7 +41,7 @@ The log level is specified as an integer as follows:
 | Error | 0 |
 | Notice | 1 |
 | Info | 2 |
-| Debug ] 3 |
+| Debug | 3 |
 
 The higher the number, the more verbose will the output be.
 

@@ -135,7 +135,7 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 
 * Some words on using the watcher with [Docker & VMs](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/docker-and-vm.md).
 
-* [Running the watcher from code](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/using-via-code.md)
+* [Running the watcher from code](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/using-via-code.md).
 
 * The [rationale](https://github.com/mage2tv/magento-cache-clean/blob/master/doc/rationale.md) explains the reasons I wrote the utility.
 
