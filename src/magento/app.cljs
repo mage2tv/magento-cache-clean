@@ -5,7 +5,8 @@
             [cache.config :as config]
             [clojure.string :as string]
             [goog.json :as json]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [util.crypto :refer [md5]]))
 
 (defonce child-process (js/require "child_process"))
 
@@ -83,7 +84,7 @@
   (memoize
     (fn [base-dir]
       (let [path (fs/add-trailing-slash (fs/realpath (app-config-dir base-dir)))
-            id-prefix (str (subs (storage/md5 path) 0 3) "_")]
+            id-prefix (str (subs (md5 path) 0 3) "_")]
         (log/debug "Calculated default cache ID prefix" id-prefix "from" path)
         id-prefix))))
 

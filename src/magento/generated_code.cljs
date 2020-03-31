@@ -1,26 +1,8 @@
 (ns magento.generated-code
   (:require [file.system :as fs]
             [log.log :as log]
-            [clojure.string :as string]))
-
-(defn- php-namespace [php]
-  (second (re-find #"(?mi)^\s*namespace\s+([a-z0-9\\]+)" (str php))))
-
-(defn- php-class [php]
-  (second (re-find #"(?mi)^\s*class\s+(\w+)" (str php))))
-
-(defn- php-interface [php]
-  (second (re-find #"(?mi)^\s*interface\s+(\w+)" (str php))))
-
-(defn- file->php-class [file]
-  (let [maybe-php (fs/head file 2048)
-        namespace (php-namespace maybe-php)
-        class (or (php-class maybe-php) (php-interface maybe-php))]
-    (when (and namespace class)
-      (str "\\" namespace "\\" class))))
-
-(defn- php-class->file [php-class]
-  (str (string/replace php-class "\\" "/") ".php"))
+            [clojure.string :as string]
+            [php.reader :as php]))
 
 (defn generated-code-dir [base-dir]
   (let [candidates [(str base-dir "generated/code") (str base-dir "var/generated")]]
@@ -49,7 +31,7 @@
       generated-types)))
 
 (defn- php-class->generated-file [generated-code-dir class-name]
-  (str generated-code-dir (php-class->file class-name)))
+  (str generated-code-dir (php/php-class->file class-name)))
 
 (defn- generated-files-for-class [base-dir php-class]
   (when-let [dir (generated-code-dir base-dir)]
@@ -59,7 +41,7 @@
          (filter fs/exists?))))
 
 (defn php-file->generated-code-files [base-dir php-file]
-  (when-let [php-class (file->php-class php-file)]
+  (when-let [php-class (php/file->php-class php-file)]
     (generated-files-for-class base-dir php-class)))
 
 (defn generated-extension-attribute-classes

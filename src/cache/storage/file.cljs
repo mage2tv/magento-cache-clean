@@ -2,7 +2,8 @@
   (:require [file.system :as fs]
             [cache.storage :as storage]
             [log.log :as log]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [util.crypto :refer [md5]]))
 
 (def options
   {:file-name-prefix       "mage"
@@ -17,7 +18,7 @@
 (defn- path [^String cache-dir ^String id]
   (let [length (:hashed-directory-level options)]
     (if (< 0 length)
-      (let [suffix (chars-from-end (storage/md5 id) length)]
+      (let [suffix (chars-from-end (md5 id) length)]
         (str cache-dir (file-name-prefix) "--" suffix "/"))
       cache-dir)))
 

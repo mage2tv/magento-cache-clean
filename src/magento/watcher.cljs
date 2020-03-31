@@ -7,7 +7,8 @@
             [file.system :as fs]
             [magento.generated-code :as generated]
             [magento.static-content :as static]
-            [cache.hotkeys :as hotkeys]))
+            [cache.hotkeys :as hotkeys]
+            [magento.service-contract :as service-contract]))
 
 (defonce in-process-files (atom {}))
 
@@ -69,6 +70,9 @@
     (cache/clean-cache-types ["full_page"])
     (swap! controllers conj file)))
 
+(defn clean-cache-for-service-interface [file]
+  (cache/clean-cache-ids (service-contract/service-cache-ids file)))
+
 (defn- without-base-path [file]
   (subs file (count (mage/base-dir))))
 
@@ -122,6 +126,7 @@
     (when-let [ids (cache/magefile->cacheids file)]
       (cache/clean-cache-ids ids))
     (clean-cache-for-new-controller file)
+    (clean-cache-for-service-interface file)
     (remove-generated-files-based-on! file)
     (show-all-caches-disabled-notice)))
 

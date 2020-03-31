@@ -1,9 +1,4 @@
-(ns cache.storage
-  (:require [file.system :as fs]))
-
-(defn md5 [^String data]
-  (let [crypto (js/require "crypto")]
-    (-> crypto (.createHash "md5") (.update data) (.digest "hex"))))
+(ns cache.storage)
 
 (defprotocol CacheStorage
   (clean-tag [storage tag] "Deletes all cache records associated with the given tag.")
