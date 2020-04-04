@@ -1,5 +1,6 @@
 (ns cache.storage.varnish
-  (:require [cache.storage :as storage]
+  (:require [clojure.string :as string]
+            [cache.storage :as storage]
             [log.log :as log]))
 
 (defonce http (js/require "http"))
@@ -9,23 +10,33 @@
 (defn- purge-options [server pattern]
   {:protocol "http:"
    :hostname (:host server "localhost")
-   :port (:port server "80")
-   :method "PURGE"
-   :path "/"
-   :headers {"X-Magento-Tags-Pattern" pattern}
-   :timeout 10000})
+   :port     (:port server "80")
+   :method   "PURGE"
+   :path     "/"
+   :headers  {"X-Magento-Tags-Pattern" pattern}
+   :timeout  10000})
 
 (defn request [options success-callback error-callback]
   (doto (.request http options success-callback)
     (.on "error" error-callback)
     (.end)))
 
-(defn- handle-varnish-response [res]
+(defn in-body-status [body]
+  (let [status (re-find #"<title>(\d+).+</title>" body)]
+    (int (second status))))
+
+(defn- handle-varnish-response
+  "Successful responses might have status code 200 or o.
+  If the response code is 0, then the body should contain \"200 Purged\".
+  (The latter is produced if synth() is used in the vcl to generate a synthetic response.)"
+  [res]
   (let [status (int (.-statusCode res))]
-    (when-not (= 200 status)
-      (log/notice "Varnish response code" status))
-    (.on res "data" #(when-not (= 200 status)
-                       (log/notice "Response:" %)))))
+    (.on res "data" (fn [buffer]
+                      (let [body (str buffer)
+                            status (if (= 0 status) (in-body-status body) status)]
+                        (when-not (= 200 status)
+                          (log/notice "Varnish response code" status)
+                          (log/notice "Response:" body)))))))
 
 (defn- handle-varnish-error [e]
   (log/debug "Varnish request error: " (.-message e))
