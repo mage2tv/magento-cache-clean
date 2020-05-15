@@ -15,11 +15,13 @@
   (map second (re-seq #"\bpublic\s+function\s+(\w+)\(" php)))
 
 (defn file->php-class [file]
-  (let [maybe-php (fs/head file 2048)
-        namespace (php-namespace maybe-php)
-        class (or (php-class maybe-php) (php-interface maybe-php))]
-    (when (and namespace class)
-      (str "\\" namespace "\\" class))))
+  (try
+    (let [maybe-php (fs/head file 2048)
+          namespace (php-namespace maybe-php)
+          class (or (php-class maybe-php) (php-interface maybe-php))]
+      (when (and namespace class)
+        (str "\\" namespace "\\" class)))
+    (catch :default e)))
 
 (defn php-class->file [php-class]
   (str (string/replace php-class "\\" "/") ".php"))
