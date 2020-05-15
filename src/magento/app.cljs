@@ -133,12 +133,16 @@
        (not (:cache_dir config))
        (not (workaround-fpc-dir-bug? base-dir config cache-type))))
 
+(defn empty-id-prefix? [config]
+  (let [id-prefix (str (:id_prefix config))]
+    (string/blank? id-prefix)))
+
 (defn add-default-config-values [base-dir config cache-type]
   (cond-> config
           (file-cache-backend? config) (assoc :backend "Cm_Cache_Backend_File")
           (workaround-fpc-dir-bug? base-dir config cache-type) (assoc :cache_dir (str base-dir "var/cache"))
           (missing-cache-dir? base-dir config cache-type) (assoc :cache_dir (default-cache-dir base-dir cache-type))
-          (not (:id_prefix config)) (assoc :id_prefix (default-cache-id-prefix base-dir))))
+          (empty-id-prefix? config) (assoc :id_prefix (default-cache-id-prefix base-dir))))
 
 (defn cache-config
   "Given the cache type :default or :page_cache returns the configuration"
