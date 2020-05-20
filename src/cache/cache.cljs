@@ -43,9 +43,12 @@
   backends, and an if statement is simpler."
   [config]
   (log/debug "Cache storage " config)
-  (if (= "Cm_Cache_Backend_Redis" (:backend config))
-    (redis/create config)
-    (file/create config)))
+  (let [backend (:backend config)]
+    (if (or (= backend "Cm_Cache_Backend_Redis")
+            (= backend "\\Magento\\Framework\\Cache\\Backend\\Redis")
+            (= backend "Magento\\Framework\\Cache\\Backend\\Redis"))
+      (redis/create config)
+      (file/create config))))
 
 (defn- clean
   ([cache] (storage/clean-all cache))
