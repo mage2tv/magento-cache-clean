@@ -21,20 +21,27 @@
   (memoize trailing-slash))
 
 (defn exists? [file]
-  (.existsSync fs file))
+  (try (.existsSync fs file)
+       (catch :default e false)))
 
 (defn dir? [s]
-  (and (exists? s) (.. fs (lstatSync s) isDirectory) s))
+  (and (exists? s)
+       (try (.. fs (lstatSync s) isDirectory) (catch :default e false))
+       s))
 
 (defn file? [s]
-  (and (exists? s) (.. fs (lstatSync s) isFile) s))
+  (and (exists? s)
+       (try (.. fs (lstatSync s) isFile) (catch :default e false))
+       s))
 
 (defn symlink? [s]
-  (.. fs (lstatSync s) isSymbolicLink))
+  (try (.. fs (lstatSync s) isSymbolicLink)
+       (catch :default e false)))
 
 (defn mtime [s]
   (when (exists? s)
-    (.. fs (lstatSync s) -mtimeMs)))
+    (try (.. fs (lstatSync s) -mtimeMs)
+         (catch :default e false))))
 
 (defn realpath [file]
   (if (exists? file)
