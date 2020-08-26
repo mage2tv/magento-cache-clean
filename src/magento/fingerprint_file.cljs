@@ -98,7 +98,13 @@
              ["/etc/extension_attributes\\.xml" ["extension_attributes_config"]]
              ["/etc/acl\\.xml$" ["provider_acl_resources_cache"]]
              ["/etc/frontend/routes\\.xml$" ["frontend::RoutesConfig"]]
-             ["/etc/adminhtml/routes\\.xml$" ["adminhtml::RoutesConfig"]]]
+             ["/etc/adminhtml/routes\\.xml$" ["adminhtml::RoutesConfig"]]
+             ["/etc/csp_whitelist\\.xml" ["global::csp_whitelist_config"
+                                          "frontend::csp_whitelist_config"
+                                          "adminhtml::csp_whitelist_config"
+                                          "webapi_rest::csp_whitelist_config"
+                                          "webapi_soap::csp_whitelist_config"
+                                          "graphql::csp_whitelist_config"]]]
         id-fns (map (fn [[pattern-string ids]]
                       (let [re (path-pattern pattern-string)]
                         (fn [file]
