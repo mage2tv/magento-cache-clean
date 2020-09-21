@@ -34,10 +34,12 @@
 
 (defn extract-local-config [synchronized-config]
   {:backend (-> synchronized-config :backend_options :local_backend)
+   :id_prefix (:id_prefix synchronized-config)
    :backend_options (-> synchronized-config :backend_options :local_backend_options)})
 
 (defn extract-remote-config [synchronized-config]
   {:backend (-> synchronized-config :backend_options :remote_backend)
+   :id_prefix (:id_prefix synchronized-config)
    :backend_options (-> synchronized-config :backend_options :remote_backend_options)})
 
 #_(def test-config {:id_prefix "69d_",
