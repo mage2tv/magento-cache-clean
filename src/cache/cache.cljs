@@ -2,6 +2,7 @@
   (:require [cache.storage.redis :as redis]
             [cache.storage.file :as file]
             [cache.storage.varnish :as varnish]
+            [cache.storage.remote-synchronized :as remote-synchronized]
             [cache.storage :as storage]
             [log.log :as log]
             [clojure.string :as string]
@@ -40,14 +41,21 @@
 
 (defn get-storage
   "Note to self: decided against a multi-method because I'm not adding more
-  backends, and an if statement is simpler."
+  backends, and a case statement is simpler."
   [config]
   (log/debug "Cache storage " config)
   (let [backend (:backend config)]
-    (if (or (= backend "Cm_Cache_Backend_Redis")
-            (= backend "\\Magento\\Framework\\Cache\\Backend\\Redis")
-            (= backend "Magento\\Framework\\Cache\\Backend\\Redis"))
+    (case backend
+      ("Cm_Cache_Backend_Redis"
+        "\\Magento\\Framework\\Cache\\Backend\\Redis"
+        "Magento\\Framework\\Cache\\Backend\\Redis")
       (redis/create config)
+
+      ("\\Magento\\Framework\\Cache\\Backend\\RemoteSynchronizedCache"
+        "Magento\\Framework\\Cache\\Backend\\RemoteSynchronizedCache")
+      (remote-synchronized/create (get-storage (remote-synchronized/extract-local-config config))
+                                  (get-storage (remote-synchronized/extract-remote-config config)))
+
       (file/create config))))
 
 (defn- clean

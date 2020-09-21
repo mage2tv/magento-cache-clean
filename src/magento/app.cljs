@@ -120,7 +120,7 @@
   [base-dir config cache-type]
   (when
     (and (= :page_cache cache-type)
-         (not (:cache_dir config))
+         (not (-> config :backend_options :cache_dir))
          (:id_prefix config)
          (file-cache-backend? config)
          (fpc-dir-bug-present? base-dir))
@@ -130,7 +130,7 @@
 
 (defn missing-cache-dir? [base-dir config cache-type]
   (and (file-cache-backend? config)
-       (not (:cache_dir config))
+       (not (-> config :backend_options :cache_dir))
        (not (workaround-fpc-dir-bug? base-dir config cache-type))))
 
 (defn empty-id-prefix? [config]
@@ -140,8 +140,8 @@
 (defn add-default-config-values [base-dir config cache-type]
   (cond-> config
           (file-cache-backend? config) (assoc :backend "Cm_Cache_Backend_File")
-          (workaround-fpc-dir-bug? base-dir config cache-type) (assoc :cache_dir (str base-dir "var/cache"))
-          (missing-cache-dir? base-dir config cache-type) (assoc :cache_dir (default-cache-dir base-dir cache-type))
+          (workaround-fpc-dir-bug? base-dir config cache-type) (assoc-in [:backend_options :cache_dir] (str base-dir "var/cache"))
+          (missing-cache-dir? base-dir config cache-type) (assoc-in [:backend_options :cache_dir] (default-cache-dir base-dir cache-type))
           (empty-id-prefix? config) (assoc :id_prefix (default-cache-id-prefix base-dir))))
 
 (defn cache-config
