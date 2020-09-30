@@ -33,7 +33,11 @@
   (str service-interface-methods-cache-prefix "-" (md5 (service-name php-source))))
 
 (defn service-cache-ids [file]
-  (when (service-interface? file)
-    (let [php-source (fs/slurp file)]
-      (conj (method-param-cache-ids php-source)
-            (methods-list-cache-id php-source)))))
+  (when (and (service-interface? file) (fs/exists? file))
+    (try
+      (let [php-source (fs/slurp file)]
+        (conj (method-param-cache-ids php-source)
+              (methods-list-cache-id php-source)))
+      (catch :default e
+        ;; the file probably was removed since the change event was triggered. Happens on synchronized fs sometimes.
+        []))))
