@@ -40,7 +40,7 @@ The tool is commonly installed globally using `composer global require ...`.
 
 ## Usage
 
-In your Magento directory, run `vendor/bin/cache-clean.js --watch`
+In your Magento directory, run `bin/cache-clean.js --watch`
 
 Press `Ctrl-C` to exit the watcher process.
 
