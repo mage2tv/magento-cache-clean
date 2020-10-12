@@ -48,14 +48,14 @@ The script can also be used as a faster drop in replacement of `bin/magento cach
 For example:
 
 ``` shell
-vendor/bin/cache-clean.js config full_page
+bin/cache-clean.js config full_page
 ```
 (It's quicker because the start up time of `bin/magento` is so slow.)
 
 There are several options to customize the behavior:
 
 ```
-vendor/bin/cache-clean.js --help
+bin/cache-clean.js --help
 Sponsored by https://www.mage2.tv
 
 Usage: cache-clean.js [options and flags] [cache-types...]
@@ -72,7 +72,7 @@ Clean the given cache types. If none are given, clean all cache types.
 
 Usually I run the command once with the `--watch` switch when I start
 development, and when I make a change that isn't automatically detected (yet),
-I run `vendor/bin/cache-clean.js` with the given cache types as a drop in
+I run `bin/cache-clean.js` with the given cache types as a drop in
 replacement for `bin/magento cache:clean`.
 
 ### Hotkeys
