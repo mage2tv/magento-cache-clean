@@ -7,10 +7,18 @@ In many situations the cache watcher "just works" when run inside the container.
 For example, if you are using [Warden](https://warden.dev), you can run the utility
 after running `warden shell`:
 ```
-$ warden env exec php-fpm composer global require mage2tv/magento-cache-clean
-$ warden env exec php-fpm vendor/bin/cache-clean.js -w
+$ composer global require mage2tv/magento-cache-clean
+$ ~/.composer/vendor/bin/cache-clean.js -w
 ```
-And since the composer directory is mounted in the image, the installation only has to
+
+Or, if you want to execute the commands from the host machine:
+
+```
+$ warden env exec php-fpm composer global require mage2tv/magento-cache-clean
+$ warden env exec php-fpm ./.composer/vendor/bin/cache-clean.js -w
+```
+
+Since the composer home directory is mounted in the image, the installation only has to
 be done once for all projects.
 
 However, there are a couple of common issues that can arrise when working
