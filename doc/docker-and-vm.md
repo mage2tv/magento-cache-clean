@@ -21,6 +21,8 @@ $ warden env exec php-fpm ./.composer/vendor/bin/cache-clean.js -w
 Since the composer home directory is mounted in the image, the installation only has to
 be done once for all projects.
 
+Simon Sprankel provided [a screenshot of the PHPStorm settings](https://github.com/davidalger/warden/issues/258#issuecomment-723576699) on how the command can be run automatically.
+
 However, there are a couple of common issues that can arrise when working
 with a virtualized environment in regards to the `cache-clean.js` watcher.
 
