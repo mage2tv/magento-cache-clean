@@ -15,7 +15,7 @@ Or, if you want to execute the commands from the host machine:
 
 ```
 $ warden env exec php-fpm composer global require mage2tv/magento-cache-clean
-$ warden env exec php-fpm ./.composer/vendor/bin/cache-clean.js -w
+$ warden env exec php-fpm /home/www-data/.composer/vendor/bin/cache-clean.js -w
 ```
 
 Since the composer home directory is mounted in the image, the installation only has to
