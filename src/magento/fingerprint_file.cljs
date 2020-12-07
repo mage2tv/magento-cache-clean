@@ -53,7 +53,8 @@
 
 (defn- full-page-cache-only-filetypes []
   (let [res ["/etc/frontend/sections\\.xml$" ;; section names list in head
-             "/view/(?:base|frontend|adminhtml)/requirejs-config\\.js$"]]
+             "/view/(?:base|frontend|adminhtml)/requirejs-config\\.js$"
+             "/etc/csp_whitelist\\.xml$"]]
     (filenames->fingerprint-fns ::fpc res)))
 
 (def file->type
