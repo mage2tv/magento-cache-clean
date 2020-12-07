@@ -63,12 +63,16 @@
         (fs/rmdir-recursive dir))
     (log/debug "No generated code directory found")))
 
+(defn rm [file]
+  (try (fs/rm file)
+       (catch :default e false)))
+
 (defn remove-generated-files-based-on-php! [base-dir php-file]
   (let [files (php-file->generated-code-files base-dir php-file)]
     (when (seq files)
       (log/notice "Removing generated code from" (str base-dir ":\n")
                   (apply str (interpose ", " (map #(without-base-path base-dir %) files))))
-      (run! fs/rm files))))
+      (run! rm files))))
 
 (defn remove-generated-extension-attributes-php! [base-dir]
   (let [files (generated-extension-attribute-classes base-dir)]
@@ -76,4 +80,4 @@
       (log/notice "Removing all generated extension attributes classes")
       (log/debug (str "In base dir " base-dir ":\n")
                  (apply str (interpose ", " (map #(without-base-path base-dir %) files))))
-      (run! fs/rm files))))
+      (run! rm files))))
