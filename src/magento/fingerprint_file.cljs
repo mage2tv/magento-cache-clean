@@ -33,6 +33,7 @@
 
 (defn- layout-filetypes []
   (let [res ["/layout/.+\\.xml$"
+             "/ui_component/.+\\.xml$" ;; because of htmlContent blocks
              "/page_layout/.+\\.xml$"]]
     (filenames->fingerprint-fns ::layout res)))
 
@@ -78,7 +79,7 @@
   for these, but this more granular approach should allow for faster cache
   rebuild times. If there are problems add them to config-filetypes above."
   []
-  (let [res [["/etc/adminhtml/system\\.xml$" ["adminhtml__backend_system_configuration_structure"]]
+  (let [res [["/etc/adminhtml/system.*\\.xml$" ["adminhtml__backend_system_configuration_structure"]]
              ["/etc/queue\\.xml$" ["message_queue_config_cache"]]
              ["/etc/queue_consumer\\.xml$" ["message_queue_consumer_config_cache"]]
              ["/etc/queue_publisher\\.xml$" ["message_queue_publisher_config_cache"]]
