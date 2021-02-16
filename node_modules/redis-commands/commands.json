@@ -115,6 +115,17 @@
     "keyStop": 1,
     "step": 1
   },
+  "blmove": {
+    "arity": 6,
+    "flags": [
+      "write",
+      "denyoom",
+      "noscript"
+    ],
+    "keyStart": 1,
+    "keyStop": 2,
+    "step": 1
+  },
   "blpop": {
     "arity": -3,
     "flags": [
@@ -215,6 +226,16 @@
     "keyStop": 0,
     "step": 0
   },
+  "copy": {
+    "arity": -3,
+    "flags": [
+      "write",
+      "denyoom"
+    ],
+    "keyStart": 1,
+    "keyStop": 2,
+    "step": 1
+  },
   "dbsize": {
     "arity": 1,
     "flags": [
@@ -293,7 +314,6 @@
   "echo": {
     "arity": 2,
     "flags": [
-      "readonly",
       "fast"
     ],
     "keyStart": 0,
@@ -304,6 +324,7 @@
     "arity": -3,
     "flags": [
       "noscript",
+      "may_replicate",
       "movablekeys"
     ],
     "keyStart": 0,
@@ -314,6 +335,7 @@
     "arity": -3,
     "flags": [
       "noscript",
+      "may_replicate",
       "movablekeys"
     ],
     "keyStart": 0,
@@ -362,6 +384,17 @@
     "keyStart": 1,
     "keyStop": 1,
     "step": 1
+  },
+  "failover": {
+    "arity": -1,
+    "flags": [
+      "admin",
+      "noscript",
+      "stale"
+    ],
+    "keyStart": 0,
+    "keyStop": 0,
+    "step": 0
   },
   "flushall": {
     "arity": -1,
@@ -422,6 +455,7 @@
     "arity": -6,
     "flags": [
       "write",
+      "denyoom",
       "movablekeys"
     ],
     "keyStart": 1,
@@ -431,8 +465,7 @@
   "georadius_ro": {
     "arity": -6,
     "flags": [
-      "readonly",
-      "movablekeys"
+      "readonly"
     ],
     "keyStart": 1,
     "keyStop": 1,
@@ -442,6 +475,7 @@
     "arity": -5,
     "flags": [
       "write",
+      "denyoom",
       "movablekeys"
     ],
     "keyStart": 1,
@@ -451,11 +485,29 @@
   "georadiusbymember_ro": {
     "arity": -5,
     "flags": [
-      "readonly",
-      "movablekeys"
+      "readonly"
     ],
     "keyStart": 1,
     "keyStop": 1,
+    "step": 1
+  },
+  "geosearch": {
+    "arity": -7,
+    "flags": [
+      "readonly"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
+  "geosearchstore": {
+    "arity": -8,
+    "flags": [
+      "write",
+      "denyoom"
+    ],
+    "keyStart": 1,
+    "keyStop": 2,
     "step": 1
   },
   "get": {
@@ -472,6 +524,26 @@
     "arity": 3,
     "flags": [
       "readonly",
+      "fast"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
+  "getdel": {
+    "arity": 2,
+    "flags": [
+      "write",
+      "fast"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
+  "getex": {
+    "arity": -2,
+    "flags": [
+      "write",
       "fast"
     ],
     "keyStart": 1,
@@ -509,7 +581,7 @@
     "step": 1
   },
   "hello": {
-    "arity": -2,
+    "arity": -1,
     "flags": [
       "noscript",
       "loading",
@@ -627,6 +699,16 @@
     "keyStop": 0,
     "step": 0
   },
+  "hrandfield": {
+    "arity": -2,
+    "flags": [
+      "readonly",
+      "random"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
   "hscan": {
     "arity": -3,
     "flags": [
@@ -736,7 +818,6 @@
   "lastsave": {
     "arity": 1,
     "flags": [
-      "readonly",
       "random",
       "loading",
       "stale",
@@ -787,6 +868,16 @@
     "keyStop": 1,
     "step": 1
   },
+  "lmove": {
+    "arity": 5,
+    "flags": [
+      "write",
+      "denyoom"
+    ],
+    "keyStart": 1,
+    "keyStop": 2,
+    "step": 1
+  },
   "lolwut": {
     "arity": -1,
     "flags": [
@@ -798,7 +889,7 @@
     "step": 0
   },
   "lpop": {
-    "arity": 2,
+    "arity": -2,
     "flags": [
       "write",
       "fast"
@@ -1025,7 +1116,8 @@
   "pfcount": {
     "arity": -2,
     "flags": [
-      "readonly"
+      "readonly",
+      "may_replicate"
     ],
     "keyStart": 1,
     "keyStop": -1,
@@ -1035,11 +1127,12 @@
     "arity": -3,
     "flags": [
       "write",
+      "denyoom",
       "admin"
     ],
-    "keyStart": 0,
-    "keyStop": 0,
-    "step": 0
+    "keyStart": 2,
+    "keyStop": 2,
+    "step": 1
   },
   "pfmerge": {
     "arity": -2,
@@ -1104,7 +1197,7 @@
     "step": 0
   },
   "psync": {
-    "arity": 3,
+    "arity": -3,
     "flags": [
       "admin",
       "noscript"
@@ -1130,7 +1223,8 @@
       "pubsub",
       "loading",
       "stale",
-      "fast"
+      "fast",
+      "may_replicate"
     ],
     "keyStart": 0,
     "keyStop": 0,
@@ -1241,6 +1335,18 @@
     "keyStop": 0,
     "step": 0
   },
+  "reset": {
+    "arity": 1,
+    "flags": [
+      "noscript",
+      "loading",
+      "stale",
+      "fast"
+    ],
+    "keyStart": 0,
+    "keyStop": 0,
+    "step": 0
+  },
   "restore": {
     "arity": -4,
     "flags": [
@@ -1265,7 +1371,6 @@
   "role": {
     "arity": 1,
     "flags": [
-      "readonly",
       "noscript",
       "loading",
       "stale",
@@ -1276,7 +1381,7 @@
     "step": 0
   },
   "rpop": {
-    "arity": 2,
+    "arity": -2,
     "flags": [
       "write",
       "fast"
@@ -1361,7 +1466,8 @@
   "script": {
     "arity": -2,
     "flags": [
-      "noscript"
+      "noscript",
+      "may_replicate"
     ],
     "keyStart": 0,
     "keyStop": 0,
@@ -1524,6 +1630,16 @@
     "keyStop": 1,
     "step": 1
   },
+  "smismember": {
+    "arity": -3,
+    "flags": [
+      "readonly",
+      "fast"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
   "smove": {
     "arity": 4,
     "flags": [
@@ -1670,7 +1786,6 @@
   "time": {
     "arity": 1,
     "flags": [
-      "readonly",
       "random",
       "loading",
       "stale",
@@ -1789,6 +1904,17 @@
     "keyStop": 1,
     "step": 1
   },
+  "xautoclaim": {
+    "arity": -6,
+    "flags": [
+      "write",
+      "random",
+      "fast"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
   "xclaim": {
     "arity": -6,
     "flags": [
@@ -1865,9 +1991,9 @@
       "readonly",
       "movablekeys"
     ],
-    "keyStart": 1,
-    "keyStop": 1,
-    "step": 1
+    "keyStart": 0,
+    "keyStop": 0,
+    "step": 0
   },
   "xreadgroup": {
     "arity": -7,
@@ -1875,9 +2001,9 @@
       "write",
       "movablekeys"
     ],
-    "keyStart": 1,
-    "keyStop": 1,
-    "step": 1
+    "keyStart": 0,
+    "keyStop": 0,
+    "step": 0
   },
   "xrevrange": {
     "arity": -4,
@@ -1940,6 +2066,27 @@
     "keyStop": 1,
     "step": 1
   },
+  "zdiff": {
+    "arity": -3,
+    "flags": [
+      "readonly",
+      "movablekeys"
+    ],
+    "keyStart": 0,
+    "keyStop": 0,
+    "step": 0
+  },
+  "zdiffstore": {
+    "arity": -4,
+    "flags": [
+      "write",
+      "denyoom",
+      "movablekeys"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
   "zincrby": {
     "arity": 4,
     "flags": [
@@ -1951,6 +2098,16 @@
     "keyStop": 1,
     "step": 1
   },
+  "zinter": {
+    "arity": -3,
+    "flags": [
+      "readonly",
+      "movablekeys"
+    ],
+    "keyStart": 0,
+    "keyStop": 0,
+    "step": 0
+  },
   "zinterstore": {
     "arity": -4,
     "flags": [
@@ -1958,12 +2115,22 @@
       "denyoom",
       "movablekeys"
     ],
-    "keyStart": 0,
-    "keyStop": 0,
-    "step": 0
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
   },
   "zlexcount": {
     "arity": 4,
+    "flags": [
+      "readonly",
+      "fast"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
+  "zmscore": {
+    "arity": -3,
     "flags": [
       "readonly",
       "fast"
@@ -1987,6 +2154,16 @@
     "flags": [
       "write",
       "fast"
+    ],
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
+  },
+  "zrandmember": {
+    "arity": -2,
+    "flags": [
+      "readonly",
+      "random"
     ],
     "keyStart": 1,
     "keyStop": 1,
@@ -2017,6 +2194,16 @@
     ],
     "keyStart": 1,
     "keyStop": 1,
+    "step": 1
+  },
+  "zrangestore": {
+    "arity": -5,
+    "flags": [
+      "write",
+      "denyoom"
+    ],
+    "keyStart": 1,
+    "keyStop": 2,
     "step": 1
   },
   "zrank": {
@@ -2123,6 +2310,16 @@
     "keyStop": 1,
     "step": 1
   },
+  "zunion": {
+    "arity": -3,
+    "flags": [
+      "readonly",
+      "movablekeys"
+    ],
+    "keyStart": 0,
+    "keyStop": 0,
+    "step": 0
+  },
   "zunionstore": {
     "arity": -4,
     "flags": [
@@ -2130,8 +2327,8 @@
       "denyoom",
       "movablekeys"
     ],
-    "keyStart": 0,
-    "keyStop": 0,
-    "step": 0
+    "keyStart": 1,
+    "keyStop": 1,
+    "step": 1
   }
 }
