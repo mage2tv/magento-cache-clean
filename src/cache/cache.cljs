@@ -85,8 +85,6 @@
 (defn- now []
   (.getTime (js/Date.)))
 
-(def cache-clean-grace-period 500)                          ;; ms
-
 (let [last-cleaned-map (atom {})]
 
   (defn- last-cleaned [cache-type-or-id]
@@ -95,15 +93,16 @@
   (defn- update-last-cleaned [cache-type-or-id]
     (swap! last-cleaned-map assoc cache-type-or-id (now))))
 
-(defn- may-clean? [cache-type-or-id]
-  (let [prev (last-cleaned cache-type-or-id)
-        t (now)]
-    (if (or (nil? prev) (< 0 (- t prev cache-clean-grace-period)))
-      (do (update-last-cleaned cache-type-or-id)
-          #_(log/notice "OK to clean " cache-type-or-id "since")
-          true)
-      (do #_(log/notice "WAIT grace period " cache-type-or-id (str (- t prev cache-clean-grace-period) "ms"))
-          false))))
+(let [cache-clean-grace-period 1000]
+  (defn- may-clean? [cache-type-or-id]
+    (let [prev (last-cleaned cache-type-or-id)
+          t (now)]
+      (if (or (nil? prev) (< 0 (- t prev cache-clean-grace-period)))
+        (do (update-last-cleaned cache-type-or-id)
+            (log/debug "OK to clean " cache-type-or-id "since" (str (- t (or prev 0))) "ms")
+            true)
+        (do (log/debug "WAIT grace period " cache-type-or-id (str (- t prev cache-clean-grace-period) "ms"))
+            false)))))
 
 (defn- clean-cache-types-with-base-dir [base-dir cache-types]
   (when (or (empty? cache-types) (not= ["full_page"] cache-types))
