@@ -195,8 +195,9 @@
 (defn show-hotkeys []
   (log/notice :without-time "Hot-keys for manual cache cleaning:")
   (log/notice :without-time "[c]onfig [b]lock_html [l]ayout [t]ranslate [f]ull_page [v]iew [a]ll\n")
-  (log/notice :without-time "Hot-key for cleaning all generated code: [G]")
-  (log/notice :without-time "Hot-keys for cleaning static content areas: [F]rontend [A]dminhtml\n"))
+  (log/notice :without-time "Clean all generated code: [G]")
+  (log/notice :without-time "Clean Integration Test Sandboxes: [I]")
+  (log/notice :without-time "Clean static content areas: [F]rontend [A]dminhtml\n"))
 
 (defn start []
   (watch-all-modules! log-watching-module)

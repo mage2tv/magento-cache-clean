@@ -3,6 +3,7 @@
             [cache.cache :as cache]
             [magento.static-content :as static-content]
             [magento.generated-code]
+            [magento.integration-tests]
             [cljs.core.async :refer [go-loop <! put! close! chan]]))
 
 (def ctr-c \u0003)
@@ -21,6 +22,8 @@
                                 "A" ["adminhtml"]})
 
 (def key-generated-code "G")
+
+(def key-integration-tests-sandboxes "I")
 
 (defn- prep-stdin [^js/net.Socket stdin]
   (.resume stdin)
@@ -45,7 +48,10 @@
   (doseq [area (get key->static-content-areas key)]
     (static-content/clean base-dir area))
   (when (= key-generated-code key)
-    (magento.generated-code/clean base-dir)))
+    (magento.generated-code/clean base-dir))
+  (when (= key-integration-tests-sandboxes)
+    (magento.integration-tests/clean base-dir)))
+
 
 (defn- process-keys [base-dir key-chan]
   (go-loop []
