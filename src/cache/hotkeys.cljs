@@ -49,7 +49,7 @@
     (static-content/clean base-dir area))
   (when (= key-generated-code key)
     (magento.generated-code/clean base-dir))
-  (when (= key-integration-tests-sandboxes)
+  (when (= key-integration-tests-sandboxes key)
     (magento.integration-tests/clean base-dir)))
 
 
