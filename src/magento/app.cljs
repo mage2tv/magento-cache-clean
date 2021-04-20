@@ -94,7 +94,7 @@
 
 (defn read-cache-config [base-dir]
   (let [config (read-app-config base-dir)]
-    (get-in config [:cache :frontend])))
+    (hash-map (get-in config [:cache :frontend]))))
 
 (defn file-cache-backend? [config]
   (or (not (:backend config))
