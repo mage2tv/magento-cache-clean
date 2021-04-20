@@ -94,7 +94,7 @@
 
 (defn read-cache-config [base-dir]
   (let [config (read-app-config base-dir)]
-    (hash-map (get-in config [:cache :frontend]))))
+    (get-in config [:cache :frontend])))
 
 (defn file-cache-backend? [config]
   (or (not (:backend config))
@@ -147,7 +147,7 @@
 (defn cache-config
   "Given the cache type :default or :page_cache returns the configuration"
   [base-dir cache-type]
-  (let [config (get (read-cache-config base-dir) cache-type {})]
+  (let [config (into {} (get (read-cache-config base-dir) cache-type {}))]
     (add-default-config-values base-dir config cache-type)))
 
 (defn varnish-hosts-config []
