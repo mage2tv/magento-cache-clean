@@ -15,7 +15,7 @@
                       "l" ["layout"]
                       "f" ["full_page"]
                       "a" [] ;; a for all
-                      "v" ["block_html" "layout" "full_page"] ;; v for view
+                      "v" ["block_html" "layout" "full_page" "translate"] ;; v for view
                       "t" ["translate"]})
 
 (def key->static-content-areas {"F" ["frontend"]
