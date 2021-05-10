@@ -87,7 +87,7 @@ individual keystrokes:
 |`l`| `layout` |
 |`f`| `full_page` |
 |`a`| (a for all) |
-|`v`| (v for view) `block_html`, `layout`, `full_page` |
+|`v`| (v for view) `block_html`, `layout`, `full_page`, `translate` |
 |`t`| `translate` |
 
 There also are hotkeys to clean the static assets in the `A`dminhtml or
