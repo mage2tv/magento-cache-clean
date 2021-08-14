@@ -68,11 +68,20 @@
          (full-page-cache-only-filetypes)))
 
 (defn- make-ui-component->ids-fn
-  "Return a matcher fn where the returned cache id contains part of the file name."[]
+  "Return a matcher fn where the returned cache id contains part of the file name."
+  []
   (let [ui-comp-pattern (path-pattern "/ui_component/(.+)\\.xml$")]
     (fn [file]
       (when-let [m (re-find ui-comp-pattern file)]
         [(str "ui_component_configuration_data_" (second m))]))))
+
+(defn- make-page-builder-component->ids-fn
+  "Return a matcher fn where the returned cache id contains part of the file name."
+  []
+  (let [page-builder-content-type-pattern (path-pattern "/view/adminhtml/pagebuilder/content_type/(.*)\\.xml")]
+    (fn [file]
+      (when-let [m (re-find page-builder-content-type-pattern file)]
+        ["pagebuilder_config" (str "content_type_" (second m))]))))
 
 (defn- make-file->ids
   "Configure the mapping of file name regex to cache-id's to be cleaned on
@@ -113,6 +122,6 @@
                         (fn [file]
                           #_(prn pattern-string)
                           (when (match-name? re file) ids)))) res)]
-    (apply some-fn (conj id-fns (make-ui-component->ids-fn)))))
+    (apply some-fn (conj id-fns (make-ui-component->ids-fn) (make-page-builder-component->ids-fn)))))
 
 (def file->ids (make-file->ids))
