@@ -150,9 +150,14 @@
   (let [config (into {} (get (read-cache-config base-dir) cache-type {}))]
     (add-default-config-values base-dir config cache-type)))
 
-(defn varnish-hosts-config []
-  (let [config (read-app-config (base-dir))]
-    (get config :http_cache_hosts)))
+(defn varnish-hosts-config
+  ([]
+   (varnish-hosts-config (read-app-config (base-dir))))
+  ([config]
+   (map #(if-let [server-with-port (re-find #"(.+):(\d+)" (:host %1))]
+           (merge %1 {:host (get server-with-port 1) :port (get server-with-port 2)})
+           %1)
+     (get config :http_cache_hosts))))
 
 (defn disabled-caches []
   (let [config (:cache_types (read-app-config (base-dir)))]
