@@ -46,7 +46,10 @@
              "/templates/.+\\.twig$"
              "/etc/view\\.xml$"
              "/theme\\.xml$"]]
-    (filenames->fingerprint-fns ::template res)))
+    (assoc (filenames->fingerprint-fns ::template res)
+      (fn [file]
+        (string/includes? (fs/head file) "Magento\\Framework\\View\\Element\\Block\\ArgumentInterface"))
+      ::template)))
 
 (defn- menu-filetypes []
   (let [res ["/etc/adminhtml/menu\\.xml$"]]
