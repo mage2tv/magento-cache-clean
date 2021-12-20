@@ -48,7 +48,8 @@
              "/theme\\.xml$"]]
     (assoc (filenames->fingerprint-fns ::template res)
       (fn [file]
-        (string/includes? (fs/head file) "Magento\\Framework\\View\\Element\\Block\\ArgumentInterface"))
+        (when-let [header (fs/head file)]
+          (string/includes? header "Magento\\Framework\\View\\Element\\Block\\ArgumentInterface")))
       ::template)))
 
 (defn- menu-filetypes []
