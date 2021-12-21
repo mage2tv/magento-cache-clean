@@ -117,14 +117,50 @@
        (not (string/ends-with? file "~"))
        (not (in-process? file))))
 
+(defn- now []
+  (.getTime (js/Date.)))
+
+(def cache-clean-guard-period 5000)                          ;; ms
+
+(let [last-cleaned-map (atom {})]
+
+  (defn- last-cleaned [cache-type-or-id]
+    (get @last-cleaned-map cache-type-or-id))
+
+  (defn- update-last-cleaned [cache-type-or-id]
+    (swap! last-cleaned-map assoc cache-type-or-id (now))))
+
+(defn- may-clean? [cache-type-or-id]
+  (let [prev (last-cleaned cache-type-or-id)
+        t (now)]
+    (if (or (nil? prev) (< 0 (- t prev cache-clean-guard-period)))
+      (do (update-last-cleaned cache-type-or-id)
+          #_(log/notice "OK to clean " cache-type-or-id "since")
+          true)
+      (do #_(log/notice "WAIT grace period " cache-type-or-id (str (- t prev cache-clean-guard-period) "ms"))
+        false))))
+
+(defn- clean-cache-types [types]
+  (if (seq types)
+    (let [types (filter may-clean? types)]
+      (when (seq types) (cache/clean-cache-types types)))
+    (when (may-clean? :all)
+      (cache/clean-cache-types types))))
+
+(defn- clean-cache-ids [ids]
+  (let [ids (filter may-clean? ids)]
+    (when (seq ids)
+      (cache/clean-cache-ids ids))))
+
+
 (defn file-changed [file]
   (when (process-changed-file? file)
     (set-in-process! file)
     (log/info "Processing" file)
     (when-let [types (seq (cache/magefile->cachetypes file))]
-      (cache/clean-cache-types types))
+      (clean-cache-types types))
     (when-let [ids (cache/magefile->cacheids file)]
-      (cache/clean-cache-ids ids))
+      (clean-cache-ids ids))
     (clean-cache-for-new-controller file)
     (clean-cache-for-service-interface file)
     (remove-generated-files-based-on! file)

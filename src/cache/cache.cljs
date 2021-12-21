@@ -82,38 +82,14 @@
   (let [varnish (varnish/create (mage/varnish-hosts-config))]
     (storage/clean-all varnish)))
 
-(defn- now []
-  (.getTime (js/Date.)))
-
-(def cache-clean-grace-period 500)                          ;; ms
-
-(let [last-cleaned-map (atom {})]
-
-  (defn- last-cleaned [cache-type-or-id]
-    (get @last-cleaned-map cache-type-or-id))
-
-  (defn- update-last-cleaned [cache-type-or-id]
-    (swap! last-cleaned-map assoc cache-type-or-id (now))))
-
-(defn- may-clean? [cache-type-or-id]
-  (let [prev (last-cleaned cache-type-or-id)
-        t (now)]
-    (if (or (nil? prev) (< 0 (- t prev cache-clean-grace-period)))
-      (do (update-last-cleaned cache-type-or-id)
-          #_(log/notice "OK to clean " cache-type-or-id "since")
-          true)
-      (do #_(log/notice "WAIT grace period " cache-type-or-id (str (- t prev cache-clean-grace-period) "ms"))
-          false))))
-
 (defn- clean-cache-types-with-base-dir [base-dir cache-types]
   (when (or (empty? cache-types) (not= ["full_page"] cache-types))
     (log/debug "Using :default cache_backend")
-    (let [cache (get-storage (mage/cache-config base-dir :default))
-          cache-types (filter may-clean? (remove #(= "full_page" %) cache-types))]
-      (apply clean cache cache-types)
+    (let [cache (get-storage (mage/cache-config base-dir :default))]
+      (apply clean cache (remove #(= "full_page" %) cache-types))
       (storage/close cache)))
 
-  (when (or (empty? cache-types) (some #{"full_page"} (filter may-clean? cache-types)))
+  (when (or (empty? cache-types) (some #{"full_page"} cache-types))
     (clean-full-page-cache base-dir)))
 
 (defn clean-cache-types [cache-types]
@@ -131,6 +107,6 @@
          (run! #(storage/clean-id cache %)))))
 
 (defn clean-cache-ids [ids]
-  (when (seq (filter may-clean? ids))
+  (when (seq ids)
     (apply log/notice "Cleaning id(s):" ids)
     (run! #(clean-cache-ids-with-base-dir % ids) (mage/all-base-dirs))))
