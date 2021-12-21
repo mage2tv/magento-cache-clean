@@ -64,7 +64,7 @@
   "Return the first n bytes of the given file (default 1024 bytes)."
   ([file] (head file 1024))
   ([file bytes]
-   (when (exists? file)
+   (when (file? file)
      (let [buffer (.alloc js/Buffer bytes)
            descriptor (.openSync fs file "r")]
        (.readSync fs descriptor buffer 0 bytes 0)
