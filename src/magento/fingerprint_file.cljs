@@ -104,6 +104,7 @@
              ["/etc/adminhtml/events\\.xml$" ["adminhtml__event_config_cache"]]
              ["/etc/webapi_rest/events\\.xml$" ["webapi_rest__event_config_cache"]]
              ["/etc/webapi_soap/events\\.xml$" ["webapi_soap__event_config_cache"]]
+             ["/etc/graphql/events\\.xml$" ["graphql__event_config_cache"]]
              ["/etc/crontab/events\\.xml$" ["crontab__event_config_cache"]]
              ["/etc/frontend/sections\\.xml$" ["sections_invalidation_config"]]
              ["/etc/email_templates\\.xml$" ["email_templates"]]
