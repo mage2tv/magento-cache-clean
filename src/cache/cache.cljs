@@ -30,7 +30,8 @@
    ::magefile/layout      ["layout" "full_page"]
    ::magefile/template    ["block_html" "full_page"]
    ::magefile/menu        ["config" "block_html"]
-   ::magefile/fpc         ["full_page"]})
+   ::magefile/fpc         ["full_page"]
+   ::magefile/svg         ["hyva_svg"]})
 
 (defn magefile->cachetypes [file]
   (let [filetype (magefile->filetype file)]
