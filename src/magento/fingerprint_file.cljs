@@ -63,13 +63,18 @@
              "/etc/schema.graphqls$"]]
     (filenames->fingerprint-fns ::fpc res)))
 
+(defn- svg-file-types []
+  (let [res ["\\.svg$"]]
+    (filenames->fingerprint-fns ::svg res)))
+
 (def file->type
   (merge (config-filetypes)
          (layout-filetypes)
          (translation-filetypes)
          (template-filetypes)
          (menu-filetypes)
-         (full-page-cache-only-filetypes)))
+         (full-page-cache-only-filetypes)
+         (svg-file-types)))
 
 (defn- make-ui-component->ids-fn
   "Return a matcher fn where the returned cache id contains part of the file name."
