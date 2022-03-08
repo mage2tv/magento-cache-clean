@@ -147,7 +147,8 @@ Clean the given cache types. If none are given, clean all cache types.
   (exit-with-code 1))
 
 (defn -main [& args]
-  (log/always :without-time "Release" version "sponsored by https://www.mage2.tv\n")
+  ;;(js/console.log " \u001b[31m#StandWith\01b[0mUkraine\n")
+  (log/always :without-time "Release" version "\033[36m#StandWith\033[33mUkraine\033[0m")
   (try
     (check-node-compatibility!)
     (cond

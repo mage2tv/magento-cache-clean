@@ -43,9 +43,9 @@
 
 (defn- template-filetypes []
   (let [res ["/templates/.+\\.phtml$"
-             "/templates/.+\\.twig$"
              "/etc/view\\.xml$"
-             "/theme\\.xml$"]]
+             "/theme\\.xml$"
+             "/Block/.+\\.php"]]
     (assoc (filenames->fingerprint-fns ::template res)
       (fn [file]
         (when-let [header (fs/head file)]
