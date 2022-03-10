@@ -147,8 +147,18 @@ Clean the given cache types. If none are given, clean all cache types.
   (exit-with-code 1))
 
 (defn -main [& args]
-  ;;(js/console.log " \u001b[31m#StandWith\01b[0mUkraine\n")
-  (log/always :without-time "Release" version "\033[36m#StandWith\033[33mUkraine\033[0m")
+  ;; You might be reading this because you think it is not appropriate
+  ;; to mix politics with software development.
+  ;; Or that I should have added banners like #StandWithPalestine or #StandWithYemen,
+  ;; and adding it now makes me a hypocrite. And you are right.
+  ;; I understand the reasoning, but I decided to add the banner now, because this
+  ;; time people I hold very dear are in Kyiv, fighting for their family, their
+  ;; lives and their country. Because I know them well, I am
+  ;; personally affected.
+  ;; So if you disagree, just deal with it, or stop using this tool.
+  (log/always :without-time "Release" version
+              " \033[43m\033[34m #StandWith\033[44m\033[33mUkraine \033[0m "
+              #_"\033[40m \033[97m#BlackLivesMatter ✊🏾 \033[0m")
   (try
     (check-node-compatibility!)
     (cond
