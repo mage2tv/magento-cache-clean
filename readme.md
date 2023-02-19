@@ -95,7 +95,7 @@ the `F`rontend area or clean the `G`enerated code directory.
 
 ### Prerequisites:
 
-* `node.js` (built on 18, but should work with older 8.x versions, too).
+* `node.js` (built on 10, but should work with older 8.x versions, too).
 * It probably is a good idea to turn on all Magento caches
   `bin/magento cache:enable` to get the full benefit.
 
