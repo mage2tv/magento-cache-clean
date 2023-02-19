@@ -38,8 +38,9 @@
 (defn- delete [cache-dir file-name-prefix id]
   (let [file (id->filepath cache-dir file-name-prefix id)]
     (log/debug "cleaning file" file)
-    (when (fs/exists? file)
-      (fs/rm file))))
+    (try (fs/rm file)
+         (catch :default e
+           (log/debug :without-time "Error deleting file:" (str e))))))
 
 (defrecord File [cache-dir id-prefix file-name-prefix]
   storage/CacheStorage
