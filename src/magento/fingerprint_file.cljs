@@ -104,6 +104,7 @@
              ["/etc/queue_publisher\\.xml$" ["message_queue_publisher_config_cache"]]
              ["/etc/queue_topology\\.xml$" ["message_queue_topology_config_cache"]]
              ["/etc/crontab\\.xml$" ["crontab_config_cache"]]
+             ["/hyva_checkout\\.xml$" ["checkout_config_cache" "hyva_checkout_config_cache"]]
              ["/etc/events\\.xml" ["global__event_config_cache"]]
              ["/etc/frontend/events\\.xml$" ["frontend__event_config_cache"]]
              ["/etc/adminhtml/events\\.xml$" ["adminhtml__event_config_cache"]]
