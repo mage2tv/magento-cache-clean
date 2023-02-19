@@ -31,8 +31,7 @@ composer require --dev mage2tv/magento-cache-clean
 Update:
 
 ``` shell
-composer remove --dev mage2tv/magento-cache-clean
-composer require --dev mage2tv/magento-cache-clean
+composer update --dev mage2tv/magento-cache-clean
 ```
 
 The tool is commonly installed globally using `composer global require ...`.
@@ -96,14 +95,14 @@ the `F`rontend area or clean the `G`enerated code directory.
 
 ### Prerequisites:
 
-* `node.js` (built on 10.8, but should work with older 8.x versions, too).
+* `node.js` (built on 18, but should work with older 8.x versions, too).
 * It probably is a good idea to turn on all Magento caches
   `bin/magento cache:enable` to get the full benefit.
 
 
 ## Known issues
 
-* Currently the watcher has to be restarted after a new theme is added so it
+* Currently, the watcher has to be restarted after a new theme is added, so it
   is added to the watchlist.
 
 * Changes to files on NFS mounts (e.g. in vagrant) do not trigger the watches.
@@ -122,8 +121,8 @@ the `F`rontend area or clean the `G`enerated code directory.
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
 
-* Since Magento 2.1 there is a [bug](https://github.com/magento/magento2/pull/22228) that causes the full page cache records to
-  be written to the `var/cache` directory instead of `var/page_cache`.
+* In Magento 2.1.0 - 2.3.3 there is a [bug](https://github.com/magento/magento2/pull/22228) that causes the full page cache
+  records to be written to the `var/cache` directory instead of `var/page_cache`.
   This issue causes the cache cleaner behavior to be erratic.
   There is an easy workaround, namely removing all cache configuration from
   the default `app/etc/env.php`. The bug only affects the default config with the
@@ -147,9 +146,6 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 
 ## Thanks
 
-Thanks to [Mage2 TV](https://www.mage2.tv/) for sponsoring the development of
-this tool.
-
 This script was inspired by [Timon de Groot](https://twitter.com/TimonGreat)'s
 [blog post](https://blog.timpack.org/speed-up-magento-development) where he
 describes the idea to use a file watcher in PHPStorm to call `redis-cli` to
@@ -162,5 +158,5 @@ features! This tool would be impossible without you!
 
 ## Copyright & License
 
-Copyright 2019 by Vinai Kopp, distributed under the BSD-3-Clause license (see
+Copyright 2019 - present by Vinai Kopp, distributed under the BSD-3-Clause license (see
 the [LICENSE](https://github.com/mage2tv/magento-cache-clean/blob/master/LICENSE) file).
