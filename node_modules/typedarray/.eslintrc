@@ -1,0 +1,33 @@
+{
+  "root": true,
+
+  "extends": "@ljharb",
+
+  "rules": {
+    "camelcase": 1,
+    "func-name-matching": 1,
+    "func-style": [2, "declaration"],
+    "max-lines": 0,
+    "max-lines-per-function": 0,
+    "max-statements": 0,
+    "max-statements-per-line": 1,
+    "multiline-comment-style": 0,
+    "new-cap": 1,
+    "no-mixed-operators": 1,
+    "no-param-reassign": 1,
+    "no-restricted-properties": 1,
+    "no-restricted-syntax": 1,
+    "no-underscore-dangle": 1,
+    "sort-keys": 0,
+    "strict": 1,
+  },
+
+  "overrides": [
+    {
+      "files": "example/**",
+      "rules": {
+        "no-console": 0,
+      },
+    },
+  ],
+}
