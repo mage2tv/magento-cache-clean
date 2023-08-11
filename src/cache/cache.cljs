@@ -57,7 +57,9 @@
       (remote-synchronized/create (get-storage (remote-synchronized/extract-local-config config))
                                   (get-storage (remote-synchronized/extract-remote-config config)))
 
-      (file/create config))))
+      (if (seq (:server (:backend_options config)))
+        (redis/create config)
+        (file/create config)))))
 
 (defn- clean
   ([cache] (storage/clean-all cache))
