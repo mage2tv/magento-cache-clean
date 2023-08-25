@@ -91,6 +91,7 @@ Clean the given cache types. If none are given, clean all cache types.
 
 --directory|-d <dir>    Magento base directory
 --watch|-w              Watch for file changes
+--no-flood-guard|-n     Disable the 5s debounce per cache type
 --verbose|-v            Display more information
 --debug|-vv             Display too much information
 --silent|-s             Display less information
@@ -112,6 +113,7 @@ Clean the given cache types. If none are given, clean all cache types.
 (defn switch? [arg]
   (#{"--watch" "-w"
      "--verbose" "-v"
+     "--no-flood-guard" "-n" "-nw" "-wn"
      "--debug" "-vv"
      "--silent" "-s"
      "--help" "-h"
@@ -137,7 +139,9 @@ Clean the given cache types. If none are given, clean all cache types.
 
 (defn process [args]
   (init-app args)
-  (if (has-switch? ["-w" "--watch"] args)
+  (when (has-switch? ["-n" "-nw" "-wn" "--no-flood-guard"] args)
+    (watcher/set-cache-clean-guard-period! 0))
+  (if (has-switch? ["-w" "-nw" "-wn" "--watch"] args)
     (watcher/start)
     (clean-cache-types args)))
 

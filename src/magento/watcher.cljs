@@ -120,7 +120,11 @@
 (defn- now []
   (.getTime (js/Date.)))
 
-(def cache-clean-guard-period 5000)                          ;; ms
+(def cache-clean-guard-period (atom 5000))
+
+(defn set-cache-clean-guard-period! [ms]
+  (log/notice "Set cache clean guard period to" (str ms "ms"))
+  (reset! cache-clean-guard-period ms)) ;; ms
 
 (let [last-cleaned-map (atom {})]
 
@@ -133,11 +137,11 @@
 (defn- may-clean? [cache-type-or-id]
   (let [prev (last-cleaned cache-type-or-id)
         t (now)]
-    (if (or (nil? prev) (< 0 (- t prev cache-clean-guard-period)))
+    (if (or (nil? prev) (< 0 (- t prev @cache-clean-guard-period)))
       (do (update-last-cleaned cache-type-or-id)
-          #_(log/notice "OK to clean " cache-type-or-id "since")
+          #_(log/notice "OK to clean" cache-type-or-id "since")
           true)
-      (do #_(log/notice "WAIT grace period " cache-type-or-id (str (- t prev cache-clean-guard-period) "ms"))
+      (do #_(log/notice "WAIT grace period" cache-type-or-id (str (- t prev @cache-clean-guard-period) "ms"))
         false))))
 
 (defn- clean-cache-types [types]
