@@ -8,11 +8,15 @@
             [magento.generated-code :as generated]
             [magento.static-content :as static]
             [cache.hotkeys :as hotkeys]
-            [magento.service-contract :as service-contract]))
+            [magento.service-contract :as service-contract]
+            [cljs.core.async :refer [go <! timeout]]))
 
 (defonce in-process-files (atom {}))
 
 (defonce controllers (atom #{}))
+
+
+(defonce changed-file-queue (atom #{}))
 
 (defn timestamp []
   (.getTime (js/Date.)))
@@ -170,17 +174,32 @@
     (remove-generated-files-based-on! file)
     (show-all-caches-disabled-notice)))
 
+(defn- queue-file! [file]
+  (swap! changed-file-queue conj file))
+
+(defn shift-file! []
+  (let [file (first @changed-file-queue)]
+    (swap! changed-file-queue disj file)
+    file))
+
+(defn- start-file-processing []
+  (go (while true
+        (do
+          (when-let [file (shift-file!)]
+            (file-changed file))
+          (<! (timeout 5)))))) ;; allow keyboard events to be processed
+
 (defn module-controllers [module-dir]
   (filter #(re-find #"\.php$" %) (fs/file-tree (str module-dir "/Controller"))))
 
 (defn watch-module [log-fn module-dir]
   (when (and (fs/exists? module-dir) (not (fs/watched? module-dir)))
-    (fs/watch-recursive module-dir file-changed)
+    (fs/watch-recursive module-dir queue-file!)
     (swap! controllers into (module-controllers module-dir))
     (log-fn module-dir)))
 
 (defn watch-theme [theme-dir]
-  (fs/watch-recursive theme-dir file-changed)
+  (fs/watch-recursive theme-dir queue-file!)
   (log/debug :without-time "Watching theme" (fs/basename theme-dir)))
 
 (defn pretty-module-name [module-dir]
@@ -226,7 +245,7 @@
   (let [i18n-dir (str (mage/base-dir) "app/i18n/")]         ;; trailing slash is important to deref symlink
     (when (fs/exists? i18n-dir)                             ;; check with exists? instead of dir? to include symlinks
       (log/debug :without-time "Watching app/i18n/")
-      (fs/watch-recursive i18n-dir file-changed))))
+      (fs/watch-recursive i18n-dir queue-file!))))
 
 (defn stop []
   (fs/stop-all-watches)
@@ -248,4 +267,5 @@
   (show-disabled-caches-notice)
   (when (hotkeys/observe-keys! (mage/base-dir))
     (show-hotkeys))
+  (start-file-processing)
   (log/notice :without-time "Watcher initialized (Ctrl-C to quit)"))
