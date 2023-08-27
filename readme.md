@@ -63,6 +63,7 @@ Clean the given cache types. If none are given, clean all cache types.
 --directory|-d <dir>    Magento base directory
 --watch|-w              Watch for file changes
 --verbose|-v            Display more information
+--no-flood-guard|-n     Disable the 5s debounce per cache type
 --debug|-vv             Display too much information
 --silent|-s             Display less information
 --version               Display the version
