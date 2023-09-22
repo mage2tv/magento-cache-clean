@@ -160,6 +160,33 @@
     (when (seq ids)
       (cache/clean-cache-ids ids))))
 
+(defn- interceptor-config? [file]
+  (string/ends-with? file, "/di.xml"))
+
+(defn- di-xml-area [file]
+  (when-let [matches (re-matches #".+/etc/([a-z_]+)/di.xml$" file)]
+    (get matches 1)))
+
+(defn- rm-creatuity-cache-area [area]
+  (let [cache-file-name (str "generated/staticcache/global_primary_" area "_compiled_plugins.php")]
+    (run! (fn [base-dir]
+            (let [cache-file (str base-dir cache-file-name)]
+              (when (fs/exists? cache-file)
+                (do
+                  (log/notice "Removing creatuity interceptor cache file" cache-file)
+                  (fs/rm cache-file))))) (mage/all-base-dirs))))
+
+(defn- rm-creatuity-cache []
+  (run! #(let [cache-dir (str % "generated/staticcache/")]
+           (when (fs/dir? cache-dir)
+             (do
+               (log/notice "Removing creatuity interceptors cache" cache-dir)
+               (fs/rm-contents cache-dir)))) (mage/all-base-dirs)))
+
+(defn- clean-creatuity-interceptor-cache [file]
+  (if-let [area (di-xml-area file)]
+    (rm-creatuity-cache-area area)
+    (rm-creatuity-cache)))
 
 (defn file-changed [file]
   (when (process-changed-file? file)
@@ -169,6 +196,8 @@
       (clean-cache-types types))
     (when-let [ids (cache/magefile->cacheids file)]
       (clean-cache-ids ids))
+    (when (interceptor-config? file)
+      (clean-creatuity-interceptor-cache file))
     (clean-cache-for-new-controller file)
     (clean-cache-for-service-interface file)
     (remove-generated-files-based-on! file)
