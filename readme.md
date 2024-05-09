@@ -91,7 +91,7 @@ individual keystrokes:
 |`t`| `translate` |
 
 There also are hotkeys to clean the static assets in the `A`dminhtml or
-the `F`rontend area or clean the `G`enerated code directory.
+the `F`rontend area or `I`ntegration test sandboxes or clean the `G`enerated code directory.
 
 
 ### Prerequisites:
