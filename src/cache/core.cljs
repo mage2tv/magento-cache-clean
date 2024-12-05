@@ -92,6 +92,7 @@ Clean the given cache types. If none are given, clean all cache types.
 --directory|-d <dir>    Magento base directory
 --watch|-w              Watch for file changes
 --file-list <file>      Clean caches based on list of files in specified file
+--keep-generated        Skip cleaning the generated/ directory
 --no-flood-guard|-n     Disable the 5s debounce per cache type
 --verbose|-v            Display more information
 --debug|-vv             Display too much information
@@ -119,7 +120,8 @@ Clean the given cache types. If none are given, clean all cache types.
      "--debug" "-vv"
      "--silent" "-s"
      "--help" "-h"
-     "--version"} arg))
+     "--version"
+     "--keep-generated" "-k"} arg))
 
 (defn find-file-list [args]
   (find-arg ["--file-list"] args))
@@ -146,6 +148,8 @@ Clean the given cache types. If none are given, clean all cache types.
   (init-app args)
   (when (has-switch? ["-n" "-nw" "-wn" "--no-flood-guard"] args)
     (watcher/set-cache-clean-guard-period! 0))
+  (when (has-switch? ["--keep-generated" "-k"] args)
+    (reset! watcher/keep-generated true))
   (cond
     (find-file-list args)
     (let [filepath (find-file-list args)]
