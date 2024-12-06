@@ -128,9 +128,7 @@
 
 (def cache-clean-guard-period (atom 5000))
 
-(defn clean-from-file-list [dir loglevel filepath]
-  (log/set-verbosity! loglevel)
-  (mage/set-base-dir! dir)
+(defn clean-from-file-list [filepath]
   (let [files (string/split-lines (fs/slurp filepath))
         cache-types (->> files
                          (mapcat cache/magefile->cachetypes)
@@ -148,13 +146,12 @@
     (doseq [file files]
       (clean-cache-for-new-controller file)
       (clean-cache-for-service-interface file)
-      (remove-generated-files-based-on! file)
-      (show-all-caches-disabled-notice)))
-  nil)
+      (remove-generated-files-based-on! file))
+    (show-all-caches-disabled-notice)))
 
 (defn set-cache-clean-guard-period! [ms]
   (log/notice "Set cache clean guard period to" (str ms "ms"))
-  (reset! cache-clean-guard-period ms)) ;; ms
+  (reset! cache-clean-guard-period ms))
 
 (let [last-cleaned-map (atom {})]
 

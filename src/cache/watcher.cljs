@@ -39,18 +39,3 @@
   (cache/clean-cache-types [])
   nil)
 
-
-(comment
-  (def log-level {:debug  3
-                  :info   2
-                  :notice 1
-                  :error 0})
-  (cleanTags "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level) "layout" "config")
-  (cleanTags "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level))
-
-  (cleanIds "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level) "global__event_config_cache" "webapi_config")
-  (cleanIds "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level))
-
-  (cleanAll "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level))
-
-  (watch "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level)))

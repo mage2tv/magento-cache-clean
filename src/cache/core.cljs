@@ -7,7 +7,7 @@
 
 (set! *warn-on-infer* true)
 
-(defonce version "1.0.53")
+(defonce version "1.0.54")
 
 (defn node-version-str []
   (let [proc ^js/process (js/require "process")]
@@ -123,8 +123,11 @@ Clean the given cache types. If none are given, clean all cache types.
      "--version"
      "--keep-generated" "-k"} arg))
 
-(defn find-file-list [args]
+(defn get-file-list [args]
   (find-arg ["--file-list"] args))
+
+(defn has-file-list? [args]
+  (get-file-list args))
 
 (defn remove-switches-and-args-with-vals [args]
   (let [args (vec args)]
@@ -151,9 +154,9 @@ Clean the given cache types. If none are given, clean all cache types.
   (when (has-switch? ["--keep-generated" "-k"] args)
     (reset! watcher/keep-generated true))
   (cond
-    (find-file-list args)
-    (let [filepath (find-file-list args)]
-      (watcher/clean-from-file-list (mage/base-dir) (find-log-level args) filepath))
+    (has-file-list? args)
+    (let [filepath (get-file-list args)]
+      (watcher/clean-from-file-list filepath))
 
     (has-switch? ["-w" "-nw" "-wn" "--watch"] args)
     (watcher/start)
@@ -188,5 +191,3 @@ Clean the given cache types. If none are given, clean all cache types.
     (catch :default ^Error e
       (handle-error! e))))
 
-(comment
-  (-main "-w" "-vv" "-d" "/Users/vinai/Workspace/mage2tv/m2ce"))

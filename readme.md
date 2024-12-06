@@ -20,6 +20,7 @@ Please report bugs by opening an issue on the [GitHub issue tracker](https://git
 * Zero configuration, all required information is read from `app/etc/env.php`
 * Hotkeys for quick cache flushes while the watcher is running
 
+
 ## Installation & Updating
 
 Installation:
@@ -66,6 +67,8 @@ Clean the given cache types. If none are given, clean all cache types.
 --no-flood-guard|-n     Disable the 5s debounce per cache type
 --debug|-vv             Display too much information
 --silent|-s             Display less information
+--keep-generated|-k     Do not modify generated/code/
+--file-list|-f <file>   Process file list and exit
 --version               Display the version
 --help|-h               This help message
 ```
@@ -93,6 +96,11 @@ individual keystrokes:
 There also are hotkeys to clean the static assets in the `A`dminhtml or
 the `F`rontend area or `I`ntegration test sandboxes or clean the `G`enerated code directory.
 
+## Clearing cache on production after deploy
+
+The `--file-list <file>` argument is intended to be used to flush affected caches after deployment.  
+List the names of all changed files separated by a newline in the specified file.  
+Use the `--keep-generated` switch if you want files in `generated/code` to remain even if the PHP source files changed.
 
 ### Prerequisites:
 

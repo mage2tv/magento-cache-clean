@@ -107,7 +107,8 @@
     (->> ids
          (map string/upper-case)
          (map add-cache-id-prefix)
-         (run! #(storage/clean-id cache %)))))
+         (run! #(storage/clean-id cache %)))
+    (storage/close cache)))
 
 (defn clean-cache-ids [ids]
   (when (seq ids)
