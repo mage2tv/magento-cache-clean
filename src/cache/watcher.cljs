@@ -54,7 +54,3 @@
   (cleanAll "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level))
 
   (watch "/Users/vinai/Workspace/mage2tv/m2ce" (:debug log-level)))
-
-
-
-

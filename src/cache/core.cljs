@@ -7,7 +7,7 @@
 
 (set! *warn-on-infer* true)
 
-(defonce version "1.0.52")
+(defonce version "1.0.53")
 
 (defn node-version-str []
   (let [proc ^js/process (js/require "process")]
@@ -91,6 +91,8 @@ Clean the given cache types. If none are given, clean all cache types.
 
 --directory|-d <dir>    Magento base directory
 --watch|-w              Watch for file changes
+--file-list <file>      Clean caches based on list of files in specified file
+--keep-generated        Skip cleaning the generated/ directory
 --no-flood-guard|-n     Disable the 5s debounce per cache type
 --verbose|-v            Display more information
 --debug|-vv             Display too much information
@@ -108,16 +110,21 @@ Clean the given cache types. If none are given, clean all cache types.
   (log/always :without-time version))
 
 (defn arg-with-val? [arg]
-  (#{"--directory" "-d" "--verbosity"} arg))
+  (#{"--directory" "-d" "--verbosity" "--file-list" "-f"} arg))
 
 (defn switch? [arg]
   (#{"--watch" "-w"
+     "--file-list" "-f"
      "--verbose" "-v"
      "--no-flood-guard" "-n" "-nw" "-wn"
      "--debug" "-vv"
      "--silent" "-s"
      "--help" "-h"
-     "--version"} arg))
+     "--version"
+     "--keep-generated" "-k"} arg))
+
+(defn find-file-list [args]
+  (find-arg ["--file-list"] args))
 
 (defn remove-switches-and-args-with-vals [args]
   (let [args (vec args)]
@@ -141,8 +148,17 @@ Clean the given cache types. If none are given, clean all cache types.
   (init-app args)
   (when (has-switch? ["-n" "-nw" "-wn" "--no-flood-guard"] args)
     (watcher/set-cache-clean-guard-period! 0))
-  (if (has-switch? ["-w" "-nw" "-wn" "--watch"] args)
+  (when (has-switch? ["--keep-generated" "-k"] args)
+    (reset! watcher/keep-generated true))
+  (cond
+    (find-file-list args)
+    (let [filepath (find-file-list args)]
+      (watcher/clean-from-file-list (mage/base-dir) (find-log-level args) filepath))
+
+    (has-switch? ["-w" "-nw" "-wn" "--watch"] args)
     (watcher/start)
+
+    :else
     (clean-cache-types args)))
 
 (defn handle-error! [^Error e]

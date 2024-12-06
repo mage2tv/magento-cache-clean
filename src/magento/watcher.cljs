@@ -15,6 +15,7 @@
 
 (defonce controllers (atom #{}))
 
+(defonce keep-generated (atom false))
 
 (defonce changed-file-queue (atom #{}))
 
@@ -98,9 +99,10 @@
     (remove-generated-js-translation-json!)))
 
 (defn remove-generated-files-based-on! [file]
-  (check-remove-generated-files-based-on-php! file)
-  (check-remove-generated-extension-attributes-php! file)
-  (check-remove-generated-js-translation-json! file))
+  (when (not @keep-generated)
+    (check-remove-generated-files-based-on-php! file)
+    (check-remove-generated-extension-attributes-php! file)
+    (check-remove-generated-js-translation-json! file)))
 
 (defn compiled-requirejs-config? [file]
   (when (= "requirejs-config.js" (fs/basename file))
@@ -125,6 +127,30 @@
   (.getTime (js/Date.)))
 
 (def cache-clean-guard-period (atom 5000))
+
+(defn clean-from-file-list [dir loglevel filepath]
+  (log/set-verbosity! loglevel)
+  (mage/set-base-dir! dir)
+  (let [files (string/split-lines (fs/slurp filepath))
+        cache-types (->> files
+                         (mapcat cache/magefile->cachetypes)
+                         distinct)
+        cache-ids (->> files
+                       (mapcat cache/magefile->cacheids)
+                       distinct)]
+    ;; Clean cache types and cache ids
+    (when (seq cache-types)
+      (cache/clean-cache-types cache-types))
+    (when (seq cache-ids)
+      (cache/clean-cache-ids cache-ids))
+
+    ;; Apply additional cleaning functions for each file
+    (doseq [file files]
+      (clean-cache-for-new-controller file)
+      (clean-cache-for-service-interface file)
+      (remove-generated-files-based-on! file)
+      (show-all-caches-disabled-notice)))
+  nil)
 
 (defn set-cache-clean-guard-period! [ms]
   (log/notice "Set cache clean guard period to" (str ms "ms"))
