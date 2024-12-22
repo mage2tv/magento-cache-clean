@@ -211,6 +211,10 @@
     (rm-creatuity-cache-area area)
     (rm-creatuity-cache)))
 
+(defn directory-renamed [old-dir new-dir]
+  (log/info "Directory renamed from" old-dir "to" new-dir)
+  (cache/clean-cache-types ["full_page" "block_html" "layout"]))
+
 (defn file-changed [file]
   (when (process-changed-file? file)
     (set-in-process! file)
@@ -251,7 +255,13 @@
     (log-fn module-dir)))
 
 (defn watch-theme [theme-dir]
-  (fs/watch-recursive theme-dir queue-file!)
+  (fs/watch-recursive theme-dir
+                      (fn [file]
+                        (queue-file! file)
+                        (when (fs/dir? file)
+                          (let [old-dir (fs/dirname file)
+                                new-dir (str old-dir "2")] ;; Example logic for renaming
+                            (directory-renamed old-dir new-dir)))))
   (log/debug :without-time "Watching theme" (fs/basename theme-dir)))
 
 (defn pretty-module-name [module-dir]
