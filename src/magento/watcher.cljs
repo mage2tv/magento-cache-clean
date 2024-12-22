@@ -224,6 +224,8 @@
     (clean-cache-for-new-controller file)
     (clean-cache-for-service-interface file)
     (remove-generated-files-based-on! file)
+    (when (string/ends-with? file ".svg")
+      (cache/clean-cache-types ["hyva_svg"]))
     (show-all-caches-disabled-notice)))
 
 (defn- queue-file! [file]
