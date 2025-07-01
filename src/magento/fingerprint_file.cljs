@@ -122,6 +122,8 @@
              ["/etc/acl\\.xml$" ["provider_acl_resources_cache"]]
              ["/etc/frontend/routes\\.xml$" ["frontend::RoutesConfig"]]
              ["/etc/adminhtml/routes\\.xml$" ["adminhtml::RoutesConfig"]]
+             ["/layout/.+\\.xml$", ["resolvers"]] ;; Magewire blockname to resolver map
+             ["/etc(?:/[^/]+|)/di\\.xml$" ["resolvers"]] ;; Magewire blockname to resolver map
              ["/etc/csp_whitelist\\.xml" ["global::csp_whitelist_config"
                                           "frontend::csp_whitelist_config"
                                           "adminhtml::csp_whitelist_config"
