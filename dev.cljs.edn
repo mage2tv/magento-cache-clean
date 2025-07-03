@@ -1,4 +1,0 @@
-{:main cache.core
- :target :nodejs
- :npm-deps {:redis "2.8.0"}
- :install-deps true}
