@@ -3,7 +3,7 @@
     "description": "This package has been migrated to mage-os/magento-cache-clean. Please switch over at your convenience.",
     "type": "library",
     "require": {
-        "mage-os/magento-cache-clean": "~1.1.0"
+        "mage-os/magento-cache-clean": "~1.1.1"
     },
     "keywords": [
         "magento",
