@@ -1,4 +1,4 @@
-# Magento 2 Cache Clean
+# Magento 2 Cache Clean MOVED!
 
 Since release 1.1.0, this package has moved to `mage-os/magento-cache-clean`.  
 
